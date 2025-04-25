@@ -1,0 +1,78 @@
+  pw:api => selectors.setTestIdAttribute started +0ms
+  pw:api => browserType.launch started +2ms
+  pw:api <= selectors.setTestIdAttribute succeeded +2ms
+  pw:api <= browserType.launch succeeded +1s
+  pw:api => browser.newContext started +2ms
+  pw:api <= browser.newContext succeeded +134ms
+  pw:api => browserContext.newPage started +2ms
+  pw:api   navigated to "about:blank" +530ms
+  pw:api   navigated to "about:blank" +0ms
+  pw:api <= browserContext.newPage succeeded +1ms
+  pw:api => page.goto started +3ms
+  pw:api navigating to "https://login.salesforce.com/", waiting until "load" +2ms
+  pw:api   "commit" event fired +385ms
+  pw:api   navigated to "https://login.salesforce.com/" +0ms
+  pw:api   "domcontentloaded" event fired +367ms
+  pw:api   navigated to "https://login.salesforce.com/s.gif" +95ms
+  pw:api   navigated to "https://login.salesforce.com/login/sessionserver212.html" +98ms
+  pw:api   "load" event fired +120ms
+  pw:api <= page.goto succeeded +0ms
+  pw:api => page.waitForSelector started +2ms
+  pw:api waiting for locator('#username') to be visible +1ms
+  pw:api   locator resolved to visible <input value="" type="email" id="username" name="username" aria-describedby="error" class="input r4 wide mb16 mt8 username"/> +19ms
+  pw:api <= page.waitForSelector succeeded +4ms
+  pw:api => page.fill started +1ms
+  pw:api waiting for locator('#username') +0ms
+  pw:api   locator resolved to <input value="" type="email" id="username" name="username" aria-describedby="error" class="input r4 wide mb16 mt8 username"/> +12ms
+  pw:api   fill("invalid@example.com") +2ms
+  pw:api attempting fill action +0ms
+  pw:api   waiting for element to be visible, enabled and editable +0ms
+  pw:api   navigated to "https://c.salesforce.com/login-messages/promos.html" +9ms
+  pw:api <= page.fill succeeded +2ms
+  pw:api => page.fill started +0ms
+  pw:api waiting for locator('#password') +1ms
+  pw:api   locator resolved to <input name="pw" id="password" type="password" autocomplete="off" aria-required="true" aria-describedby="error" onkeypress="checkCaps(event)" class="input r4 wide mb16 mt8 password"/> +6ms
+  pw:api   fill("wrongpassword") +0ms
+  pw:api attempting fill action +0ms
+  pw:api   waiting for element to be visible, enabled and editable +0ms
+  pw:api <= page.fill succeeded +4ms
+  pw:api => page.click started +1ms
+  pw:api waiting for locator('#Login') +1ms
+  pw:api   locator resolved to <input id="Login" name="Login" type="submit" value="Log In" class="button r4 wide primary"/> +4ms
+  pw:api attempting click action +1ms
+  pw:api   waiting for element to be visible, enabled and stable +1ms
+  pw:api   element is visible, enabled and stable +15ms
+  pw:api   scrolling into view if needed +0ms
+  pw:api   done scrolling +1ms
+  pw:api   performing click action +3ms
+  pw:api   click action done +40ms
+  pw:api   waiting for scheduled navigations to finish +0ms
+  pw:api   "commit" event fired +196ms
+  pw:api   navigated to "https://login.salesforce.com/" +0ms
+  pw:api   navigated to "https://login.salesforce.com/" +0ms
+  pw:api   navigations have finished +1ms
+  pw:api <= page.click succeeded +0ms
+  pw:api => page.waitForSelector started +1ms
+  pw:api waiting for locator('div.slds-global-header') to be visible +1ms
+  pw:api   navigated to "https://login.salesforce.com/s.gif" +22ms
+  pw:api   navigated to "https://login.salesforce.com/login/sessionserver212.html" +4ms
+  pw:api   "domcontentloaded" event fired +85ms
+  pw:api   "load" event fired +1ms
+  pw:api   navigated to "https://c.salesforce.com/login-messages/promos.html" +29ms
+  pw:api   navigated to "about:blank" +199ms
+  pw:api   navigated to "https://a10681260716.cdn.optimizely.com/client_storage/a10681260716.html" +113ms
+  pw:api   navigated to "about:blank" +2s
+  pw:api   navigated to "https://www.googletagmanager.com/static/service_worker/54l0/sw_iframe.html?origin=https%3A%2F%2Fc.salesforce.com" +15ms
+  pw:api   "networkidle" event fired +1s
+  pw:api => page.screenshot started +24s
+  pw:api taking page screenshot +1ms
+  pw:api waiting for fonts to load... +9ms
+  pw:api fonts loaded +1ms
+  pw:api <= page.screenshot succeeded +26ms
+  pw:api waiting for locator('body') +5ms
+  pw:api   locator resolved to <body onload="lazyload();">…</body> +5ms
+  pw:api <= page.waitForSelector failed +12ms
+  pw:api => page.waitForSelector started +1ms
+  pw:api <= page.waitForSelector failed +0ms
+  pw:api => page.waitForSelector started +1ms
+  pw:api <= page.waitForSelector failed +1ms

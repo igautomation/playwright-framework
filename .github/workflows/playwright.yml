@@ -1,0 +1,87 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 0 * * *'  # Daily midnight run
+
+jobs:
+  test:
+    name: 'Playwright Tests'
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        environment: [development, qa]
+    
+    env:
+      NODE_ENV: ${{ matrix.environment }}
+      SALESFORCE_USERNAME: ${{ secrets.SALESFORCE_USERNAME }}
+      SALESFORCE_PASSWORD: ${{ secrets.SALESFORCE_PASSWORD }}
+      SALESFORCE_SECURITY_TOKEN: ${{ secrets.SALESFORCE_SECURITY_TOKEN }}
+      SALESFORCE_CLIENT_ID: ${{ secrets.SALESFORCE_CLIENT_ID }}
+      SALESFORCE_CLIENT_SECRET: ${{ secrets.SALESFORCE_CLIENT_SECRET }}
+      SALESFORCE_BASE_URL: ${{ secrets.SALESFORCE_BASE_URL }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Security audit
+      run: npm audit
+    
+    - name: Verify code style
+      run: npm run lint
+    
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Run Playwright tests
+      run: npx playwright test --project=${{ matrix.browser }} --grep @smoke
+    
+    - name: Generate Allure report
+      if: always()
+      run: npx allure generate ./allure-results --clean -o allure-report
+    
+    - name: Upload Allure report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}
+        path: allure-report/
+        retention-days: 30
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: playwright-results-${{ matrix.browser }}-${{ matrix.environment }}
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 30
+    
+    - name: Notify Slack on failure
+      if: failure()
+      run: |
+        curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "❌ Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment! See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        }' ${{ secrets.SLACK_WEBHOOK_URL }}

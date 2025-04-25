@@ -1,0 +1,33 @@
+  pw:api => selectors.setTestIdAttribute started +0ms
+  pw:api => browserType.launch started +2ms
+  pw:api <= selectors.setTestIdAttribute succeeded +3ms
+  pw:api <= browserType.launch succeeded +501ms
+  pw:api => browser.newContext started +2ms
+  pw:api <= browser.newContext succeeded +21ms
+  pw:api => browserContext.newPage started +28ms
+  pw:api   navigated to "about:blank" +728ms
+  pw:api   navigated to "about:blank" +0ms
+  pw:api <= browserContext.newPage succeeded +4ms
+  pw:api => page.goto started +1ms
+  pw:api navigating to "https://login.salesforce.com/", waiting until "load" +8ms
+  pw:api   "commit" event fired +395ms
+  pw:api   navigated to "https://login.salesforce.com/" +0ms
+  pw:api   "domcontentloaded" event fired +403ms
+  pw:api   navigated to "https://login.salesforce.com/s.gif" +92ms
+  pw:api   navigated to "https://login.salesforce.com/login/sessionserver212.html" +103ms
+  pw:api   "load" event fired +117ms
+  pw:api <= page.goto succeeded +30ms
+  pw:api => page.waitForSelector started +1ms
+  pw:api waiting for locator('#username') to be visible +4ms
+  pw:api   locator resolved to visible <input value="" type="email" id="username" name="username" aria-describedby="error" class="input r4 wide mb16 mt8 username"/> +54ms
+  pw:api <= page.waitForSelector succeeded +4ms
+  pw:api => page.screenshot started +2ms
+  pw:api taking page screenshot +1ms
+  pw:api waiting for fonts to load... +4ms
+  pw:api fonts loaded +1ms
+  pw:api   navigated to "https://c.salesforce.com/login-messages/promos.html" +15ms
+  pw:api <= page.screenshot succeeded +18ms
+  pw:api waiting for locator('body') +45ms
+  pw:api   locator resolved to <body onload="lazyload();">…</body> +137ms
+  pw:api => video.saveAs started +38ms
+  pw:api <= video.saveAs succeeded +1ms
