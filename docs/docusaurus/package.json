@@ -35,6 +35,8 @@
     },
     "devDependencies": {
         "husky": "^9.1.7",
-        "lint-staged": "^15.5.1"
+        "lint-staged": "^15.5.1",
+        "@docusaurus/core": "^3.5.2",
+        "@docusaurus/preset-classic": "^3.5.2"
     }
 }
