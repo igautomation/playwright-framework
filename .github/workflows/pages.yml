@@ -6,19 +6,45 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Install dependencies
+
+      - name: Install root dependencies
         run: npm install
+
+      - name: Install Docusaurus dependencies
+        run: npm install
+        working-directory: docs/docusaurus
+
+      - name: Run pre-checks
+        run: |
+          npm audit
+          npm run lint
+          npm run format:check
+        continue-on-error: true
+
       - name: Build Docusaurus site
         run: npm run docs:build
+        if: success()
+
       - name: Generate PDF
         run: npm run docs:pdf
+        if: success()
+
+      - name: Move PDF to Docusaurus static directory
+        run: |
+          mkdir -p docs/docusaurus/static
+          mv docs/user-guide.pdf docs/docusaurus/static/user-guide.pdf
+        if: success()
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/docusaurus/build
+        if: success()
