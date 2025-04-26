@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/ci-cd",
+  "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/ci-cd.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/ci-cd",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/ci-cd.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Extending\\nAdd custom page objects in .",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/extending"
+  },
+  "next": {
+    "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray"
+  }
+}

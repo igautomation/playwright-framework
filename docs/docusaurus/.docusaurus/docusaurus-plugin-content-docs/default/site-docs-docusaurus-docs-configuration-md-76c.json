@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/configuration",
+  "title": "Configuration\\nConfigure  and .",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/configuration.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/configuration",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/configuration",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/configuration.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Installation\\nInstall with .",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/installation"
+  },
+  "next": {
+    "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/writing-tests"
+  }
+}

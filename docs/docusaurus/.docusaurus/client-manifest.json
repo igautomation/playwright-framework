@@ -1,0 +1,339 @@
+{
+  "entrypoints": [
+    "main"
+  ],
+  "origins": {
+    "42": [
+      42
+    ],
+    "341": [
+      61,
+      401,
+      869,
+      341
+    ],
+    "17896441": [
+      341,
+      869,
+      401
+    ],
+    "main": [
+      354,
+      869,
+      792
+    ],
+    "runtime~main": [
+      792,
+      869,
+      354
+    ],
+    "1f391b9e": [
+      341,
+      869,
+      61
+    ],
+    "2e8f9d2c": [
+      796
+    ],
+    "301b2487": [
+      446
+    ],
+    "32ce463e": [
+      6
+    ],
+    "3dd22eea": [
+      109
+    ],
+    "5e95c892": [
+      647
+    ],
+    "76cc5bc3": [
+      141
+    ],
+    "79a59d40": [
+      534
+    ],
+    "8d31ce87": [
+      568
+    ],
+    "9dd8a0d2": [
+      617
+    ],
+    "a7456010": [
+      235
+    ],
+    "a7bd4aaa": [
+      98
+    ],
+    "a94703ab": [
+      869,
+      48
+    ],
+    "aba21aa0": [
+      742
+    ],
+    "beef27e1": [
+      970
+    ],
+    "c2102732": [
+      857
+    ],
+    "ef72dd94": [
+      62
+    ],
+    "f2ab4ea5": [
+      437
+    ],
+    "f3976560": [
+      795
+    ],
+    "fbed89d4": [
+      265
+    ],
+    "styles": [
+      48,
+      61,
+      341,
+      354,
+      401,
+      792,
+      869
+    ]
+  },
+  "assets": {
+    "6": {
+      "js": [
+        {
+          "file": "assets/js/32ce463e.b0158a3b.js",
+          "hash": "e9d106dead3bf1db",
+          "publicPath": "/playwright-framework/assets/js/32ce463e.b0158a3b.js"
+        }
+      ]
+    },
+    "42": {
+      "js": [
+        {
+          "file": "assets/js/42.0abd2520.js",
+          "hash": "df56ad03ea019a1d",
+          "publicPath": "/playwright-framework/assets/js/42.0abd2520.js"
+        }
+      ]
+    },
+    "48": {
+      "js": [
+        {
+          "file": "assets/js/a94703ab.ddc9627e.js",
+          "hash": "a8a7966f232ad7e0",
+          "publicPath": "/playwright-framework/assets/js/a94703ab.ddc9627e.js"
+        }
+      ]
+    },
+    "61": {
+      "js": [
+        {
+          "file": "assets/js/1f391b9e.05d35477.js",
+          "hash": "2f08ebc80b1f4f2a",
+          "publicPath": "/playwright-framework/assets/js/1f391b9e.05d35477.js"
+        }
+      ]
+    },
+    "62": {
+      "js": [
+        {
+          "file": "assets/js/ef72dd94.0a7957cc.js",
+          "hash": "e72166eab740bfea",
+          "publicPath": "/playwright-framework/assets/js/ef72dd94.0a7957cc.js"
+        }
+      ]
+    },
+    "98": {
+      "js": [
+        {
+          "file": "assets/js/a7bd4aaa.208dcbcf.js",
+          "hash": "0a972592f71c0479",
+          "publicPath": "/playwright-framework/assets/js/a7bd4aaa.208dcbcf.js"
+        }
+      ]
+    },
+    "109": {
+      "js": [
+        {
+          "file": "assets/js/3dd22eea.ac9a65ad.js",
+          "hash": "2808312801bbe2a2",
+          "publicPath": "/playwright-framework/assets/js/3dd22eea.ac9a65ad.js"
+        }
+      ]
+    },
+    "141": {
+      "js": [
+        {
+          "file": "assets/js/76cc5bc3.7a79e1d4.js",
+          "hash": "e5a82be897d61729",
+          "publicPath": "/playwright-framework/assets/js/76cc5bc3.7a79e1d4.js"
+        }
+      ]
+    },
+    "235": {
+      "js": [
+        {
+          "file": "assets/js/a7456010.41eff1ed.js",
+          "hash": "5ad81e85dd535236",
+          "publicPath": "/playwright-framework/assets/js/a7456010.41eff1ed.js"
+        }
+      ]
+    },
+    "265": {
+      "js": [
+        {
+          "file": "assets/js/fbed89d4.5fb58c73.js",
+          "hash": "4f6bd594ca1ff9f6",
+          "publicPath": "/playwright-framework/assets/js/fbed89d4.5fb58c73.js"
+        }
+      ]
+    },
+    "341": {
+      "js": [
+        {
+          "file": "assets/js/341.11b905e0.js",
+          "hash": "c508c3bb00c033d7",
+          "publicPath": "/playwright-framework/assets/js/341.11b905e0.js"
+        }
+      ]
+    },
+    "354": {
+      "js": [
+        {
+          "file": "assets/js/runtime~main.36fe33bb.js",
+          "hash": "74d7f6fa11cd3b80",
+          "publicPath": "/playwright-framework/assets/js/runtime~main.36fe33bb.js"
+        }
+      ]
+    },
+    "401": {
+      "js": [
+        {
+          "file": "assets/js/17896441.ee4e2994.js",
+          "hash": "62cb18dc9223f888",
+          "publicPath": "/playwright-framework/assets/js/17896441.ee4e2994.js"
+        }
+      ]
+    },
+    "437": {
+      "js": [
+        {
+          "file": "assets/js/f2ab4ea5.f40ed874.js",
+          "hash": "41863ff9fbff9c89",
+          "publicPath": "/playwright-framework/assets/js/f2ab4ea5.f40ed874.js"
+        }
+      ]
+    },
+    "446": {
+      "js": [
+        {
+          "file": "assets/js/301b2487.d7328a78.js",
+          "hash": "466b31f698dafd6c",
+          "publicPath": "/playwright-framework/assets/js/301b2487.d7328a78.js"
+        }
+      ]
+    },
+    "534": {
+      "js": [
+        {
+          "file": "assets/js/79a59d40.0bd35ea3.js",
+          "hash": "701602c55ec4a3c0",
+          "publicPath": "/playwright-framework/assets/js/79a59d40.0bd35ea3.js"
+        }
+      ]
+    },
+    "568": {
+      "js": [
+        {
+          "file": "assets/js/8d31ce87.c17def1e.js",
+          "hash": "df4571e848d7b468",
+          "publicPath": "/playwright-framework/assets/js/8d31ce87.c17def1e.js"
+        }
+      ]
+    },
+    "617": {
+      "js": [
+        {
+          "file": "assets/js/9dd8a0d2.ecddb982.js",
+          "hash": "7e3bfc214341b802",
+          "publicPath": "/playwright-framework/assets/js/9dd8a0d2.ecddb982.js"
+        }
+      ]
+    },
+    "647": {
+      "js": [
+        {
+          "file": "assets/js/5e95c892.d39bde93.js",
+          "hash": "b923d45478f99fe1",
+          "publicPath": "/playwright-framework/assets/js/5e95c892.d39bde93.js"
+        }
+      ]
+    },
+    "742": {
+      "js": [
+        {
+          "file": "assets/js/aba21aa0.d36a5ec1.js",
+          "hash": "fceaa0fe45228343",
+          "publicPath": "/playwright-framework/assets/js/aba21aa0.d36a5ec1.js"
+        }
+      ]
+    },
+    "792": {
+      "js": [
+        {
+          "file": "assets/js/main.71e16e98.js",
+          "hash": "8c22cdcd9afe35e5",
+          "publicPath": "/playwright-framework/assets/js/main.71e16e98.js"
+        }
+      ]
+    },
+    "795": {
+      "js": [
+        {
+          "file": "assets/js/f3976560.4aa1591c.js",
+          "hash": "e3024cf29b4aa500",
+          "publicPath": "/playwright-framework/assets/js/f3976560.4aa1591c.js"
+        }
+      ]
+    },
+    "796": {
+      "js": [
+        {
+          "file": "assets/js/2e8f9d2c.ac7e9a30.js",
+          "hash": "2245abc7e2cbdbfe",
+          "publicPath": "/playwright-framework/assets/js/2e8f9d2c.ac7e9a30.js"
+        }
+      ]
+    },
+    "857": {
+      "js": [
+        {
+          "file": "assets/js/c2102732.cc6974ee.js",
+          "hash": "9b380d34c9799f7b",
+          "publicPath": "/playwright-framework/assets/js/c2102732.cc6974ee.js"
+        }
+      ]
+    },
+    "869": {
+      "css": [
+        {
+          "file": "assets/css/styles.114d84c0.css",
+          "hash": "eb3610e86e3bccc3",
+          "publicPath": "/playwright-framework/assets/css/styles.114d84c0.css"
+        }
+      ]
+    },
+    "970": {
+      "js": [
+        {
+          "file": "assets/js/beef27e1.d8242ddb.js",
+          "hash": "9472a32ce1d88e54",
+          "publicPath": "/playwright-framework/assets/js/beef27e1.d8242ddb.js"
+        }
+      ]
+    }
+  }
+}

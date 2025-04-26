@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/cli",
+  "title": "CLI\\nUse Error: No tests found to execute tests.",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/cli.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/cli",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/cli",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/cli.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray"
+  },
+  "next": {
+    "title": "Utilities\\nReusable utilities in .",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/utilities"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "mdx",
+  "permalink": "/playwright-framework/",
+  "source": "@site/src/pages/index.md",
+  "title": "Welcome to Playwright Framework\\nThis is an enterprise-grade test automation framework built with Playwright.",
+  "frontMatter": {},
+  "unlisted": false
+}

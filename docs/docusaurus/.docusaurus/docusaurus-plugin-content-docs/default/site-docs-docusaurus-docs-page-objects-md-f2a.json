@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/page-objects",
+  "title": "Page Objects\\nFollow POM best practices.",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/page-objects.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/page-objects",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/page-objects",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/page-objects.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Utilities\\nReusable utilities in .",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/utilities"
+  },
+  "next": {
+    "title": "POJOs\\nUse POJOs for API testing.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/pojos"
+  }
+}

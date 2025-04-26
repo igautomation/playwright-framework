@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/utilities",
+  "title": "Utilities\\nReusable utilities in .",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/utilities.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/utilities",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/utilities",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/utilities.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "CLI\\nUse Error: No tests found to execute tests.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/cli"
+  },
+  "next": {
+    "title": "Page Objects\\nFollow POM best practices.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/page-objects"
+  }
+}

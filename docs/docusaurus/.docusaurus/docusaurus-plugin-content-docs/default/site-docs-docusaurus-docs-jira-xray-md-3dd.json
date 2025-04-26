@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/jira-xray",
+  "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/jira-xray.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/jira-xray",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/jira-xray.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd"
+  },
+  "next": {
+    "title": "CLI\\nUse Error: No tests found to execute tests.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/cli"
+  }
+}

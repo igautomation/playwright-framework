@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus/docs/extending",
+  "title": "Extending\\nAdd custom page objects in .",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/extending.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/extending",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/extending",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/extending.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/writing-tests"
+  },
+  "next": {
+    "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd"
+  }
+}

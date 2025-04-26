@@ -1,0 +1,20 @@
+{
+  "id": "docusaurus/docs/intro",
+  "title": "Introduction\\nWelcome to the Playwright Framework.",
+  "description": "",
+  "source": "@site/docs/docusaurus/docs/intro.md",
+  "sourceDirName": "docusaurus/docs",
+  "slug": "/docusaurus/docs/intro",
+  "permalink": "/playwright-framework/docs/docusaurus/docs/intro",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/intro.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "next": {
+    "title": "Installation\\nInstall with .",
+    "permalink": "/playwright-framework/docs/docusaurus/docs/installation"
+  }
+}

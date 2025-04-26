@@ -1,0 +1,109 @@
+{
+  "/playwright-framework/__docusaurus/debug-657": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/__docusaurus/debug/config-0a4": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/__docusaurus/debug/content-35a": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    },
+    "__props": "__props---playwright-framework-docusaurus-debug-contentf-0-a-637"
+  },
+  "/playwright-framework/__docusaurus/debug/globalData-6ed": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/__docusaurus/debug/metadata-e1c": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/__docusaurus/debug/registry-848": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/__docusaurus/debug/routes-72e": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docusaurus-debugb-38-2c0"
+    }
+  },
+  "/playwright-framework/docs-4fa": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---playwright-framework-docsaba-ccf"
+    }
+  },
+  "/playwright-framework/docs-6f8": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---playwright-framework-docsfbe-4a3"
+  },
+  "/playwright-framework/docs-8cf": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/playwright-framework/docs/docusaurus/docs/ci-cd-e87": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-ci-cdef-7-4f9"
+  },
+  "/playwright-framework/docs/docusaurus/docs/cli-bcb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-clibee-f03"
+  },
+  "/playwright-framework/docs/docusaurus/docs/configuration-af4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-configuration-76-c-d53"
+  },
+  "/playwright-framework/docs/docusaurus/docs/extending-0a7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-extending-32-c-e53"
+  },
+  "/playwright-framework/docs/docusaurus/docs/installation-8ee": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-installation-2-e-8-8bf"
+  },
+  "/playwright-framework/docs/docusaurus/docs/intro-ee9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-intro-8-d-3-4b4"
+  },
+  "/playwright-framework/docs/docusaurus/docs/jira-xray-e58": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-jira-xray-3-dd-900"
+  },
+  "/playwright-framework/docs/docusaurus/docs/page-objects-97a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-page-objectsf-2-a-e94"
+  },
+  "/playwright-framework/docs/docusaurus/docs/pojos-2f1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-pojos-301-ef1"
+  },
+  "/playwright-framework/docs/docusaurus/docs/utilities-f8c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-utilitiesc-21-a1c"
+  },
+  "/playwright-framework/docs/docusaurus/docs/writing-tests-541": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---playwright-framework-docs-docusaurus-docs-writing-tests-79-a-974"
+  },
+  "/playwright-framework/-772": {
+    "__comp": "__comp---theme-mdx-page-1-f-3-b90",
+    "__context": {
+      "plugin": "plugin---playwright-framework-a-74-9a1"
+    },
+    "content": "content---playwright-framework-f-39-c9e"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/playwright-framework/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/playwright-framework/docs",
+          "mainDocId": "docusaurus/docs/intro",
+          "docs": [
+            {
+              "id": "docusaurus/docs/ci-cd",
+              "path": "/playwright-framework/docs/docusaurus/docs/ci-cd",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/cli",
+              "path": "/playwright-framework/docs/docusaurus/docs/cli",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/configuration",
+              "path": "/playwright-framework/docs/docusaurus/docs/configuration",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/extending",
+              "path": "/playwright-framework/docs/docusaurus/docs/extending",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/installation",
+              "path": "/playwright-framework/docs/docusaurus/docs/installation",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/intro",
+              "path": "/playwright-framework/docs/docusaurus/docs/intro",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/jira-xray",
+              "path": "/playwright-framework/docs/docusaurus/docs/jira-xray",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/page-objects",
+              "path": "/playwright-framework/docs/docusaurus/docs/page-objects",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/pojos",
+              "path": "/playwright-framework/docs/docusaurus/docs/pojos",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/utilities",
+              "path": "/playwright-framework/docs/docusaurus/docs/utilities",
+              "sidebar": "docs"
+            },
+            {
+              "id": "docusaurus/docs/writing-tests",
+              "path": "/playwright-framework/docs/docusaurus/docs/writing-tests",
+              "sidebar": "docs"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "docs": {
+              "link": {
+                "path": "/playwright-framework/docs/docusaurus/docs/intro",
+                "label": "docusaurus/docs/intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}
