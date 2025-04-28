@@ -1,0 +1,4 @@
+# src/data/csv/products.csv
+id,name,price,category,stock
+1,Product 1,10.99,Electronics,100
+2,Product 2,20.99,Books,50

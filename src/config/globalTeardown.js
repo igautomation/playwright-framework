@@ -1,5 +1,9 @@
 // src/config/globalTeardown.js
-module.exports = async () => {
-    console.log('Global teardown');
-    // Add teardown logic (e.g., clean up test data)
-  };
+async function globalTeardown(config) {
+  console.log('Global teardown: Cleaning up...');
+  // Perform cleanup (e.g., delete test data, close connections)
+  // Example: Delete authentication token
+  delete process.env.AUTH_TOKEN;
+}
+
+module.exports = globalTeardown;

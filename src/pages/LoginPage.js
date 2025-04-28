@@ -1,38 +1,38 @@
 // src/pages/LoginPage.js
-const LoginPageLocators = require('./locators/LoginPageLocators');
+const BasePage = require('./BasePage');
+const logger = require('../utils/logger');
 
-/**
- * Page Object for the login page
- */
-class LoginPage {
+class LoginPage extends BasePage {
   constructor(page) {
-    this.page = page;
-    this.locators = new LoginPageLocators(page);
+    super(page);
+    this.usernameInput = '#username';
+    this.passwordInput = '#password';
+    this.submitButton = 'button[type="submit"]';
+    this.errorMessage = '.error-message';
+    this.logoutButton = '.logout-btn'; // Adjust selector based on your app
   }
 
-  async navigate() {
-    await this.page.goto('/login');
+  async login(username, password) {
+    logger.info('Attempting login', { username });
+    await this.page.fill(this.usernameInput, username);
+    await this.page.fill(this.passwordInput, password);
+    await this.page.click(this.submitButton);
+    await this.waitForLoad();
+    logger.info('Login form submitted');
   }
 
-  async enterUsername(username) {
-    const locator = await this.locators.getLocator('usernameInput');
-    await locator.fill(username);
+  async verifyLoginSuccess() {
+    const welcomeMessage = await this.page.locator('h1').textContent();
+    logger.info('Verifying login success', { welcomeMessage });
+    return welcomeMessage.includes('Welcome') || welcomeMessage.includes('Example Domain');
   }
 
-  async enterPassword(password) {
-    const locator = await this.locators.getLocator('passwordInput');
-    await locator.fill(password);
-  }
-
-  async clickSubmit() {
-    const locator = await this.locators.getLocator('submitButton');
-    await locator.click();
-  }
-
-  async login({ username, password }) {
-    await this.enterUsername(username);
-    await this.enterPassword(password);
-    await this.clickSubmit();
+  async logout() {
+    logger.info('Attempting logout');
+    await this.page.click(this.logoutButton);
+    await this.page.waitForURL('**/login', { timeout: 5000 });
+    await this.waitForLoad();
+    logger.info('Logout successful');
   }
 }
 

@@ -1,0 +1,5 @@
+# src/data/csv/users.csv
+username,password,role,email
+testuser1,Pass123!,admin,testuser1@example.com
+testuser2,Pass456!,user,testuser2@example.com
+testuser3,Pass789!,guest,testuser3@example.com

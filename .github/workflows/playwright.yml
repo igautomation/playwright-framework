@@ -1,95 +1,121 @@
+# .github/workflows/playwright.yml
 name: Playwright Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
   pull_request:
-    branches: [main, master]
+    branches: [ main, master ]
   schedule:
     - cron: '0 0 * * *'  # Daily midnight run
 
 jobs:
-  test:
-    name: 'Playwright Tests'
+  pre-checks:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Run npm audit
+      run: npm audit
+      continue-on-error: true
+    - name: Run ESLint
+      run: npm run lint
+      continue-on-error: true
+    - name: Run Prettier check
+      run: npm run format:check
+      continue-on-error: true
 
+  select-tests:
+    needs: pre-checks
+    runs-on: ubuntu-latest
+    outputs:
+      tests: ${{ steps.select-tests.outputs.tests }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Needed for Git diff
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Select affected tests
+      id: select-tests
+      run: |
+        TESTS=$(npx framework select-tests origin/main HEAD | jq -R -s -c 'split("\n")[:-1]')
+        echo "tests=$TESTS" >> $GITHUB_OUTPUT
+
+  test:
+    needs: [pre-checks, select-tests]
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
-        environment: [development, qa, uat, prod]
-        shard: [1/3, 2/3, 3/3]  # Sharding for parallel execution
-
+        browser: [ chromium, firefox, webkit ]
+        environment: [ development, qa, uat, prod ]
+        shard: [ "1/3", "2/3", "3/3" ]
     env:
       NODE_ENV: ${{ matrix.environment }}
-      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-      JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
-      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      API_KEY: ${{ secrets.API_KEY }}
+      OAUTH2_TOKEN: ${{ secrets.OAUTH2_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
+      XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
+      TEST_EXECUTION_KEY: "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Security audit
-        run: npm audit
-        continue-on-error: true
-
-      - name: Verify code style
-        run: |
-          npm run lint
-          npm run format:check
-        continue-on-error: true
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-
-      - name: Run Playwright tests
-        run: npx playwright test --project=${{ matrix.browser }} --grep @smoke --shard=${{ matrix.shard }}
-
-      - name: Generate Allure report
-        if: always()
-        run: npx allure generate ./allure-results --clean -o allure-report
-
-      - name: Push results to Xray
-        if: always()
-        run: |
-          node src/utils/xray/xrayUtils.js push-to-xray
-        env:
-          TEST_EXECUTION_KEY: "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"
-
-      - name: Upload Allure report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
-          path: allure-report/
-          retention-days: 30
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-results-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
-          path: |
-            test-results/
-            playwright-report/
-            reports/traces/
-          retention-days: 30
-
-      - name: Notify Slack on failure
-        if: failure()
-        run: |
-          curl -X POST -H 'Content-type: application/json' --data '{
-            "text": "❌ Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard }})! See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+    - name: Quarantine flaky tests
+      run: npx framework quarantine-flaky
+    - name: Run Playwright tests
+      run: npx framework run --tags "@smoke and not @flaky" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
+    - name: Generate Allure report
+      if: always()
+      run: npx framework generate-report
+    - name: Upload Allure report to S3
+      if: always()
+      run: npx framework upload-report my-test-reports reports/allure-report
+    - name: Upload artifacts to S3
+      if: always()
+      run: npx framework upload-artifacts my-test-reports artifacts
+    - name: Upload Allure report as artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+        path: allure-report/
+        retention-days: 30
+    - name: Upload test results as artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: playwright-results-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+        path: |
+          test-results/
+          playwright-report/
+          reports/traces/
+        retention-days: 30
+    - name: Notify Slack on failure
+      if: failure()
+      run: npx framework notify ${{ secrets.SLACK_WEBHOOK_URL }} "❌ Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard }})! See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    - name: Push results to Xray
+      if: always()
+      run: npx framework push-to-xray TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}

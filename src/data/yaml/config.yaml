@@ -1,0 +1,11 @@
+# Test configuration settings
+timeouts:
+  navigation: 30000
+  expectation: 10000
+retries:
+  ui: 1
+  api: 2
+headless: true
+screenshots:
+  enabled: true
+  onFailure: true

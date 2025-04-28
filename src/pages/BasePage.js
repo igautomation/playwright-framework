@@ -1,30 +1,31 @@
-/**
- * Base Page Object for Salesforce UI Pages
- */
-import { expect } from '@playwright/test';
+// src/pages/BasePage.js
 
 /**
- * Base Page Object with common functionality for all Salesforce pages
+ * Base Page Object with common functionality for all pages
  */
-export class BasePage {
+const logger = require('../utils/logger');
+
+// Base Page Object class
+class BasePage {
   /**
    * @param {import('@playwright/test').Page} page - Playwright page
    */
   constructor(page) {
     this.page = page;
-    this.spinner = '[role="status"], .slds-spinner';
-    this.toast = '.slds-notify_toast, .forceToastMessage';
-    this.modal = '.modal-container, .slds-modal';
-    this.modalHeader = '.modal-header, .slds-modal__header';
-    this.modalClose = '.slds-modal__close, button.closeIcon';
+    this.spinner = '[role="status"], .spinner'; // Generic spinner selector
+    this.toast = '.toast-message, .notification'; // Generic toast selector
+    this.modal = '.modal, .popup'; // Generic modal selector
+    this.modalHeader = '.modal-header';
+    this.modalClose = '.modal-close, .close-btn';
   }
 
   /**
-   * Navigate to a specific Salesforce URL
+   * Navigate to a specific URL
    * @param {string} path - Path to navigate to
    * @returns {Promise<void>}
    */
   async navigateTo(path) {
+    logger.info('Navigating to URL', { path });
     await this.page.goto(path);
     await this.waitForLoad();
   }
@@ -35,17 +36,20 @@ export class BasePage {
    * @returns {Promise<void>}
    */
   async waitForLoad(options = { timeout: 30000 }) {
-    // First wait for the navigation to complete
+    logger.info('Waiting for page to load');
+    // Wait for the DOM to load
     await this.page.waitForLoadState('domcontentloaded');
-    
-    // Then check if there's a spinner and wait for it to disappear
+
+    // Check for a spinner and wait for it to disappear
     const hasSpinner = await this.page.locator(this.spinner).count() > 0;
     if (hasSpinner) {
+      logger.info('Spinner detected, waiting for it to disappear');
       await this.page.waitForSelector(this.spinner, { state: 'hidden', timeout: options.timeout });
     }
-    
-    // Finally wait for the network to be idle
+
+    // Wait for the network to be idle
     await this.page.waitForLoadState('networkidle');
+    logger.info('Page load complete');
   }
 
   /**
@@ -55,8 +59,11 @@ export class BasePage {
   async getToastMessage() {
     const toast = this.page.locator(this.toast);
     if (await toast.count() > 0) {
-      return await toast.textContent();
+      const message = await toast.textContent();
+      logger.info('Toast message retrieved', { message });
+      return message;
     }
+    logger.warn('No toast message found');
     return null;
   }
 
@@ -66,8 +73,10 @@ export class BasePage {
    * @returns {Promise<string>} Toast message text
    */
   async waitForToast(options = { timeout: 10000 }) {
+    logger.info('Waiting for toast message', { timeout: options.timeout });
     await this.page.waitForSelector(this.toast, { state: 'visible', timeout: options.timeout });
-    return this.getToastMessage();
+    const message = await this.getToastMessage();
+    return message;
   }
 
   /**
@@ -77,10 +86,13 @@ export class BasePage {
   async closeModalIfPresent() {
     const modal = this.page.locator(this.modal);
     if (await modal.count() > 0 && await modal.isVisible()) {
+      logger.info('Modal detected, attempting to close');
       await this.page.click(this.modalClose);
       await modal.waitFor({ state: 'hidden' });
+      logger.info('Modal closed successfully');
       return true;
     }
+    logger.warn('No modal present to close');
     return false;
   }
 
@@ -90,24 +102,24 @@ export class BasePage {
    * @returns {import('@playwright/test').Locator} Playwright locator
    */
   getHealingLocator(locators) {
-    // Create a joint locator that will try each strategy in order
+    logger.info('Getting self-healing locator', { locators });
     if (locators.data) {
-      // First try with data attribute (most stable in Lightning)
+      logger.debug('Trying data attribute locator');
       return this.page.locator(locators.data);
     } else if (locators.lightning && locators.classic) {
-      // Try both Lightning and Classic locators
+      logger.debug('Trying both Lightning and Classic locators');
       return this.page.locator(`${locators.lightning}, ${locators.classic}`);
     } else if (locators.text) {
-      // Try by text
+      logger.debug('Trying text locator');
       return this.page.getByText(locators.text, { exact: locators.exact ?? false });
     } else if (locators.label) {
-      // Try by label
+      logger.debug('Trying label locator');
       return this.page.getByLabel(locators.label, { exact: locators.exact ?? false });
     } else if (locators.testId) {
-      // Try by test ID
+      logger.debug('Trying test ID locator');
       return this.page.getByTestId(locators.testId);
     } else {
-      // Fallback to CSS
+      logger.debug('Falling back to CSS locator');
       return this.page.locator(locators.css);
     }
   }
@@ -119,6 +131,9 @@ export class BasePage {
    */
   async takeScreenshot(name) {
     const screenshotPath = `screenshots/${name}-${Date.now()}.png`;
+    logger.info('Taking screenshot', { path: screenshotPath });
     return await this.page.screenshot({ path: screenshotPath, fullPage: true });
   }
 }
+
+module.exports = BasePage;

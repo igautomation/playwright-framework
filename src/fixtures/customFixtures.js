@@ -1,15 +1,15 @@
-// src/tests/fixtures/customFixtures.js
-// @ts-check
-import { test as baseTest } from '@playwright/test';
+// src/tests/fixtures/customFixtures.js (updated)
+const baseTest = require('@playwright/test').test;
+const RestUtils = require('../utils/api/restUtils');
+const GraphQLUtils = require('../utils/api/graphqlUtils');
+const AuthUtils = require('../utils/api/auth');
+const XrayUtils = require('../utils/xray/xrayUtils');
+const ReportUtils = require('../utils/reporting/reportUtils');
+const FlakyTestTracker = require('../utils/ci/flakyTestTracker');
+const RetryWithBackoff = require('../utils/common/retryWithBackoff');
 
 /**
- * @typedef {Object} CustomFixtures
- * @property {import('@playwright/test').Page} authenticatedPage - A page pre-authenticated with the application
- * @property {{ get: (endpoint: string) => Promise<import('@playwright/test').APIResponse>, post: (endpoint: string, data: any) => Promise<import('@playwright/test').APIResponse>, put: (endpoint: string, data: any) => Promise<import('@playwright/test').APIResponse>, delete: (endpoint: string) => Promise<import('@playwright/test').APIResponse>, graphql: (query: string, variables?: any) => Promise<any> }} apiClient - An API client for making requests
- */
-
-/**
- * @type {import('@playwright/test').PlaywrightTestConfig & { test: import('@playwright/test').TestType<CustomFixtures, {}> }}
+ * Custom Playwright fixtures for the framework
  */
 const customTest = baseTest.extend({
   authenticatedPage: async ({ page }, use) => {
@@ -28,7 +28,6 @@ const customTest = baseTest.extend({
       await page.fill(usernameSelector, username);
       await page.fill(passwordSelector, password);
       await page.click(submitSelector);
-      // Verify login success (e.g., check for a dashboard element)
       await page.waitForSelector('.dashboard', { timeout: 5000 });
       await use(page);
     } catch (error) {
@@ -40,64 +39,56 @@ const customTest = baseTest.extend({
     const baseURL = process.env.BASE_URL;
     if (!baseURL) throw new Error('BASE_URL environment variable is required');
 
-    const authType = process.env.AUTH_TYPE || 'api-key'; // 'api-key' or 'oauth2'
-    let authHeader = {};
-    if (authType === 'api-key') {
-      const apiKey = process.env.API_KEY;
-      if (!apiKey) throw new Error('API_KEY environment variable is required for api-key auth');
-      authHeader = { Authorization: `Bearer ${apiKey}` };
-    } else if (authType === 'oauth2') {
-      const token = process.env.OAUTH2_TOKEN;
-      if (!token) throw new Error('OAUTH2_TOKEN environment variable is required for oauth2 auth');
-      authHeader = { Authorization: `Bearer ${token}` };
-    }
+    const auth = new AuthUtils();
+    const rest = new RestUtils(request);
+    const graphql = new GraphQLUtils(`${baseURL}/graphql`, { headers: auth.getApiKeyHeaders() });
 
     const apiClient = {
-      async get(endpoint) {
-        const response = await request.get(`${baseURL}${endpoint}`, {
-          headers: authHeader,
-        });
-        if (!response.ok()) throw new Error(`GET ${endpoint} failed: ${response.statusText()}`);
-        return response;
-      },
-      async post(endpoint, data) {
-        const response = await request.post(`${baseURL}${endpoint}`, {
-          headers: authHeader,
-          data,
-        });
-        if (!response.ok()) throw new Error(`POST ${endpoint} failed: ${response.statusText()}`);
-        return response;
-      },
-      async put(endpoint, data) {
-        const response = await request.put(`${baseURL}${endpoint}`, {
-          headers: authHeader,
-          data,
-        });
-        if (!response.ok()) throw new Error(`PUT ${endpoint} failed: ${response.statusText()}`);
-        return response;
-      },
-      async delete(endpoint) {
-        const response = await request.delete(`${baseURL}${endpoint}`, {
-          headers: authHeader,
-        });
-        if (!response.ok()) throw new Error(`DELETE ${endpoint} failed: ${response.statusText()}`);
-        return response;
-      },
-      async graphql(query, variables = {}) {
-        const response = await request.post(`${baseURL}/graphql`, {
-          headers: {
-            ...authHeader,
-            'Content-Type': 'application/json',
-          },
-          data: JSON.stringify({ query, variables }),
-        });
-        if (!response.ok()) throw new Error(`GraphQL request failed: ${response.statusText()}`);
-        return response.json();
-      },
+      get: async (endpoint, options) => rest.requestWithRetry('GET', endpoint, options),
+      post: async (endpoint, options) => rest.requestWithRetry('POST', endpoint, options),
+      put: async (endpoint, options) => rest.requestWithRetry('PUT', endpoint, options),
+      delete: async (endpoint, options) => rest.requestWithRetry('DELETE', endpoint, options),
+      batch: async (requests) => rest.batchRequests(requests),
+      graphqlQuery: async (query, variables) => graphql.request(query, variables),
+      graphqlSubscribe: async (subscription, callback, variables) => graphql.subscribe(subscription, callback, variables),
+      graphqlIntrospect: async () => graphql.introspectSchema(),
     };
 
     await use(apiClient);
   },
+
+  xrayClient: async ({}, use) => {
+    const xray = new XrayUtils();
+    await xray.authenticate();
+    await use(xray);
+  },
+
+  retryDiagnostics: async ({}, use, testInfo) => {
+    const report = new ReportUtils();
+    let attempt = 0;
+    await use(async (error) => {
+      attempt++;
+      if (error) {
+        report.attachLog(`Retry attempt ${attempt} failed: ${error.message}`, `Retry ${attempt}`);
+        await testInfo.attach('screenshot', {
+          body: await testInfo.page.screenshot(),
+          contentType: 'image/png',
+        });
+      }
+    });
+  },
+
+  flakyTestTracker: async ({}, use, testInfo) => {
+    const tracker = new FlakyTestTracker();
+    await use(tracker);
+    const isFlaky = testInfo.title.includes('@flaky');
+    tracker.trackTest(testInfo, isFlaky);
+  },
+
+  retryWithBackoff: async ({}, use) => {
+    const retry = new RetryWithBackoff();
+    await use(retry);
+  },
 });
 
-export default customTest;
+module.exports = { test: customTest };
