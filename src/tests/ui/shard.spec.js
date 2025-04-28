@@ -1,6 +1,9 @@
 // src/tests/ui/shard.spec.js
+require('module-alias/register');
+
 const { test, expect } = require('@fixtures/combined');
-const logger = require("../../../utils/logger");
+require('module-alias/register');
+const logger = require('@utils/common/logger');
 
 test("Test with shard logic", async ({ page }, testInfo) => {
   const shardInfo = testInfo.shard;

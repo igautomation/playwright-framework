@@ -1,4 +1,6 @@
 // src/tests/hybrid/contact-crud.spec.js
+require('module-alias/register');
+
 const { test, expect } = require('@fixtures/combined');
 const LoginPage = require('@pages/LoginPage');
 const HomePage = require('@pages/HomePage');

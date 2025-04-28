@@ -1,4 +1,6 @@
 // src/tests/ui/smoke/login.spec.js
+require('module-alias/register');
+
 const { test, expect } = require('@fixtures/combined');
 const LoginPage = require('@pages/LoginPage');
 const { readData } = require('@utils/common/dataUtils');

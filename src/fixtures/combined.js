@@ -1,30 +1,19 @@
 // src/fixtures/combined.js
-// src/fixtures/combined.js
-const { test, expect } = require('@playwright/test');
+require('module-alias/register');
 
-module.exports = { test, expect };
-
-/**
- * Combined API utility module.
- * This layer uses core API request methods to provide ready-to-use functions
- * for common user-related operations like fetching and updating user data.
- */
-
+const { test: baseTest, expect } = require('@playwright/test');
+const { test: customTest } = require('./customFixtures');
 const { createRequestContext, get, post, put, del } = require("./api");
+
+// Extend Playwright base test with custom fixtures
+const test = customTest.extend({});
 
 /**
  * Fetches user data for a specific user ID.
- * Creates a fresh request context for each call to maintain isolation.
  *
- * @param {string} baseURL - The base URL of the API (e.g., 'https://example.com/api').
- * @param {string} userId - The unique identifier of the user to fetch.
- * @returns {Promise<object>} - The JSON response containing user details.
- *
- * Example usage:
- * ```javascript
- * const userData = await fetchUserData('https://example.com/api', '123');
- * console.log(userData);
- * ```
+ * @param {string} baseURL - Base API URL.
+ * @param {string} userId - ID of the user to fetch.
+ * @returns {Promise<object>} - User data JSON.
  */
 async function fetchUserData(baseURL, userId) {
   const context = await createRequestContext(baseURL);
@@ -34,18 +23,11 @@ async function fetchUserData(baseURL, userId) {
 
 /**
  * Updates user data for a specific user ID.
- * Sends a PUT request with the provided data payload.
  *
- * @param {string} baseURL - The base URL of the API (e.g., 'https://example.com/api').
- * @param {string} userId - The unique identifier of the user to update.
- * @param {object} data - The data object containing fields to update.
- * @returns {Promise<object>} - The JSON response after the update.
- *
- * Example usage:
- * ```javascript
- * const updated = await updateUserData('https://example.com/api', '123', { name: 'New Name' });
- * console.log(updated);
- * ```
+ * @param {string} baseURL - Base API URL.
+ * @param {string} userId - ID of the user to update.
+ * @param {object} data - Data to update the user with.
+ * @returns {Promise<object>} - Update response JSON.
  */
 async function updateUserData(baseURL, userId, data) {
   const context = await createRequestContext(baseURL);
@@ -53,8 +35,10 @@ async function updateUserData(baseURL, userId, data) {
   return response.json();
 }
 
-// Export all utility functions for external use
+// Export everything properly
 module.exports = {
+  test,
+  expect,
   fetchUserData,
-  updateUserData,
+  updateUserData
 };

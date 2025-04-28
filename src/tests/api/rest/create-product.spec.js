@@ -1,10 +1,10 @@
 // src/tests/api/rest/create-product.spec.js
-const { test, expect } = require('@playwright/test');
+require('module-alias/register');
+const { test, expect } = require('@fixtures/combined');
 const { parse } = require('csv-parse/sync');
 const fs = require('fs');
-const fetch = require('node-fetch');
+const logger = require('@utils/common/logger'); // if needed
 const Ajv = require('ajv');
-const { readData } = require('@utils/common/logger');
 
 const ajv = new Ajv();
 const productSchema = {

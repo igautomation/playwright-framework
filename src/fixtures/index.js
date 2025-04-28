@@ -10,6 +10,7 @@
  *
  * Intended to serve as a functional example and test of API utility integration.
  */
+require('module-alias/register');
 
 const { fetchUserData, updateUserData } = require("./combined");
 

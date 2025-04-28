@@ -1,4 +1,6 @@
 // src/tests/ui/retry-timeout.spec.js
+require('module-alias/register');
+
 const { test, expect } = require('@fixtures/combined');
 
 test("Test with retries and timeout", async ({ page }, testInfo) => {

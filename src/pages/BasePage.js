@@ -1,5 +1,6 @@
 // src/pages/BasePage.js
-const logger = require("../utils/common/logger");
+require('module-alias/register');
+const logger = require('@utils/common/logger');
 
 class BasePage {
   constructor(page) {

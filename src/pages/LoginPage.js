@@ -1,7 +1,7 @@
 // src/pages/LoginPage.js
 const BasePage = require("./BasePage");
-const logger = require("../utils/common/logger");
-
+require('module-alias/register');
+const logger = require('@utils/common/logger');
 class LoginPage extends BasePage {
   constructor(page) {
     super(page);
