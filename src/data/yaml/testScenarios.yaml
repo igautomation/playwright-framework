@@ -1,4 +1,7 @@
-# Test scenarios for UI and API tests
+# src/data/yaml/testScenarios.yaml
+
+# Test scenarios for UI and API automation tests
+
 scenarios:
   - name: "User Login and Profile Update"
     type: "ui"

@@ -1,27 +1,42 @@
 // src/utils/ci/testSelector.js
 
-// Class to select tests based on Git diffs between two commits
+/**
+ * Test Selector Utility for Playwright Framework.
+ *
+ * Responsibilities:
+ * - Select test files based on Git diffs between two commits
+ * - Useful for smart test selection in CI/CD pipelines
+ * - Currently mocked; real implementation can use Git commands
+ */
+
 class TestSelector {
-    constructor() {
-      this.testFiles = [];
-    }
-  
-    // Method to select tests based on Git diff
-    // - `baseCommit`: The base commit to compare (e.g., 'origin/main')
-    // - `headCommit`: The head commit to compare (e.g., 'HEAD')
-    // - Returns a list of test files that have changed
-    selectTestsByDiff(baseCommit, headCommit) {
-      // Simulate Git diff logic (to be implemented with actual Git commands)
-      // For demo purposes, return a static list of test files
-      console.log(`Simulating test selection between ${baseCommit} and ${headCommit}`);
-  
-      // Mock list of test files that have changed
-      // In a real implementation, use `child_process` to run `git diff` and parse changed files
-      return [
-        'tests/ui/product-listing.spec.js',
-        'tests/api/product-list-api.spec.js'
-      ];
-    }
+  constructor() {
+    this.testFiles = [];
   }
-  
-  module.exports = TestSelector;
+
+  /**
+   * Selects a list of test files that have changed between two commits.
+   *
+   * @param {string} baseCommit - The base Git commit or branch (e.g., 'origin/main').
+   * @param {string} headCommit - The head Git commit or branch (e.g., 'HEAD').
+   * @returns {Array<string>} List of changed test file paths.
+   */
+  selectTestsByDiff(baseCommit, headCommit) {
+    console.log(
+      `Simulating test selection between ${baseCommit} and ${headCommit}`
+    );
+
+    // Mock output: list of test files changed
+    // To implement real behavior:
+    // - Use `child_process` module
+    // - Execute: `git diff --name-only baseCommit headCommit`
+    // - Filter files ending with `.spec.js`
+
+    return [
+      "tests/ui/product-listing.spec.js",
+      "tests/api/product-list-api.spec.js",
+    ];
+  }
+}
+
+module.exports = TestSelector;

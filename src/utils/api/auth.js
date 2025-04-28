@@ -1,33 +1,53 @@
 // src/utils/api/auth.js
-const fetch = require('node-fetch');
 
 /**
- * Authentication utilities for API testing
+ * API Authentication Utilities for Playwright Automation Framework.
+ *
+ * Responsibilities:
+ * - Support API Key-based authentication
+ * - Support OAuth2 client credentials flow
+ * - Provide helper methods to get authenticated headers
+ */
+
+const fetch = require("node-fetch");
+
+/**
+ * Constructor for AuthUtils.
  */
 function AuthUtils() {
-  this.apiKey = process.env.API_KEY || 'mock-key';
+  this.apiKey = process.env.API_KEY || "mock-key";
   this.oauthToken = null;
 }
 
 /**
- * Authenticates using OAuth2 client credentials
- * @param {string} tokenUrl - OAuth2 token endpoint URL
- * @param {string} clientId - Client ID
- * @param {string} clientSecret - Client secret
- * @returns {Promise} Resolves to access token
- * @throws {Error} If authentication fails
+ * Authenticates using OAuth2 client credentials flow.
+ *
+ * @param {string} tokenUrl - OAuth2 token endpoint URL.
+ * @param {string} clientId - OAuth2 client ID.
+ * @param {string} clientSecret - OAuth2 client secret.
+ * @returns {Promise<string>} - OAuth2 access token.
+ * @throws {Error} If authentication fails.
  */
-AuthUtils.prototype.getOAuthToken = async function (tokenUrl, clientId, clientSecret) {
+AuthUtils.prototype.getOAuthToken = async function (
+  tokenUrl,
+  clientId,
+  clientSecret
+) {
   if (!tokenUrl || !clientId || !clientSecret) {
-    throw new Error('Token URL, client ID, and client secret are required');
+    throw new Error("Token URL, client ID, and client secret are required");
   }
+
   try {
     const response = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
     });
-    if (!response.ok) throw new Error(`OAuth2 authentication failed: ${response.statusText}`);
+
+    if (!response.ok) {
+      throw new Error(`OAuth2 authentication failed: ${response.statusText}`);
+    }
+
     const data = await response.json();
     this.oauthToken = data.access_token;
     return this.oauthToken;
@@ -37,20 +57,24 @@ AuthUtils.prototype.getOAuthToken = async function (tokenUrl, clientId, clientSe
 };
 
 /**
- * Returns API key headers
- * @returns {Object} Headers with API key
+ * Provides API key headers for authenticated requests.
+ *
+ * @returns {Object} - Headers containing the API key.
  */
 AuthUtils.prototype.getApiKeyHeaders = function () {
-  return { 'X-API-Key': this.apiKey };
+  return { "X-API-Key": this.apiKey };
 };
 
 /**
- * Returns OAuth2 headers
- * @returns {Object} Headers with OAuth2 token
- * @throws {Error} If OAuth token is not set
+ * Provides OAuth2 headers for authenticated requests.
+ *
+ * @returns {Object} - Headers containing the Bearer token.
+ * @throws {Error} If OAuth token is not set.
  */
 AuthUtils.prototype.getOAuthHeaders = function () {
-  if (!this.oauthToken) throw new Error('OAuth token not set. Call getOAuthToken first.');
+  if (!this.oauthToken) {
+    throw new Error("OAuth token not set. Call getOAuthToken first.");
+  }
   return { Authorization: `Bearer ${this.oauthToken}` };
 };
 

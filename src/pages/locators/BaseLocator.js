@@ -1,5 +1,5 @@
 // src/pages/locators/BaseLocator.js
-const { expect } = require('@playwright/test');
+const { expect } = require("@playwright/test");
 
 /**
  * Base class for managing self-healing and pattern-based locators

@@ -1,93 +1,39 @@
-// src/fixtures/index.js (updated)
-const { test: base, expect } = require('@playwright/test');
-const fs = require('fs');
+// src/fixtures/index.js
 
-const test = base.extend({
-  defaultTestData: [{ id: '123', name: 'Test User' }, { option: true }],
+/**
+ * Entry point script demonstrating usage of combined API utilities.
+ *
+ * This script:
+ *  - Fetches user details by ID.
+ *  - Updates user information.
+ *  - Logs the operations' results.
+ *
+ * Intended to serve as a functional example and test of API utility integration.
+ */
 
-  // Override Built-in Fixture: Auto-login page
-  page: async ({ page, userAccount }, use) => {
-    const { username, password } = userAccount;
-    await page.goto('/login');
-    await page.fill('#username', username);
-    await page.fill('#password', password);
-    await page.click('button[type="submit"]');
-    await use(page);
-  },
+const { fetchUserData, updateUserData } = require("./combined");
 
-  loggedInUser: async ({ page }, use) => {
-    await page.goto('/login');
-    await page.fill('#username', 'testuser');
-    await page.fill('#password', 'password123');
-    await page.click('button[type="submit"]');
-    await use(page);
-  },
+(async () => {
+  try {
+    const baseURL = process.env.BASE_URL || "https://example.com/api";
+    const userId = "123"; // Example user ID
 
-  testData: async ({ defaultTestData }, use) => {
-    await use(defaultTestData);
-  },
+    console.log("--- Starting API operations ---");
 
-  userAccount: [
-    async ({ browser }, use, workerInfo) => {
-      const username = `user${workerInfo.workerIndex}`;
-      const password = 'password123';
-      const page = await browser.newPage();
-      await page.goto('/signup');
-      await page.fill('#username', username);
-      await page.fill('#password', password);
-      await page.click('button[type="submit"]');
-      await page.close();
-      await use({ username, password });
-    },
-    { scope: 'worker', timeout: 60000 },
-  ],
+    // Fetch user data
+    const userData = await fetchUserData(baseURL, userId);
+    console.log("Fetched User Data:", JSON.stringify(userData, null, 2));
 
-  debugLogs: [
-    async ({}, use, testInfo) => {
-      const logs = [];
-      console.log = (...args) => logs.push(args.map(String).join(''));
-      await use();
-      if (testInfo.status !== testInfo.expectedStatus) {
-        const logFile = testInfo.outputPath('logs.txt');
-        await fs.promises.writeFile(logFile, logs.join('\n'), 'utf8');
-        testInfo.attachments.push({ name: 'logs', contentType: 'text/plain', path: logFile });
-      }
-    },
-    { auto: true, box: true, title: 'Debug Logs Capture' },
-  ],
+    // Prepare updated data payload
+    const updatedData = { name: "Updated Name" };
 
-  globalBeforeEach: [
-    async ({ page }, use) => {
-      console.log('Global beforeEach: Navigating to base URL');
-      await page.goto(baseURL);
-      await use();
-    },
-    { auto: true },
-  ],
+    // Update user data
+    const updateResponse = await updateUserData(baseURL, userId, updatedData);
+    console.log("Update Response:", JSON.stringify(updateResponse, null, 2));
 
-  globalAfterEach: [
-    async ({ page }, use) => {
-      await use();
-      console.log('Global afterEach: Last URL:', page.url());
-    },
-    { auto: true },
-  ],
-
-  globalBeforeAll: [
-    async ({}, use, workerInfo) => {
-      console.log(`Starting test worker ${workerInfo.workerIndex}`);
-      await use();
-    },
-    { scope: 'worker', auto: true },
-  ],
-
-  globalAfterAll: [
-    async ({}, use, workerInfo) => {
-      await use();
-      console.log(`Stopping test worker ${workerInfo.workerIndex}`);
-    },
-    { scope: 'worker', auto: true },
-  ],
-});
-
-module.exports = { test, expect };
+    console.log("--- API operations completed successfully ---");
+  } catch (error) {
+    console.error("Error occurred during API operations:", error);
+    process.exit(1);
+  }
+})();

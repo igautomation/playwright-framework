@@ -10,14 +10,15 @@
  * @param {string} [params.role] - User role
  */
 function User({ id, name, email, password, role }) {
-  if (!id) throw new Error('User ID is required');
-  if (!name) throw new Error('User name is required');
-  if (!email || !this.isValidEmail(email)) throw new Error('Valid email is required');
+  if (!id) throw new Error("User ID is required");
+  if (!name) throw new Error("User name is required");
+  if (!email || !this.isValidEmail(email))
+    throw new Error("Valid email is required");
   this._id = id;
   this._name = name;
   this._email = email;
   this._password = password || null;
-  this._role = role || 'user';
+  this._role = role || "user";
 }
 
 /**
@@ -35,7 +36,7 @@ User.prototype.getId = function () {
 };
 
 User.prototype.setName = function (name) {
-  if (!name) throw new Error('User name cannot be empty');
+  if (!name) throw new Error("User name cannot be empty");
   this._name = name;
 };
 
@@ -44,7 +45,8 @@ User.prototype.getName = function () {
 };
 
 User.prototype.setEmail = function (email) {
-  if (!email || !this.isValidEmail(email)) throw new Error('Valid email is required');
+  if (!email || !this.isValidEmail(email))
+    throw new Error("Valid email is required");
   this._email = email;
 };
 
@@ -61,7 +63,7 @@ User.prototype.getPassword = function () {
 };
 
 User.prototype.setRole = function (role) {
-  this._role = role || 'user';
+  this._role = role || "user";
 };
 
 User.prototype.getRole = function () {
