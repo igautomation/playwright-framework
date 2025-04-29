@@ -13,9 +13,6 @@ import { execSync } from 'child_process';
 class SetupUtils {
   constructor() {}
 
-  /**
-   * Installs the Playwright extension in Visual Studio Code.
-   */
   installPlaywrightVSCode() {
     try {
       execSync('code --install-extension ms-playwright.playwright', {
@@ -29,19 +26,12 @@ class SetupUtils {
     }
   }
 
-  /**
-   * Configures the number of retries for Playwright tests.
-   *
-   * @param {number} retries - Non-negative integer representing retry attempts.
-   */
   configureRetry(retries) {
     if (typeof retries !== 'number' || retries < 0 || !Number.isInteger(retries)) {
       throw new Error('Retries must be a non-negative integer');
     }
     try {
       console.log(`Configured Playwright to retry tests ${retries} times`);
-
-      // Set environment variable for CI/CD runners
       process.env.PLAYWRIGHT_RETRIES = retries.toString();
     } catch (error) {
       throw new Error(`Failed to configure retries: ${error.message}`);
@@ -49,4 +39,8 @@ class SetupUtils {
   }
 }
 
-export default SetupUtils;
+const setupUtils = new SetupUtils();
+
+// ✅ Export **instance methods** directly for easy usage
+export const installPlaywrightVSCode = setupUtils.installPlaywrightVSCode.bind(setupUtils);
+export const configureRetry = setupUtils.configureRetry.bind(setupUtils);

@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 // src/cli/index.js
 
-require('module-alias/register');
+import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs';
+import { execSync } from 'child_process';
+import fs from 'fs-extra';
+import path from 'path';
+import { config as loadEnv } from 'dotenv-safe';
 
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
-const { execSync } = require('child_process');
-const fs = require('fs-extra');
-const path = require('path');
-const { config: loadEnv } = require('dotenv-safe');
-const logger = require('@utils/common/logger');
-const { generateUsersToFile, generateProductsToCsv } = require('@utils/common/testDataFactory');
-const { pushExecutionResults } = require('@utils/xray/xrayUtils');
-const { pushToGitHub, configureJenkinsPipeline, setupCiEnvironment } = require('@utils/ci/ciUtils');
-const { installPlaywrightVSCode, configureRetry } = require('@utils/setup/setupUtils');
-const { clone, checkout, status, pull, commit, push } = require('@utils/git/gitUtils');
-const { generateAllureReport, notify } = require('@utils/reporting/reportUtils');
-const TestSelector = require('@utils/ci/testSelector');
-const FlakyTestTracker = require('@utils/ci/flakyTestTracker');
+import logger from '../utils/common/logger.js';
+import { generateUsersToFile, generateProductsToCsv } from '../utils/common/testDataFactory.js';
+import XrayUtils from '../utils/xray/xrayUtils.js';
+import { generateAllureReport, notify } from '../utils/reporting/reportUtils.js';
+import { installPlaywrightVSCode, configureRetry } from '../utils/setup/setupUtils.js';
+import TestSelector from '../utils/ci/testSelector.js';
+import FlakyTestTracker from '../utils/ci/flakyTestTracker.js';
+import CIUtils from '../utils/ci/ciUtils.js';
 
 const testSelector = new TestSelector();
 const flakyTracker = new FlakyTestTracker();
+const ciUtils = new CIUtils();
+const xrayClient = new XrayUtils(); // instantiate XrayUtils properly
 
 function loadEnvironmentVariables(projectDir) {
   const env = process.env.NODE_ENV || 'development';
@@ -31,10 +31,7 @@ function loadEnvironmentVariables(projectDir) {
       example: path.join(projectDir, '.env.example'),
       path: path.join(projectDir, `src/config/env/${envFileName}.env`),
     });
-    loadEnv({
-      allowEmptyValues: true,
-      example: path.join(projectDir, '.env.example'),
-    });
+    loadEnv({ allowEmptyValues: true, example: path.join(projectDir, '.env.example') });
   } catch (error) {
     logger.error(`Failed to load environment variables: ${error.message}`);
     process.exit(1);
@@ -45,17 +42,6 @@ function loadEnvironmentVariables(projectDir) {
 (async () => {
   try {
     yargs(hideBin(process.argv))
-      .option('verbose', {
-        type: 'boolean',
-        describe: 'Enable verbose logging',
-        global: true
-      })
-      .option('debug', {
-        type: 'boolean',
-        describe: 'Enable debug mode logging',
-        global: true
-      })
-
       .command('init [dir]', 'Initialize project', (yargs) => {
         return yargs.option('dir', {
           describe: 'Directory to scaffold',
@@ -114,8 +100,9 @@ function loadEnvironmentVariables(projectDir) {
       })
 
       .command('push-to-xray <testExecutionKey>', 'Push results to Xray', {}, async (argv) => {
-        const dummyResults = [{ testKey: 'TEST-123', status: 'passed' }];
-        await pushExecutionResults(argv.testExecutionKey, dummyResults);
+        await xrayClient.authenticate(); // Authenticate first
+        const dummyResults = [{ testKey: 'TEST-123', status: 'passed', startTime: Date.now(), endTime: Date.now() }];
+        await xrayClient.pushExecutionResults(argv.testExecutionKey, dummyResults);
         logger.info('Results pushed to Xray.');
       })
 
@@ -150,31 +137,31 @@ function loadEnvironmentVariables(projectDir) {
       })
 
       .command('git-clone <repoUrl> [destPath]', 'Clone Git repo', {}, (argv) => {
-        clone(argv.repoUrl, argv.destPath);
+        ciUtils.git.clone(argv.repoUrl, argv.destPath);
         logger.info('Repository cloned.');
       })
 
       .command('git-status [repoPath]', 'Git status', {}, (argv) => {
-        logger.info(status(argv.repoPath));
+        logger.info(ciUtils.git.status(argv.repoPath));
       })
 
       .command('git-pull [branch] [repoPath]', 'Git pull', {}, (argv) => {
-        pull(argv.branch, argv.repoPath);
+        ciUtils.git.pull(argv.branch, argv.repoPath);
         logger.info('Git pull completed.');
       })
 
       .command('git-commit <message> [repoPath]', 'Git commit', {}, (argv) => {
-        commit(argv.message, argv.repoPath);
+        ciUtils.git.commit(argv.message, argv.repoPath);
         logger.info('Git commit completed.');
       })
 
       .command('git-push <branch> [repoPath]', 'Git push', {}, (argv) => {
-        push(argv.branch, argv.repoPath);
+        ciUtils.git.push(argv.branch, argv.repoPath);
         logger.info('Git push completed.');
       })
 
       .command('setup-ci <repoUrl> [branch] [repoPath]', 'Setup CI environment', {}, (argv) => {
-        setupCiEnvironment({ repoUrl: argv.repoUrl, branch: argv.branch, repoPath: argv.repoPath });
+        ciUtils.setupCiEnvironment({ repoUrl: argv.repoUrl, branch: argv.branch, repoPath: argv.repoPath });
         logger.info('CI environment setup completed.');
       })
 
