@@ -9,8 +9,8 @@
  * - Improves CI/CD hygiene by removing old session data.
  */
 
-const fs = require("fs-extra");
-const path = require("path");
+import fs from "fs-extra";
+import path from "path";
 
 /**
  * Global teardown function.

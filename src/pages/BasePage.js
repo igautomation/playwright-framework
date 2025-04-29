@@ -1,5 +1,5 @@
 // src/pages/BasePage.js
-import logger from '../utils/common/logger.js';
+import logger from "../utils/common/logger.js";
 
 class BasePage {
   constructor(page) {

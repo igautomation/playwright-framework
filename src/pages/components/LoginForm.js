@@ -1,6 +1,5 @@
 // src/pages/components/LoginForm.js
-require('module-alias/register');
-const SelfHealingLocator = require("@locators/SelfHealingLocator");
+import SelfHealingLocator from "#locators/SelfHealingLocator.js";
 class LoginForm {
   constructor(page) {
     this.page = page;

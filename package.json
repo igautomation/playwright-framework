@@ -68,7 +68,6 @@
         "js-yaml": "^4.1.0",
         "lucide-react": "^0.503.0",
         "mime": "^3.0.0",
-        "module-alias": "^2.2.3",
         "node-fetch": "^2.7.0",
         "pg": "^8.15.6",
         "react-dom": "^19.1.0",
@@ -109,5 +108,10 @@
             "prettier --write"
         ]
     },
-    "type": "module"
+    "type": "module",
+    "imports": {
+        "#utils/*": "./src/utils/*",
+        "#fixtures/*": "./src/fixtures/*",
+        "#pages/*": "./src/pages/*"
+    }
 }

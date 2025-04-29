@@ -9,7 +9,7 @@
  * - Automatically attach API Key authentication headers
  */
 
-import AuthUtils from './auth.js';
+import AuthUtils from "./auth.js";
 
 class RestUtils {
   /**
@@ -20,7 +20,7 @@ class RestUtils {
    */
   constructor(request) {
     if (!request) {
-      throw new Error('Request object is required');
+      throw new Error("Request object is required");
     }
     this.request = request;
     this.auth = new AuthUtils();
@@ -36,11 +36,11 @@ class RestUtils {
    * @returns {Promise<Response>} - Playwright API Response object.
    */
   async requestWithRetry(method, url, options = {}, retries = 3) {
-    if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method.toUpperCase())) {
-      throw new Error('Invalid HTTP method');
+    if (!["GET", "POST", "PUT", "DELETE"].includes(method.toUpperCase())) {
+      throw new Error("Invalid HTTP method");
     }
     if (!url) {
-      throw new Error('URL is required');
+      throw new Error("URL is required");
     }
 
     let attempt = 0;
@@ -51,21 +51,23 @@ class RestUtils {
         const requestOptions = { ...options, headers };
 
         switch (method.toUpperCase()) {
-          case 'GET':
+          case "GET":
             return await this.request.get(url, requestOptions);
-          case 'POST':
+          case "POST":
             return await this.request.post(url, requestOptions);
-          case 'PUT':
+          case "PUT":
             return await this.request.put(url, requestOptions);
-          case 'DELETE':
+          case "DELETE":
             return await this.request.delete(url, requestOptions);
           default:
-            throw new Error('Unsupported HTTP method');
+            throw new Error("Unsupported HTTP method");
         }
       } catch (error) {
         attempt++;
         if (attempt === retries) {
-          throw new Error(`Request failed after ${retries} retries: ${error.message}`);
+          throw new Error(
+            `Request failed after ${retries} retries: ${error.message}`
+          );
         }
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
       }
@@ -80,7 +82,7 @@ class RestUtils {
    */
   async batchRequests(requests) {
     if (!Array.isArray(requests)) {
-      throw new Error('Requests array is required');
+      throw new Error("Requests array is required");
     }
 
     try {

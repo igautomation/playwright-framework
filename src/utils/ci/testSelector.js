@@ -34,7 +34,7 @@ class TestSelector {
 
     return [
       "src/tests/ui/product-listing.spec.js",
-      "src/tests/api/product-list-api.spec.js"
+      "src/tests/api/product-list-api.spec.js",
     ];
   }
 }

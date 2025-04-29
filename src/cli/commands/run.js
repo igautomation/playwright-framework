@@ -1,16 +1,16 @@
-const { execSync } = require('child_process');
+import { execSync } from "child_process";
 
 function run(argv) {
-  let command = 'npx playwright test';
+  let command = "npx playwright test";
 
   if (argv.tags) {
     command += ` --grep "${argv.tags}"`;
   }
   if (argv.headed) {
-    command += ' --headed';
+    command += " --headed";
   }
   if (argv.project) {
-    command += ` --project=${argv.project.join(' ')}`;
+    command += ` --project=${argv.project.join(" ")}`;
   }
   if (argv.workers) {
     command += ` --workers=${argv.workers}`;
@@ -20,7 +20,7 @@ function run(argv) {
   }
 
   console.log(`Executing: ${command}`);
-  execSync(command, { stdio: 'inherit' });
+  execSync(command, { stdio: "inherit" });
 }
 
 module.exports = run;

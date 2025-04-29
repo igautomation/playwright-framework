@@ -10,10 +10,10 @@
  * - Use structured logging and tracing for debugging.
  */
 
-const { chromium } = require("@playwright/test");
-const { readData } = require("../utils/common/dataUtils");
-const BasePage = require("../pages/BasePage");
-const logger = require("../utils/logger");
+import { chromium } from "@playwright/test";
+import { readData } from "../utils/common/dataUtils.js";
+import BasePage from "../pages/BasePage.js";
+import logger from "../utils/logger.js";
 
 /**
  * Global setup function executed before the test suite.

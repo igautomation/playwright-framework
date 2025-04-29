@@ -1,5 +1,5 @@
 // src/config/playwright.config.js
-const { config: loadEnv } = require("dotenv-safe");
+import { config as loadEnv } from "dotenv-safe";
 
 const env = process.env.NODE_ENV || "development";
 const envFileName = env === "development" ? "dev" : env;
