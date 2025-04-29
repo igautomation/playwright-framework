@@ -13,7 +13,7 @@
         "deploy": "gh-pages -d build",
         "generate-data": "framework generate-data",
         "list-tags": "framework list-tags",
-        "generate-report": "npx allure generate reports/allure -o reports/allure-report --clean",
+        "generate-report": "framework generate-report",
         "open-report": "npx allure open reports/allure-report",
         "push-xray": "framework push-to-xray",
         "select-tests": "framework select-tests",
@@ -61,6 +61,7 @@
         "aws-sdk": "^2.1692.0",
         "csv-parse": "^5.6.0",
         "dotenv-safe": "^8.2.0",
+        "exceljs": "^4.4.0",
         "fast-xml-parser": "^5.2.1",
         "fs-extra": "^10.1.0",
         "gh-pages": "^6.3.0",
@@ -75,7 +76,6 @@
         "uuid": "^8.3.2",
         "winston": "^3.17.0",
         "ws": "^8.18.1",
-        "xlsx": "^0.18.5",
         "yargs": "^17.7.2"
     },
     "devDependencies": {
@@ -86,16 +86,6 @@
         "husky": "^8.0.3",
         "lint-staged": "^15.5.1",
         "prettier": "^2.8.8"
-    },
-    "_moduleAliases": {
-        "@root": "src",
-        "@fixtures": "src/fixtures",
-        "@pages": "src/pages",
-        "@tests": "src/tests",
-        "@utils": "src/utils",
-        "@data": "src/data",
-        "@components": "src/pages/components",
-        "@locators": "src/pages/locators"
     },
     "husky": {
         "hooks": {
@@ -110,8 +100,8 @@
     },
     "type": "module",
     "imports": {
-        "#utils/*": "./src/utils/*",
-        "#fixtures/*": "./src/fixtures/*",
-        "#pages/*": "./src/pages/*"
+        "@utils/*": "./src/utils/*",
+        "@fixtures/*": "./src/fixtures/*",
+        "@pages/*": "./src/pages/*"
     }
 }

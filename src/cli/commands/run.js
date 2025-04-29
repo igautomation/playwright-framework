@@ -1,8 +1,13 @@
+// src/cli/commands/run.js
 import { execSync } from "child_process";
+import logger from "../../utils/common/logger.js";
 
 function run(argv) {
   let command = "npx playwright test";
 
+  if (argv.files && argv.files.length) {
+    command += ` ${argv.files.join(" ")}`;
+  }
   if (argv.tags) {
     command += ` --grep "${argv.tags}"`;
   }
@@ -19,8 +24,13 @@ function run(argv) {
     command += ` --retries=${argv.retries}`;
   }
 
-  console.log(`Executing: ${command}`);
-  execSync(command, { stdio: "inherit" });
+  logger.info(`Executing: ${command}`);
+  try {
+    execSync(command, { stdio: "inherit" });
+  } catch (error) {
+    logger.error(`Playwright test execution failed: ${error.message}`);
+    process.exit(1);
+  }
 }
 
-module.exports = run;
+export default run;

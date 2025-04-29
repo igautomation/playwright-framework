@@ -1,4 +1,3 @@
-| name         | job              | email                |
-|:-------------|:------------------|:---------------------|
-| Jack Black   | QA Engineer       | jack.black@test.com   |
-| Sarah White  | Test Automation   | sarah.white@test.com  |
+name,job,email
+John Excel,Excel Developer,john.excel@test.com
+Jane Excel,Excel Tester,jane.excel@test.com

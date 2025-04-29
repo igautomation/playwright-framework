@@ -1,13 +1,24 @@
 // src/tests/hybrid/demo-hybrid.spec.js
-import { test, expect } from '../../fixtures/combined.js';
-import fetch from 'node-fetch';
+import { test, expect } from "../../fixtures/combined.js";
 
-test('@hybrid Demo Hybrid: UI and API in same test', async ({ page }) => {
-  // UI Part
-  await page.goto('https://automationexercise.com/');
-  await expect(page).toHaveTitle(/Automation Exercise/);
+test.describe("Hybrid Tests", () => {
+  test("@hybrid Demo Hybrid: UI and API in same test", async ({
+    authenticatedPage,
+    apiClient,
+    retryDiagnostics,
+  }) => {
+    try {
+      // UI Part
+      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      await authenticatedPage.goto(baseURL);
+      await expect(authenticatedPage).toHaveTitle(/Automation Exercise/);
 
-  // API Part
-  const response = await fetch('https://automationexercise.com/api/productsList');
-  expect(response.status).toBe(200);
+      // API Part
+      const response = await apiClient.get("/api/productsList");
+      expect(response.status()).toBe(200);
+    } catch (error) {
+      await retryDiagnostics(error);
+      throw error;
+    }
+  });
 });

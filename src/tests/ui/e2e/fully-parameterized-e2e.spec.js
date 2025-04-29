@@ -1,62 +1,95 @@
 // src/tests/ui/e2e/fully-parameterized-e2e.spec.js
+import { test, expect } from "../../../fixtures/combined.js";
+import XPathPracticePage from "../../../pages/XPathPracticePage.js";
+import {
+  readYaml,
+  readXml,
+  readExcel,
+} from "../../../utils/common/dataOrchestrator.js";
+import fs from "fs";
 
-import { test, expect } from '../../fixtures/combined.js';
-import XPathPracticePage from '../../../pages/XPathPracticePage.js';
-import { readYaml, readXml, readExcel } from '../../../utils/common/dataOrchestrator.js';
-import fetch from 'node-fetch';
-
-test.describe.parallel('Fully Parameterized E2E - UI + API + Data', () => {
-  
-  test('UI Login Test using ENV data', async ({ page }) => {
-    const practicePage = new XPathPracticePage(page);
-
-    await page.goto(process.env.BASE_UI_URL);
-
-    await practicePage.login(process.env.LOGIN_USERNAME, process.env.LOGIN_PASSWORD);
-
-    await expect(page.locator('#userId')).toHaveValue(process.env.LOGIN_USERNAME);
+test.describe.parallel("Fully Parameterized E2E - UI + API + Data", () => {
+  test("UI Login Test using ENV data", async ({
+    authenticatedPage,
+    retryDiagnostics,
+  }) => {
+    try {
+      const practicePage = new XPathPracticePage(authenticatedPage);
+      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      await authenticatedPage.goto(baseURL);
+      await practicePage.login(
+        process.env.LOGIN_USERNAME,
+        process.env.LOGIN_PASSWORD
+      );
+      await expect(authenticatedPage.locator("#userId")).toHaveValue(
+        process.env.LOGIN_USERNAME
+      );
+    } catch (error) {
+      console.error("UI Login Test Error:", error.message);
+      await retryDiagnostics(error);
+      throw error;
+    }
   });
 
-  test('API Create User using YAML Data', async () => {
-    const yamlData = readYaml('src/data/testData.yaml').user;
-    
-    const response = await fetch(`${process.env.BASE_API_URL}/api/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(yamlData),
-    });
-    
-    expect(response.status).toBe(201);
-    const body = await response.json();
-    expect(body.name).toBe(yamlData.name);
+  test("API Create User using YAML Data", async ({
+    apiClient,
+    retryDiagnostics,
+  }) => {
+    try {
+      const yamlData = readYaml("src/data/testData.yaml").user;
+      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      const response = await apiClient.post("/api/users", { data: yamlData });
+      expect(response.status()).toBe(201);
+      const body = await response.json();
+      expect(body.name).toBe(yamlData.name);
+    } catch (error) {
+      console.error("YAML Test Error:", error.message);
+      await retryDiagnostics(error);
+      throw error;
+    }
   });
 
-  test('API Create User using XML Data', async () => {
-    const xmlData = readXml('src/data/testData.xml').user;
-
-    const response = await fetch(`${process.env.BASE_API_URL}/api/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(xmlData),
-    });
-
-    expect(response.status).toBe(201);
-    const body = await response.json();
-    expect(body.name).toBe(xmlData.name);
+  test("API Create User using XML Data", async ({
+    apiClient,
+    retryDiagnostics,
+  }) => {
+    try {
+      const xmlData = readXml("src/data/testData.xml").user;
+      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      const response = await apiClient.post("/api/users", { data: xmlData });
+      expect(response.status()).toBe(201);
+      const body = await response.json();
+      expect(body.name).toBe(xmlData.name);
+    } catch (error) {
+      console.error("XML Test Error:", error.message);
+      await retryDiagnostics(error);
+      throw error;
+    }
   });
 
-  test('API Create User using Excel Data', async () => {
-    const excelData = readExcel('src/data/testData.xlsx')[0];
-
-    const response = await fetch(`${process.env.BASE_API_URL}/api/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(excelData),
-    });
-
-    expect(response.status).toBe(201);
-    const body = await response.json();
-    expect(body.name).toBe(excelData.name);
+  test("API Create User using Excel Data", async ({
+    apiClient,
+    retryDiagnostics,
+  }, testInfo) => {
+    const excelPath = "src/data/testData.xlsx";
+    if (!fs.existsSync(excelPath)) {
+      console.warn(`Excel file not found: ${excelPath}. Skipping test.`);
+      testInfo.skip(true, `Excel file not found: ${excelPath}`);
+      return;
+    }
+    try {
+      console.log("Attempting to read Excel file:", excelPath);
+      const excelData = (await readExcel(excelPath))[0];
+      console.log("Excel Data:", JSON.stringify(excelData));
+      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      const response = await apiClient.post("/api/users", { data: excelData });
+      expect(response.status()).toBe(201);
+      const body = await response.json();
+      expect(body.name).toBe(excelData.name);
+    } catch (error) {
+      console.error("Excel Test Error:", error.message);
+      await retryDiagnostics(error);
+      throw error;
+    }
   });
-
 });

@@ -1,12 +1,19 @@
 // src/tests/api/rest/demo-api.spec.js
-import { test, expect } from '../../fixtures/combined.js';
+import { test, expect } from "../../../fixtures/combined.js";
 
-import fetch from 'node-fetch';
+test.describe("Demo API Tests", () => {
+  test("@api List all products", async ({ apiClient, retryDiagnostics }) => {
+    try {
+      const baseURL =
+        process.env.BASE_URL || "https://automationexercise.com/api";
+      const response = await apiClient.get("/productsList");
+      expect(response.status()).toBe(200);
 
-test('@api Demo API: List all products', async () => {
-  const response = await fetch('https://automationexercise.com/api/productsList');
-  expect(response.status).toBe(200);
-
-  const body = await response.json();
-  expect(Array.isArray(body.products)).toBeTruthy();
+      const body = await response.json();
+      expect(Array.isArray(body.products)).toBeTruthy();
+    } catch (error) {
+      await retryDiagnostics(error);
+      throw error;
+    }
+  });
 });

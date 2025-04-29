@@ -1,15 +1,13 @@
 // src/fixtures/combined.js
-
 import { expect } from "@playwright/test";
 import { customTest } from "./customFixtures.js";
 import { createRequestContext, get, post, put, del } from "./api.js";
 
-// Use your customTest as test
+// Rename to avoid confusion with exported 'test'
 const test = customTest;
 
 /**
  * Fetch user data by ID.
- *
  * @param {string} baseURL - Base API URL
  * @param {string} userId - User ID
  * @returns {Promise<object>} User data
@@ -22,7 +20,6 @@ async function fetchUserData(baseURL, userId) {
 
 /**
  * Update user data by ID.
- *
  * @param {string} baseURL - Base API URL
  * @param {string} userId - User ID
  * @param {object} data - Data to update
@@ -34,5 +31,4 @@ async function updateUserData(baseURL, userId, data) {
   return response.json();
 }
 
-// Export everything cleanly
 export { test, expect, fetchUserData, updateUserData };
