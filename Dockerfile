@@ -1,7 +1,17 @@
+# Use Node LTS version
 FROM node:18
-WORKDIR /app
-COPY package.json .
-RUN npm install
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy all project files to container
 COPY . .
+
+# Install Node dependencies
+RUN npm install
+
+# Install Playwright browsers (Chromium, Firefox, Webkit)
 RUN npx playwright install --with-deps
-CMD ["npx", "framework", "run"]
+
+# Default command: run all Playwright tests
+CMD ["npx", "playwright", "test"]

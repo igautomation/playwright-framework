@@ -1,41 +1,38 @@
 // src/pages/LoginPage.js
-const BasePage = require("./BasePage");
-require('module-alias/register');
-const logger = require('@utils/common/logger');
+
+const BasePage = require('./BasePage');
+const WebInteractions = require('@utils/web/webInteractions');
+const LoginPageLocators = require('./locators/LoginPageLocators');
+
 class LoginPage extends BasePage {
   constructor(page) {
     super(page);
-    this.usernameInput = "#username";
-    this.passwordInput = "#password";
-    this.submitButton = 'button[type="submit"]';
-    this.errorMessage = ".error-message";
-    this.logoutButton = ".logout-btn";
+    this.web = new WebInteractions(page);
+
+    // Locators from LoginPageLocators.js
+    this.usernameInput = LoginPageLocators.usernameInput;
+    this.passwordInput = LoginPageLocators.passwordInput;
+    this.submitButton = LoginPageLocators.submitButton;
+    this.errorMessage = LoginPageLocators.errorMessage;
+    this.logoutButton = LoginPageLocators.logoutButton;
   }
 
   async login(username, password) {
-    logger.info("Attempting login", { username });
-    await this.page.fill(this.usernameInput, username);
-    await this.page.fill(this.passwordInput, password);
-    await this.page.click(this.submitButton);
+    await this.web.clearAndType(this.usernameInput, username);
+    await this.web.clearAndType(this.passwordInput, password);
+    await this.web.safeClick(this.submitButton);
     await this.waitForLoad();
-    logger.info("Login form submitted");
   }
 
   async verifyLoginSuccess() {
-    const welcomeMessage = await this.page.locator("h1").textContent();
-    logger.info("Verifying login success", { welcomeMessage });
-    return (
-      welcomeMessage.includes("Welcome") ||
-      welcomeMessage.includes("Example Domain")
-    );
+    const welcomeMessage = await this.web.getText('h1');
+    return welcomeMessage.includes('Welcome');
   }
 
   async logout() {
-    logger.info("Attempting logout");
-    await this.page.click(this.logoutButton);
-    await this.page.waitForURL("**/login", { timeout: 5000 });
+    await this.web.safeClick(this.logoutButton);
+    await this.page.waitForURL('**/login', { timeout: 5000 });
     await this.waitForLoad();
-    logger.info("Logout successful");
   }
 }
 

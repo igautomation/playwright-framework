@@ -1,0 +1,11 @@
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE NOT NULL,
+  job VARCHAR(100)
+);
+
+-- Insert Sample Data
+INSERT INTO users (name, email, job) VALUES 
+('Jack Black', 'jack.black@test.com', 'QA Engineer'),
+('Sarah White', 'sarah.white@test.com', 'Test Automation Engineer');

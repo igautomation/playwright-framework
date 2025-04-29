@@ -9,7 +9,7 @@ on:
   pull_request:
     branches: [ main, master ]
   schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight
+    - cron: '0 0 * * *'  # Daily midnight run
 
 jobs:
   
@@ -18,21 +18,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run npm audit
         run: npm audit
-        continue-on-error: true
-      - name: Run ESLint
+        continue-on-error: false  # FAIL build if vulnerabilities
+
+      - name: Run ESLint (strict)
         run: npm run lint
-        continue-on-error: true
-      - name: Run Prettier check
+        continue-on-error: false  # FAIL build if lint errors
+
+      - name: Run Prettier check (strict)
         run: npm run format:check
-        continue-on-error: true
+        continue-on-error: false  # FAIL build if formatting errors
 
   # Select affected tests using Git diff
   select-tests:
@@ -44,12 +49,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Select changed tests
         id: select-tests
         run: |
@@ -71,9 +79,6 @@ jobs:
       BASE_URL: ${{ secrets.BASE_URL }}
       API_KEY: ${{ secrets.API_KEY }}
       OAUTH2_TOKEN: ${{ secrets.OAUTH2_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
       XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
@@ -81,16 +86,27 @@ jobs:
       TEST_EXECUTION_KEY: "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}
+
       - name: Install dependencies
         run: npm ci
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+
       - name: Quarantine flaky tests
         run: npx framework quarantine-flaky
+
       - name: Run Playwright tests
         run: npx framework run --tags "@smoke and not @flaky" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
 
@@ -100,40 +116,38 @@ jobs:
         run: npx framework generate-report
 
       # Upload reports and artifacts
-      - name: Upload Allure report to S3
-        if: always()
-        run: npx framework upload-report my-test-reports reports/allure-report
-      - name: Upload artifacts to S3
-        if: always()
-        run: npx framework upload-artifacts my-test-reports artifacts
-
-      # Backup Artifacts to GitHub
       - name: Upload Allure report as artifact
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
-          path: allure-report/
-          retention-days: 30
-      - name: Upload test results as artifact
+          path: reports/allure-report
+
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: playwright-results-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+          name: playwright-html-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+          path: playwright-report/
+
+      - name: Upload Screenshots and Traces
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: traces-and-screenshots-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
           path: |
             test-results/
-            playwright-report/
             reports/traces/
-          retention-days: 30
+            screenshots/
 
       # Slack Notification on Failure
       - name: Notify Slack on failure
         if: failure()
         run: |
           npx framework notify ${{ secrets.SLACK_WEBHOOK_URL }} \
-          "Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard }}). Check Actions run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          "Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard}}). Check run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-        # Push Results to Xray
+      # Push Results to Xray
       - name: Push results to Xray
         if: always()
         run: npx framework push-to-xray "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"

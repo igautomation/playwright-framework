@@ -100,5 +100,4 @@ class BasePage {
     return await this.page.screenshot({ path: screenshotPath, fullPage: true });
   }
 }
-
 module.exports = BasePage;

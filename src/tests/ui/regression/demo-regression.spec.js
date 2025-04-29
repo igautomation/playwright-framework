@@ -7,5 +7,5 @@ test('@regression Demo Regression: Product Search', async ({ page }) => {
   await page.fill('input#search_product', 'T-shirt');
   await page.click('button#submit_search');
 
-  await expect(page.locator('.productinfo.text-center')).toContainText(/T-shirt/i);
+  await expect(page.locator('.features_items')).toContainText(/T-shirt/i);
 });

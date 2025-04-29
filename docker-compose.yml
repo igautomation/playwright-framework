@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  playwright-framework:
+    build: .
+    container_name: playwright-framework
+    environment:
+      - NODE_ENV=qa
+    volumes:
+      - .:/usr/src/app
+    command: ["npx", "playwright", "test"]
