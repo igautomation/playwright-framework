@@ -1,51 +1,65 @@
 // src/config/playwright.config.js
-
 /**
  * Playwright Test Configuration (ESM Compliant)
  *
  * Responsibilities:
  * - Load environment variables dynamically
- * - Configure base URLs, retries, reporters, timeouts
- * - Define multiple projects (Web, Mobile, API, Unit, BrowserStack)
+ * - Configure retries, reporters, timeouts
+ * - Define multiple projects (Web, Mobile, API, Unit)
  * - Enable test artifacts (trace, video, screenshots)
  * - Integrate global setup and teardown
  */
 
 import { defineConfig, devices } from "@playwright/test";
-import { config as loadEnv } from "dotenv-safe";
-import { join } from "path";
+import { loadEnv } from "dotenv";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { existsSync } from "fs";
+import logger from "../utils/common/logger.js";
 
-// Load environment variables safely
-const env = process.env.NODE_ENV || "development";
-const envFileName = env === "development" ? "dev" : env;
+// Environment and path setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-try {
-  loadEnv({
-    allowEmptyValues: true,
-    example: ".env.example",
-    path: join("src", "config", "env", `${envFileName}.env`),
-  });
-} catch (error) {
-  console.error(
-    `Failed to load environment variables for ${env}:`,
-    error.message
+const env = process.env.NODE_ENV || "dev";
+const envFileName = env === "prod" ? "prod" : "dev";
+const envFilePath = join(
+  __dirname,
+  "..",
+  "config",
+  "env",
+  `${envFileName}.env`
+);
+
+// Optionally load .env file if it exists
+if (existsSync(envFilePath)) {
+  try {
+    loadEnv({ path: envFilePath, override: true });
+    logger.info(
+      `Successfully loaded environment variables from ${envFilePath}`
+    );
+  } catch (error) {
+    logger.error(
+      `Failed to load environment file ${envFilePath}: ${error.message}`
+    );
+    throw new Error(`Failed to load environment file: ${error.message}`);
+  }
+} else {
+  logger.info(
+    `Environment file ${envFilePath} not found. Using existing environment variables.`
   );
-  process.exit(1);
 }
 
-// Dynamically determine baseURL
-const baseURL = (() => {
-  switch (env) {
-    case "prod":
-      return process.env.BASE_URL || "https://prod.example.com";
-    case "uat":
-      return process.env.BASE_URL || "https://uat.example.com";
-    case "qa":
-      return process.env.BASE_URL || "https://qa.example.com";
-    default:
-      return process.env.BASE_URL || "https://dev.example.com";
-  }
-})();
+// Log all environment variables for debugging (without assuming specific keys)
+const envVars = Object.fromEntries(
+  Object.entries(process.env).filter(
+    ([key]) => !key.includes("PASSWORD") && !key.includes("SECRET")
+  ) // Exclude sensitive data
+);
+logger.info("Available environment variables:", envVars);
+
+// Use BASE_URL if provided, otherwise let fixtures/tests handle validation
+const baseURL = process.env.BASE_URL;
 
 // Configure reporters (Local vs CI)
 const reporters = process.env.CI
@@ -120,18 +134,17 @@ export default defineConfig({
 
   use: {
     baseURL,
-    storageState: process.env.STORAGE_STATE || "test-results/state.json",
-    colorScheme: "dark",
-    locale: process.env.LOCALE || "en-US",
-    timezoneId: process.env.TIMEZONE || "UTC",
-    viewport: { width: 1280, height: 720 },
+    storageState: process.env.STORAGE_STATE,
+    colorScheme: process.env.COLOR_SCHEME,
+    locale: process.env.LOCALE,
+    timezoneId: process.env.TIMEZONE,
     geolocation:
       process.env.GEOLOCATION_LATITUDE && process.env.GEOLOCATION_LONGITUDE
         ? {
             latitude: parseFloat(process.env.GEOLOCATION_LATITUDE),
             longitude: parseFloat(process.env.GEOLOCATION_LONGITUDE),
           }
-        : { latitude: 40.7128, longitude: -74.006 },
+        : null,
     permissions: process.env.GEOLOCATION_LATITUDE ? ["geolocation"] : undefined,
     offline: process.env.OFFLINE === "true",
     javaScriptEnabled: process.env.JAVASCRIPT_ENABLED !== "false",
@@ -145,11 +158,10 @@ export default defineConfig({
     video: "retain-on-failure",
     actionTimeout: 10000,
     headless: process.env.HEADLESS === "false" ? false : true,
-    testIdAttribute: "data-test-id",
+    testIdAttribute: process.env.TEST_ID_ATTRIBUTE || "data-test-id",
     launchOptions: {
       slowMo: process.env.HEADLESS === "false" ? 50 : 0,
     },
-    defaultTestData: { id: "456", name: "Default User" },
   },
 
   projects: [
@@ -197,34 +209,6 @@ export default defineConfig({
       testMatch: /.*\.ui\.spec\.js/,
     },
     {
-      name: "browserstack-chromium",
-      use: {
-        browserName: "chromium",
-        "bstack:options": {
-          os: process.env.BSTACK_OS || "Windows",
-          osVersion: process.env.BSTACK_OS_VERSION || "11",
-          browserVersion: process.env.BSTACK_BROWSER_VERSION || "latest",
-          projectName: "Playwright Framework",
-          buildName: process.env.BSTACK_BUILD_NAME || "playwright-build",
-          sessionName: "Playwright Test",
-          local: false,
-          userName: process.env.BROWSERSTACK_USERNAME,
-          accessKey: process.env.BROWSERSTACK_ACCESS_KEY,
-        },
-        connectOptions: {
-          wsEndpoint: `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(
-            JSON.stringify({
-              "bstack:options": {
-                userName: process.env.BROWSERSTACK_USERNAME,
-                accessKey: process.env.BROWSERSTACK_ACCESS_KEY,
-              },
-            })
-          )}`,
-        },
-      },
-      testMatch: /.*\.ui\.spec\.js/,
-    },
-    {
       name: "api",
       use: {
         browserName: undefined,
@@ -241,15 +225,23 @@ export default defineConfig({
     },
   ],
 
-  timeout: 30000,
+  timeout: process.env.TEST_TIMEOUT
+    ? parseInt(process.env.TEST_TIMEOUT, 10)
+    : 30000,
 
   expect: {
-    timeout: 10000,
+    timeout: process.env.EXPECT_TIMEOUT
+      ? parseInt(process.env.EXPECT_TIMEOUT, 10)
+      : 10000,
     toHaveScreenshot: {
-      maxDiffPixels: 50,
+      maxDiffPixels: process.env.SCREENSHOT_MAX_DIFF_PIXELS
+        ? parseInt(process.env.SCREENSHOT_MAX_DIFF_PIXELS, 10)
+        : 50,
     },
     toMatchSnapshot: {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: process.env.SNAPSHOT_MAX_DIFF_PIXEL_RATIO
+        ? parseFloat(process.env.SNAPSHOT_MAX_DIFF_PIXEL_RATIO)
+        : 0.05,
     },
   },
 });

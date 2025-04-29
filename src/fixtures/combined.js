@@ -4,7 +4,10 @@ import { customTest } from "./customFixtures.js";
 import { createRequestContext, get, post, put, del } from "./api.js";
 
 // Rename to avoid confusion with exported 'test'
-const test = customTest;
+const test = customTest.extend({
+  apiClient: customTest.apiClient,
+  retryDiagnostics: customTest.retryDiagnostics,
+});
 
 /**
  * Fetch user data by ID.
@@ -31,4 +34,4 @@ async function updateUserData(baseURL, userId, data) {
   return response.json();
 }
 
-export { test, expect, fetchUserData, updateUserData };
+export { test, expect };
