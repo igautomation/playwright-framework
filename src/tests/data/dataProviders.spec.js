@@ -1,9 +1,8 @@
 // src/tests/data/dataProviders.spec.js
 
-import { test, expect } from '../../../fixtures/combined.js';
-const { readData } = require('@utils/common/dataUtils');
-const { readYaml, readXml, readExcel } = require('@utils/common/dataOrchestrator');
-const DBUtils = require('@utils/database/dbUtils');
+import { test, expect } from '../../fixtures/combined.js';
+import { readData } from '../../../utils/common/dataUtils.js';
+import { readYaml, readXml, readExcel } from '../../../utils/common/dataOrchestrator';
 
 test.describe.parallel('Data Providers - Unified Test Suite', () => {
 

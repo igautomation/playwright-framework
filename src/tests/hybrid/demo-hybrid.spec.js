@@ -1,6 +1,6 @@
 // src/tests/hybrid/demo-hybrid.spec.js
-import { test, expect } from '../../../fixtures/combined.js';
-const fetch = require('node-fetch');
+import { test, expect } from '../../fixtures/combined.js';
+import fetch from 'node-fetch';
 
 test('@hybrid Demo Hybrid: UI and API in same test', async ({ page }) => {
   // UI Part

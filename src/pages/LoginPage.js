@@ -1,8 +1,8 @@
 // src/pages/LoginPage.js
 
-const BasePage = require('./BasePage');
-const WebInteractions = require('@utils/web/webInteractions');
-const LoginPageLocators = require('./locators/LoginPageLocators');
+import BasePage from './BasePage.js';
+import WebInteractions from '../utils/web/webInteractions.js';
+import LoginPageLocators from './locators/LoginPageLocators.js';
 
 class LoginPage extends BasePage {
   constructor(page) {
@@ -36,4 +36,4 @@ class LoginPage extends BasePage {
   }
 }
 
-module.exports = LoginPage;
+export default LoginPage;

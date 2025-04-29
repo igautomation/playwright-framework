@@ -1,6 +1,7 @@
 // src/tests/api/rest/demo-api.spec.js
-import { test, expect } from '../../../fixtures/combined.js';
-const fetch = require('node-fetch');
+import { test, expect } from '../../fixtures/combined.js';
+
+import fetch from 'node-fetch';
 
 test('@api Demo API: List all products', async () => {
   const response = await fetch('https://automationexercise.com/api/productsList');

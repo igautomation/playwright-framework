@@ -1,6 +1,5 @@
 // src/pages/BasePage.js
-require('module-alias/register');
-const logger = require('@utils/common/logger');
+import logger from '../utils/common/logger.js';
 
 class BasePage {
   constructor(page) {
@@ -100,4 +99,4 @@ class BasePage {
     return await this.page.screenshot({ path: screenshotPath, fullPage: true });
   }
 }
-module.exports = BasePage;
+export default BasePage;

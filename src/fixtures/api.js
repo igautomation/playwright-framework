@@ -1,26 +1,21 @@
 // src/fixtures/api.js
 
 /**
- * API utilities module to perform HTTP requests using Playwright's request context.
- * Provides standardized helper methods for GET, POST, PUT, DELETE operations.
+ * API utilities module for Playwright Framework (ESM Compliant).
  *
- * This module promotes code reuse and centralized API management across tests.
+ * Responsibilities:
+ * - Create isolated API request contexts
+ * - Standardize helper methods for GET, POST, PUT, DELETE
  */
 
-const { request } = require("@playwright/test");
+import { request } from '@playwright/test';
 
 /**
- * Creates a new API request context.
- * This context is isolated per test and includes a base URL and optional headers.
+ * Creates a new API request context with optional base URL and headers.
  *
- * @param {string} baseURL - The base URL for the API requests (e.g., 'https://example.com/api').
- * @param {object} [extraHTTPHeaders={}] - Optional additional headers (e.g., authentication tokens).
- * @returns {Promise<APIRequestContext>} - Returns a new Playwright APIRequestContext instance.
- *
- * Example usage:
- * ```javascript
- * const context = await createRequestContext('https://example.com/api', { Authorization: 'Bearer token' });
- * ```
+ * @param {string} baseURL - The base URL for API requests.
+ * @param {object} [extraHTTPHeaders={}] - Additional headers (e.g., auth).
+ * @returns {Promise<import('@playwright/test').APIRequestContext>}
  */
 async function createRequestContext(baseURL, extraHTTPHeaders = {}) {
   return await request.newContext({
@@ -31,91 +26,50 @@ async function createRequestContext(baseURL, extraHTTPHeaders = {}) {
 
 /**
  * Generic function to make an API request.
- * Automatically builds request options based on method and payload.
  *
- * @param {APIRequestContext} context - The Playwright request context created earlier.
- * @param {string} method - HTTP method (GET, POST, PUT, DELETE).
- * @param {string} endpoint - API endpoint (e.g., '/users/123').
- * @param {object} [payload={}] - Optional request body payload for non-GET methods.
- * @param {object} [headers={}] - Optional additional request headers.
- * @returns {Promise<Response>} - Returns a Playwright API response object.
- *
- * Example usage:
- * ```javascript
- * const response = await makeApiRequest(context, 'POST', '/users', { name: 'John Doe' });
- * ```
+ * @param {import('@playwright/test').APIRequestContext} context - Request context.
+ * @param {string} method - HTTP method.
+ * @param {string} endpoint - API endpoint path.
+ * @param {object} [payload={}] - Request body.
+ * @param {object} [headers={}] - Additional headers.
+ * @returns {Promise<Response>}
  */
-async function makeApiRequest(
-  context,
-  method,
-  endpoint,
-  payload = {},
-  headers = {}
-) {
+async function makeApiRequest(context, method, endpoint, payload = {}, headers = {}) {
   const options = {
     method,
     headers,
-    ...(method.toUpperCase() !== "GET" && { data: payload }),
+    ...(method.toUpperCase() !== 'GET' && { data: payload }),
   };
 
   return await context.request(endpoint, options);
 }
 
 /**
- * Performs a GET request to the specified endpoint.
- *
- * @param {APIRequestContext} context - The Playwright request context.
- * @param {string} endpoint - The API endpoint.
- * @param {object} [headers={}] - Optional headers.
- * @returns {Promise<Response>} - API response.
+ * Performs a GET request.
  */
 async function get(context, endpoint, headers = {}) {
-  return await makeApiRequest(context, "GET", endpoint, {}, headers);
+  return await makeApiRequest(context, 'GET', endpoint, {}, headers);
 }
 
 /**
- * Performs a POST request with an optional payload.
- *
- * @param {APIRequestContext} context - The Playwright request context.
- * @param {string} endpoint - The API endpoint.
- * @param {object} [payload={}] - Request body.
- * @param {object} [headers={}] - Optional headers.
- * @returns {Promise<Response>} - API response.
+ * Performs a POST request.
  */
 async function post(context, endpoint, payload = {}, headers = {}) {
-  return await makeApiRequest(context, "POST", endpoint, payload, headers);
+  return await makeApiRequest(context, 'POST', endpoint, payload, headers);
 }
 
 /**
- * Performs a PUT request with an optional payload.
- *
- * @param {APIRequestContext} context - The Playwright request context.
- * @param {string} endpoint - The API endpoint.
- * @param {object} [payload={}] - Request body.
- * @param {object} [headers={}] - Optional headers.
- * @returns {Promise<Response>} - API response.
+ * Performs a PUT request.
  */
 async function put(context, endpoint, payload = {}, headers = {}) {
-  return await makeApiRequest(context, "PUT", endpoint, payload, headers);
+  return await makeApiRequest(context, 'PUT', endpoint, payload, headers);
 }
 
 /**
- * Performs a DELETE request to the specified endpoint.
- *
- * @param {APIRequestContext} context - The Playwright request context.
- * @param {string} endpoint - The API endpoint.
- * @param {object} [headers={}] - Optional headers.
- * @returns {Promise<Response>} - API response.
+ * Performs a DELETE request.
  */
 async function del(context, endpoint, headers = {}) {
-  return await makeApiRequest(context, "DELETE", endpoint, {}, headers);
+  return await makeApiRequest(context, 'DELETE', endpoint, {}, headers);
 }
 
-// Export all API request functions for external usage
-module.exports = {
-  createRequestContext,
-  get,
-  post,
-  put,
-  del,
-};
+export { createRequestContext, get, post, put, del };

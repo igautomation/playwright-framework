@@ -1,5 +1,5 @@
 // src/tests/ui/regression/demo-regression.spec.js
-import { test, expect } from '../../../fixtures/combined.js';
+import { test, expect } from '../../fixtures/combined.js';
 
 test('@regression Demo Regression: Product Search', async ({ page }) => {
   await page.goto('https://automationexercise.com/products');

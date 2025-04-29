@@ -62,21 +62,18 @@ class SelfHealingLocator {
   static create(page, primarySelector, elementDescription) {
     const fallbackStrategies = [];
 
-    // Fallback 1: Use text content if the element has known text
     if (elementDescription.text) {
       fallbackStrategies.push({
         selector: `text=${elementDescription.text}`,
       });
     }
 
-    // Fallback 2: Use role and name (Playwright's ARIA role selectors)
     if (elementDescription.role && elementDescription.name) {
       fallbackStrategies.push({
         selector: `[role="${elementDescription.role}"][name="${elementDescription.name}"]`,
       });
     }
 
-    // Fallback 3: Use a broader CSS selector (e.g., by tag or partial class)
     if (elementDescription.tag) {
       fallbackStrategies.push({
         selector: elementDescription.tag,
@@ -89,4 +86,4 @@ class SelfHealingLocator {
   }
 }
 
-module.exports = SelfHealingLocator;
+export default SelfHealingLocator;

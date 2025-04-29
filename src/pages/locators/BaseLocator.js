@@ -1,5 +1,6 @@
 // src/pages/locators/BaseLocator.js
-const { expect } = require("@playwright/test");
+
+import { expect } from '@playwright/test';
 
 /**
  * Base class for managing self-healing and pattern-based locators
@@ -28,11 +29,15 @@ class BaseLocator {
    */
   async getLocator(name) {
     const { primary, fallbacks } = this.locators[name] || {};
-    if (!primary) throw new Error(`Locator not defined: ${name}`);
+    if (!primary) {
+      throw new Error(`Locator not defined: ${name}`);
+    }
 
     // Try primary locator
     let locator = this.page.locator(primary);
-    if (await this.isLocatorValid(locator)) return locator;
+    if (await this.isLocatorValid(locator)) {
+      return locator;
+    }
 
     // Try fallbacks
     for (const fallback of fallbacks) {
@@ -61,4 +66,4 @@ class BaseLocator {
   }
 }
 
-module.exports = BaseLocator;
+export default BaseLocator;

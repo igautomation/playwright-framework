@@ -1,7 +1,7 @@
 // src/pages/HomePage.js
 
-const BasePage = require('./BasePage');
-const WebInteractions = require('@utils/web/webInteractions');
+import BasePage from './BasePage.js';
+import WebInteractions from '../utils/web/webInteractions.js';
 
 class HomePage extends BasePage {
   constructor(page) {
@@ -28,5 +28,4 @@ class HomePage extends BasePage {
     return actualText.includes(expectedText);
   }
 }
-
-module.exports = HomePage;
+export default HomePage;

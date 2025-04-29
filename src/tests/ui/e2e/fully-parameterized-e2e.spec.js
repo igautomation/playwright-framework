@@ -1,6 +1,6 @@
 // src/tests/ui/e2e/fully-parameterized-e2e.spec.js
 
-import { test, expect } from '../../../fixtures/combined.js';
+import { test, expect } from '../../fixtures/combined.js';
 import XPathPracticePage from '../../../pages/XPathPracticePage.js';
 import { readYaml, readXml, readExcel } from '../../../utils/common/dataOrchestrator.js';
 import fetch from 'node-fetch';

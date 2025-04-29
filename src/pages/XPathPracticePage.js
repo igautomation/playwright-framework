@@ -1,5 +1,6 @@
-const BasePage = require('./BasePage');
-const WebInteractions = require('@utils/web/webInteractions');
+// src/pages/XPathPracticePage.js
+import BasePage from './BasePage.js';
+import WebInteractions from '../utils/web/webInteractions.js';
 
 class XPathPracticePage {
     constructor(page) {
@@ -17,4 +18,3 @@ class XPathPracticePage {
   }
   
   export default XPathPracticePage;
-  

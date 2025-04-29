@@ -1,6 +1,6 @@
 // src/tests/ui/shard.spec.js
-import { test, expect } from '../../../fixtures/combined.js';
-const logger = require('@utils/common/logger');
+import { test, expect } from '../../fixtures/combined.js';
+import logger from '../../../utils/common/logger.js';
 
 test('@shard Demo: Shard info and navigation to products page', async ({ page }, testInfo) => {
   const shardInfo = testInfo.shard;
