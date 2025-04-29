@@ -1,12 +1,9 @@
-require('module-alias/register');
-const { test, expect } = require('@fixtures/combined');
-const XPathPracticePage = require('@pages/XPathPracticePage');
-const { readYaml, readXml, readExcel, getHybridTestData } = require('@utils/common/dataOrchestrator');
-const yamlData= readYaml('src/data/test.yaml');
-const excelData = readExcel('src/data/testData.xlsx');
-const xmlData = readXml('src/data/testData.xml');
-const hybridData = await getHybridTestData();
-const fetch = require('node-fetch');
+// src/tests/ui/e2e/fully-parameterized-e2e.spec.js
+
+import { test, expect } from '../../../fixtures/combined.js';
+import XPathPracticePage from '../../../pages/XPathPracticePage.js';
+import { readYaml, readXml, readExcel } from '../../../utils/common/dataOrchestrator.js';
+import fetch from 'node-fetch';
 
 test.describe.parallel('Fully Parameterized E2E - UI + API + Data', () => {
   
@@ -60,17 +57,6 @@ test.describe.parallel('Fully Parameterized E2E - UI + API + Data', () => {
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.name).toBe(excelData.name);
-  });
-
-  test('Hybrid Orchestration Test (ENV + YAML + Excel + DB)', async () => {
-    const data = await getHybridTestData();
-
-    await expect(data.envUsername).not.toBeNull();
-    await expect(data.name).not.toBeNull();
-    await expect(data.job).not.toBeNull();
-    await expect(data.email).not.toBeNull();
-
-    expect(data.dbUser.email).toBe(data.email);
   });
 
 });

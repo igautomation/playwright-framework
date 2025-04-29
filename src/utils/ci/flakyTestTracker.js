@@ -1,7 +1,7 @@
 // src/utils/ci/flakyTestTracker.js
 
 /**
- * Flaky Test Tracker Utility for Playwright Framework.
+ * Flaky Test Tracker Utility for Playwright Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Track test execution status over multiple runs
@@ -9,67 +9,69 @@
  * - Log flaky detections for reporting and debugging
  */
 
-const ReportUtils = require("../reporting/reportUtils");
+import ReportUtils from '../reporting/reportUtils.js';
 
 /**
- * Constructor for FlakyTestTracker.
+ * FlakyTestTracker class definition.
  */
-function FlakyTestTracker() {
-  this.report = new ReportUtils();
-  this.testResults = new Map();
-}
-
-/**
- * Tracks an individual test's execution result.
- *
- * @param {Object} testInfo - Playwright test information object.
- * @param {boolean} isFlaky - Whether the test was pre-marked as flaky (e.g., via a @flaky tag).
- */
-FlakyTestTracker.prototype.trackTest = function (testInfo, isFlaky) {
-  const testId = `${testInfo.title}-${testInfo.file}`;
-
-  // Retrieve existing stats or initialize
-  let results = this.testResults.get(testId) || {
-    runs: 0,
-    failures: 0,
-    isFlaky,
-  };
-
-  results.runs++;
-  if (testInfo.status !== "passed") {
-    results.failures++;
+class FlakyTestTracker {
+  constructor() {
+    this.report = new ReportUtils();
+    this.testResults = new Map();
   }
 
-  this.testResults.set(testId, results);
+  /**
+   * Tracks an individual test's execution result.
+   *
+   * @param {Object} testInfo - Playwright test information object.
+   * @param {boolean} isFlaky - Whether the test was pre-marked as flaky (e.g., via a @flaky tag).
+   */
+  trackTest(testInfo, isFlaky) {
+    const testId = `${testInfo.title}-${testInfo.file}`;
 
-  // Log flaky behavior if failures detected over multiple runs
-  if (results.failures > 0 && results.runs > 1) {
-    this.report.attachLog(
-      `Flaky test detected: ${testInfo.title} (Failures: ${results.failures}/${results.runs})`,
-      "Flaky Test"
-    );
-  }
-};
+    // Retrieve existing stats or initialize
+    let results = this.testResults.get(testId) || {
+      runs: 0,
+      failures: 0,
+      isFlaky,
+    };
 
-/**
- * Quarantines tests identified as flaky.
- *
- * Criteria:
- * - Explicitly marked flaky via tag
- * - OR Failure rate > 30% after at least 3 test runs
- *
- * @returns {Array} - List of flaky test IDs to be skipped/quarantined.
- */
-FlakyTestTracker.prototype.quarantineFlakyTests = function () {
-  const flakyTests = [];
+    results.runs++;
+    if (testInfo.status !== 'passed') {
+      results.failures++;
+    }
 
-  for (const [testId, { runs, failures, isFlaky }] of this.testResults) {
-    if (isFlaky || (runs >= 3 && failures / runs > 0.3)) {
-      flakyTests.push(testId);
+    this.testResults.set(testId, results);
+
+    // Log flaky behavior if failures detected over multiple runs
+    if (results.failures > 0 && results.runs > 1) {
+      this.report.attachLog(
+        `Flaky test detected: ${testInfo.title} (Failures: ${results.failures}/${results.runs})`,
+        'Flaky Test'
+      );
     }
   }
 
-  return flakyTests;
-};
+  /**
+   * Quarantines tests identified as flaky.
+   *
+   * Criteria:
+   * - Explicitly marked flaky via tag
+   * - OR Failure rate > 30% after at least 3 test runs
+   *
+   * @returns {Array} - List of flaky test IDs to be skipped/quarantined.
+   */
+  quarantineFlakyTests() {
+    const flakyTests = [];
 
-module.exports = FlakyTestTracker;
+    for (const [testId, { runs, failures, isFlaky }] of this.testResults) {
+      if (isFlaky || (runs >= 3 && failures / runs > 0.3)) {
+        flakyTests.push(testId);
+      }
+    }
+
+    return flakyTests;
+  }
+}
+
+export default FlakyTestTracker;

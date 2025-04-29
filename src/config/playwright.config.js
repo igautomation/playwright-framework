@@ -1,7 +1,7 @@
 // src/config/playwright.config.js
 
 /**
- * Playwright Test Configuration
+ * Playwright Test Configuration (ESM Compliant)
  *
  * Responsibilities:
  * - Load environment variables dynamically
@@ -11,9 +11,9 @@
  * - Integrate global setup and teardown
  */
 
-const { defineConfig, devices } = require('@playwright/test');
-const { config: loadEnv } = require('dotenv-safe');
-const path = require('path');
+import { defineConfig, devices } from '@playwright/test';
+import { config as loadEnv } from 'dotenv-safe';
+import { join } from 'path';
 
 // Load environment variables safely
 const env = process.env.NODE_ENV || 'development';
@@ -23,7 +23,7 @@ try {
   loadEnv({
     allowEmptyValues: true,
     example: '.env.example',
-    path: `src/config/env/${envFileName}.env`,
+    path: join('src', 'config', 'env', `${envFileName}.env`)
   });
 } catch (error) {
   console.error(`Failed to load environment variables for ${env}:`, error.message);
@@ -32,7 +32,7 @@ try {
 
 // Dynamically determine baseURL
 const baseURL = (() => {
-  switch (process.env.NODE_ENV) {
+  switch (env) {
     case 'prod':
       return process.env.BASE_URL || 'https://prod.example.com';
     case 'uat':
@@ -64,9 +64,9 @@ const reporters = process.env.CI
     ];
 
 // Final Playwright Configuration
-module.exports = defineConfig({
-  globalSetup: require.resolve('./globalSetup.js'),
-  globalTeardown: require.resolve('./globalTeardown.js'),
+export default defineConfig({
+  globalSetup: './src/config/globalSetup.js',
+  globalTeardown: './src/config/globalTeardown.js',
 
   testDir: './src/tests',
   testMatch: /.*\.spec\.js/,
@@ -109,7 +109,7 @@ module.exports = defineConfig({
     extraHTTPHeaders: process.env.API_KEY
       ? { Authorization: `Bearer ${process.env.API_KEY}` }
       : undefined,
-    ignoreHTTPSErrors: process.env.NODE_ENV !== 'prod',
+    ignoreHTTPSErrors: env !== 'prod',
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     video: 'retain-on-failure',

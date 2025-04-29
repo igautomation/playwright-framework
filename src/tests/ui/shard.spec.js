@@ -1,7 +1,5 @@
 // src/tests/ui/shard.spec.js
-require('module-alias/register');
-
-const { test, expect } = require('@fixtures/combined');
+import { test, expect } from '../../../fixtures/combined.js';
 const logger = require('@utils/common/logger');
 
 test('@shard Demo: Shard info and navigation to products page', async ({ page }, testInfo) => {

@@ -1,14 +1,13 @@
 // src/fixtures/customFixtures.js
-require('module-alias/register');
 
-const { test: baseTest } = require('@playwright/test');
-const RestUtils = require('@utils/api/restUtils');
-const GraphQLUtils = require('@utils/api/graphqlUtils');
-const AuthUtils = require('@utils/api/auth');
-const XrayUtils = require('@utils/xray/xrayUtils');
-const ReportUtils = require('@utils/reporting/reportUtils');
-const FlakyTestTracker = require('@utils/ci/flakyTestTracker');
-const RetryWithBackoff = require('@utils/common/retryWithBackoff');
+import { test as baseTest } from '@playwright/test';
+import RestUtils from '../utils/api/restUtils.js';
+import GraphQLUtils from '../utils/api/graphqlUtils.js';
+import AuthUtils from '../utils/api/auth.js';
+import XrayUtils from '../utils/xray/xrayUtils.js';
+import ReportUtils from '../utils/reporting/reportUtils.js';
+import FlakyTestTracker from '../utils/ci/flakyTestTracker.js';
+import RetryWithBackoff from '../utils/common/retryWithBackoff.js';
 
 /**
  * Custom Playwright fixtures for the automation framework.
@@ -74,7 +73,7 @@ const customTest = baseTest.extend({
     await use(xray);
   },
 
-  retryDiagnostics: async ({}, use, testInfo) => {
+  retryDiagnostics: async ({ page }, use, testInfo) => {
     const report = new ReportUtils();
     let attempt = 0;
     await use(async (error) => {
@@ -85,7 +84,7 @@ const customTest = baseTest.extend({
           `Retry ${attempt}`
         );
         await testInfo.attach('screenshot', {
-          body: await testInfo.page.screenshot(),
+          body: await page.screenshot(),
           contentType: 'image/png',
         });
       }
@@ -107,4 +106,5 @@ const customTest = baseTest.extend({
 
 });
 
-module.exports = { test: customTest };
+// Correct ESM Export
+export { customTest };

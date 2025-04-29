@@ -1,22 +1,37 @@
 // src/utils/common/dataOrchestrator.js
 
-const fs = require('fs');
-const yaml = require('js-yaml');
-const { XMLParser } = require('fast-xml-parser');
-const xlsx = require('xlsx');
-const DBUtils = require('@utils/database/dbUtils');
+import { readFileSync } from 'fs';
+import yaml from 'js-yaml';
+import { XMLParser } from 'fast-xml-parser';
+import xlsx from 'xlsx';
+import DBUtils from '../database/dbUtils.js';
 
+/**
+ * Reads YAML file and parses it.
+ * @param {string} path - File path to YAML file.
+ * @returns {object} Parsed YAML data.
+ */
 function readYaml(path) {
-  const file = fs.readFileSync(path, 'utf8');
+  const file = readFileSync(path, 'utf8');
   return yaml.load(file);
 }
 
+/**
+ * Reads XML file and parses it.
+ * @param {string} path - File path to XML file.
+ * @returns {object} Parsed XML data.
+ */
 function readXml(path) {
-  const raw = fs.readFileSync(path, 'utf8');
+  const raw = readFileSync(path, 'utf8');
   const parser = new XMLParser();
   return parser.parse(raw);
 }
 
+/**
+ * Reads Excel file and parses it.
+ * @param {string} path - File path to Excel (.xlsx) file.
+ * @returns {Array<object>} Parsed Excel sheet as JSON array.
+ */
 function readExcel(path) {
   const workbook = xlsx.readFile(path);
   const sheetName = workbook.SheetNames[0];
@@ -24,6 +39,10 @@ function readExcel(path) {
   return xlsx.utils.sheet_to_json(sheet);
 }
 
+/**
+ * Aggregates hybrid test data from ENV, YAML, Excel, and Database.
+ * @returns {Promise<object>} Consolidated test data.
+ */
 async function getHybridTestData() {
   const envData = {
     envUsername: process.env.LOGIN_USERNAME,
@@ -46,7 +65,7 @@ async function getHybridTestData() {
   };
 }
 
-module.exports = {
+export {
   readYaml,
   readXml,
   readExcel,

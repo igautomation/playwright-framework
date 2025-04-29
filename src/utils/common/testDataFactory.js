@@ -1,7 +1,7 @@
 // src/utils/common/testDataFactory.js
 
 /**
- * Test Data Factory Utility for Playwright Framework.
+ * Test Data Factory Utility for Playwright Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Generate random test data for UI and API testing
@@ -9,169 +9,121 @@
  * - Enable bulk test data creation for automation scripts
  */
 
-const { faker } = require("@faker-js/faker");
-const { v4: uuidv4 } = require("uuid");
-const fs = require("fs").promises;
-const yaml = require("js-yaml");
-const csv = require("csv-parse/sync");
+import { faker } from '@faker-js/faker';
+import { v4 as uuidv4 } from 'uuid';
+import { promises as fs } from 'fs';
+import yaml from 'js-yaml';
+import { parse as parseCsv } from 'csv-parse/sync';
 
 /**
  * Generates random user data for tests.
- *
- * @param {Object} [overrides] - Fields to override.
- * @returns {Object} - Generated user data.
  */
 function generateUserData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  try {
-    const getFirstName = () =>
-      faker.person?.firstName() || faker.name?.firstName();
-    const getLastName = () =>
-      faker.person?.lastName() || faker.name?.lastName();
+  const getFirstName = () => faker.person?.firstName() || faker.name?.firstName();
+  const getLastName = () => faker.person?.lastName() || faker.name?.lastName();
 
-    const defaultData = {
-      id: uuidv4(),
-      firstName: getFirstName(),
-      lastName: getLastName(),
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      username: faker.internet.username(),
-    };
+  const defaultData = {
+    id: uuidv4(),
+    firstName: getFirstName(),
+    lastName: getLastName(),
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    username: faker.internet.username(),
+  };
 
-    return { ...defaultData, ...overrides };
-  } catch (error) {
-    throw new Error(`Failed to generate user data: ${error.message}`);
-  }
+  return { ...defaultData, ...overrides };
 }
 
 /**
  * Generates random form input data for UI tests.
- *
- * @param {Object} [overrides] - Fields to override.
- * @returns {Object} - Generated form data.
  */
 function generateFormData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  try {
-    const defaultData = {
-      username: faker.internet.username(),
-      password: faker.internet.password(8),
-      email: faker.internet.email(),
-      phone: faker.phone.number(),
-    };
-
-    return { ...defaultData, ...overrides };
-  } catch (error) {
-    throw new Error(`Failed to generate form data: ${error.message}`);
-  }
+  const defaultData = {
+    username: faker.internet.username(),
+    password: faker.internet.password(8),
+    email: faker.internet.email(),
+    phone: faker.phone.number(),
+  };
+  return { ...defaultData, ...overrides };
 }
 
 /**
  * Generates random contact data.
- *
- * @param {Object} [overrides] - Fields to override.
- * @returns {Object} - Generated contact data.
  */
 function generateContactData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  try {
-    const timestamp = Date.now();
-    const getFirstName = () =>
-      faker.person?.firstName() || faker.name?.firstName();
-    const getLastName = () =>
-      faker.person?.lastName() || faker.name?.lastName();
+  const timestamp = Date.now();
+  const getFirstName = () => faker.person?.firstName() || faker.name?.firstName();
+  const getLastName = () => faker.person?.lastName() || faker.name?.lastName();
 
-    const defaultData = {
-      FirstName: getFirstName(),
-      LastName: getLastName(),
-      Email: `test-${timestamp}@example.com`,
-      Phone: faker.phone.number(),
-      Title: "Test Contact",
-      Department: "QA",
-    };
-
-    return { ...defaultData, ...overrides };
-  } catch (error) {
-    throw new Error(`Failed to generate contact data: ${error.message}`);
-  }
+  const defaultData = {
+    FirstName: getFirstName(),
+    LastName: getLastName(),
+    Email: `test-${timestamp}@example.com`,
+    Phone: faker.phone.number(),
+    Title: 'Test Contact',
+    Department: 'QA',
+  };
+  return { ...defaultData, ...overrides };
 }
 
 /**
  * Generates random account data.
- *
- * @param {Object} [overrides] - Fields to override.
- * @returns {Object} - Generated account data.
  */
 function generateAccountData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  try {
-    const timestamp = Date.now();
-    const defaultData = {
-      Name: `TestAccount${timestamp}`,
-      Phone: faker.phone.number(),
-      Industry: "Technology",
-      Type: "Customer",
-      Website: faker.internet.url(),
-    };
-
-    return { ...defaultData, ...overrides };
-  } catch (error) {
-    throw new Error(`Failed to generate account data: ${error.message}`);
-  }
+  const timestamp = Date.now();
+  const defaultData = {
+    Name: `TestAccount${timestamp}`,
+    Phone: faker.phone.number(),
+    Industry: 'Technology',
+    Type: 'Customer',
+    Website: faker.internet.url(),
+  };
+  return { ...defaultData, ...overrides };
 }
 
 /**
  * Generates random opportunity data.
- *
- * @param {Object} [overrides] - Fields to override.
- * @returns {Object} - Generated opportunity data.
  */
 function generateOpportunityData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  try {
-    const timestamp = Date.now();
-    const defaultData = {
-      Name: `TestOpp${timestamp}`,
-      StageName: "Prospecting",
-      CloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
-      Amount: faker.finance.amount(1000, 10000),
-    };
-
-    return { ...defaultData, ...overrides };
-  } catch (error) {
-    throw new Error(`Failed to generate opportunity data: ${error.message}`);
-  }
+  const timestamp = Date.now();
+  const defaultData = {
+    Name: `TestOpp${timestamp}`,
+    StageName: 'Prospecting',
+    CloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    Amount: faker.finance.amount(1000, 10000),
+  };
+  return { ...defaultData, ...overrides };
 }
 
 /**
  * Loads test data from a file (JSON, YAML, or CSV).
- *
- * @param {string} path - File path.
- * @returns {Promise<Object|Array>} - Parsed test data.
  */
 async function loadTestData(path) {
   try {
-    const ext = path.split(".").pop().toLowerCase();
-    const data = await fs.readFile(path, "utf8");
+    const ext = path.split('.').pop().toLowerCase();
+    const data = await fs.readFile(path, 'utf8');
 
-    if (ext === "json") {
+    if (ext === 'json') {
       return JSON.parse(data);
-    } else if (ext === "yaml" || ext === "yml") {
+    } else if (ext === 'yaml' || ext === 'yml') {
       return yaml.load(data);
-    } else if (ext === "csv") {
-      return csv.parse(data, { columns: true, skip_empty_lines: true });
+    } else if (ext === 'csv') {
+      return parseCsv(data, { columns: true, skip_empty_lines: true });
     } else {
       throw new Error(`Unsupported file format: ${ext}`);
     }
@@ -183,9 +135,6 @@ async function loadTestData(path) {
 
 /**
  * Generates multiple users and writes them to a JSON file.
- *
- * @param {number} count - Number of users to generate.
- * @param {string} outputPath - Output file path.
  */
 async function generateUsersToFile(count, outputPath) {
   try {
@@ -198,9 +147,6 @@ async function generateUsersToFile(count, outputPath) {
 
 /**
  * Generates multiple products and writes them to a CSV file.
- *
- * @param {number} count - Number of products to generate.
- * @param {string} outputPath - Output file path.
  */
 async function generateProductsToCsv(count, outputPath) {
   try {
@@ -213,11 +159,9 @@ async function generateProductsToCsv(count, outputPath) {
     }));
 
     const csvData = [
-      "id,name,price,category,stock",
-      ...products.map(
-        (p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`
-      ),
-    ].join("\n");
+      'id,name,price,category,stock',
+      ...products.map((p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`)
+    ].join('\n');
 
     await fs.writeFile(outputPath, csvData);
   } catch (error) {
@@ -225,7 +169,7 @@ async function generateProductsToCsv(count, outputPath) {
   }
 }
 
-module.exports = {
+export {
   generateUserData,
   generateFormData,
   generateContactData,
@@ -233,5 +177,5 @@ module.exports = {
   generateOpportunityData,
   loadTestData,
   generateUsersToFile,
-  generateProductsToCsv,
+  generateProductsToCsv
 };

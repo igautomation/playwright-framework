@@ -1,7 +1,7 @@
 // src/utils/common/dataUtils.js
 
 /**
- * Data Utilities for Playwright Framework.
+ * Data Utilities for Playwright Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Read and parse data from JSON, YAML, and CSV files
@@ -9,9 +9,9 @@
  * - Cache parsed data to improve performance
  */
 
-const fs = require("fs").promises;
-const yaml = require("js-yaml");
-const csv = require("csv-parse/sync");
+import { promises as fs } from 'fs';
+import yaml from 'js-yaml';
+import { parse as parseCsv } from 'csv-parse/sync';
 
 // In-memory cache to avoid redundant file reads
 const cache = new Map();
@@ -22,28 +22,27 @@ const parsers = {
   yaml: (data) => yaml.load(data),
   yml: (data) => yaml.load(data),
   csv: (data, path) => {
-    // Parse CSV
-    const parsed = csv.parse(data, { columns: true, skip_empty_lines: true });
+    const parsed = parseCsv(data, { columns: true, skip_empty_lines: true });
+
     if (parsed.length === 0) {
       throw new Error(`CSV file ${path} is empty`);
     }
 
-    // Validate CSV headers for known files
     const headers = Object.keys(parsed[0]);
     const requiredHeaders = {
-      "src/data/csv/users.csv": ["username", "password"],
-      "src/data/csv/products.csv": ["id", "name", "price"],
+      'src/data/csv/users.csv': ['username', 'password'],
+      'src/data/csv/products.csv': ['id', 'name', 'price'],
     };
     const required = requiredHeaders[path] || [];
-    const missing = required.filter((header) => !headers.includes(header));
+    const missing = required.filter(header => !headers.includes(header));
     if (missing.length > 0) {
       throw new Error(
-        `Missing required headers in ${path}: ${missing.join(", ")}`
+        `Missing required headers in ${path}: ${missing.join(', ')}`
       );
     }
 
     return parsed;
-  },
+  }
 };
 
 /**
@@ -55,18 +54,17 @@ const parsers = {
  */
 async function readData(path) {
   try {
-    // Return cached data if available
     if (cache.has(path)) {
       return cache.get(path);
     }
 
-    const ext = path.split(".").pop().toLowerCase();
+    const ext = path.split('.').pop().toLowerCase();
     const parser = parsers[ext];
     if (!parser) {
       throw new Error(`Unsupported file format: ${ext}`);
     }
 
-    const data = await fs.readFile(path, "utf8");
+    const data = await fs.readFile(path, 'utf8');
     const result = parser(data, path);
 
     cache.set(path, result);
@@ -76,4 +74,4 @@ async function readData(path) {
   }
 }
 
-module.exports = { readData };
+export { readData };

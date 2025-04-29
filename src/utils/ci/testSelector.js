@@ -1,7 +1,7 @@
 // src/utils/ci/testSelector.js
 
 /**
- * Test Selector Utility for Playwright Framework.
+ * Test Selector Utility for Playwright Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Select test files based on Git diffs between two commits
@@ -33,10 +33,10 @@ class TestSelector {
     // - Filter files ending with `.spec.js`
 
     return [
-      "tests/ui/product-listing.spec.js",
-      "tests/api/product-list-api.spec.js",
+      "src/tests/ui/product-listing.spec.js",
+      "src/tests/api/product-list-api.spec.js"
     ];
   }
 }
 
-module.exports = TestSelector;
+export default TestSelector;

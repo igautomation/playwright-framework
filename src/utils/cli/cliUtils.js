@@ -1,16 +1,16 @@
 // src/utils/cli/cliUtils.js
 
 /**
- * CLI Utilities for Playwright Automation Framework.
+ * CLI Utilities for Playwright Automation Framework (ESM Compliant).
  *
  * Responsibilities:
  * - List available test tags across the project
  * - Run Playwright tests with optional tag expressions and headed mode
  */
 
-const glob = require("glob");
-const fs = require("fs").promises;
-const { execSync } = require("child_process");
+import glob from 'glob';
+import { promises as fs } from 'fs';
+import { execSync } from 'child_process';
 
 /**
  * Lists all unique tags across test files.
@@ -21,12 +21,12 @@ const { execSync } = require("child_process");
  * @returns {Promise<void>}
  */
 async function listTags() {
-  const files = glob.sync("src/tests/**/*.spec.js");
+  const files = glob.sync('src/tests/**/*.spec.js');
   const tags = new Set();
   const tagMap = {};
 
   for (const file of files) {
-    const content = await fs.readFile(file, "utf-8");
+    const content = await fs.readFile(file, 'utf-8');
     const matches = content.match(/@[\w-]+/g) || [];
     matches.forEach((tag) => {
       tags.add(tag);
@@ -35,15 +35,15 @@ async function listTags() {
   }
 
   if (tags.size === 0) {
-    console.log("No tags found in test files.");
+    console.log('No tags found in test files.');
     return;
   }
 
-  console.log("Available tags:");
+  console.log('Available tags:');
   Array.from(tags)
     .sort()
     .forEach((tag) => {
-      console.log(`- ${tag} [Found in: ${tagMap[tag].join(", ")}]`);
+      console.log(`- ${tag} [Found in: ${tagMap[tag].join(', ')}]`);
     });
 }
 
@@ -55,16 +55,16 @@ async function listTags() {
  * @param {boolean} [argv.headed] - Whether to run in headed mode.
  */
 function runTests(argv) {
-  const tags = argv.tags ? `--grep "${argv.tags}"` : "";
-  const headed = argv.headed ? "--headed" : "";
+  const tags = argv.tags ? `--grep "${argv.tags}"` : '';
+  const headed = argv.headed ? '--headed' : '';
   const cmd = `npx playwright test ${tags} ${headed}`.trim();
 
   try {
-    execSync(cmd, { stdio: "inherit" });
+    execSync(cmd, { stdio: 'inherit' });
   } catch (error) {
-    console.error("Error running tests:", error.message);
+    console.error('Error running tests:', error.message);
     process.exit(1);
   }
 }
 
-module.exports = { listTags, runTests };
+export { listTags, runTests };

@@ -1,6 +1,16 @@
 // src/utils/database/dbUtils.js
 
-const { Client } = require('pg');
+/**
+ * Database Utility for Playwright Framework (ESM Compliant).
+ *
+ * Responsibilities:
+ * - Connect to PostgreSQL Database
+ * - Execute queries
+ * - Fetch specific user data for hybrid scenarios
+ */
+
+import pkg from 'pg';
+const { Client } = pkg;
 
 class DBUtils {
   constructor() {
@@ -32,4 +42,4 @@ class DBUtils {
   }
 }
 
-module.exports = DBUtils;
+export default DBUtils;

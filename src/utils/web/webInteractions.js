@@ -1,12 +1,14 @@
 // src/utils/web/webInteractions.js
 
 /**
- * Web Interaction Utilities for Playwright Automation Framework.
+ * Web Interaction Utilities for Playwright Automation Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Simplify common UI interactions (text, dropdowns, hover, uploads, frames, tabs)
  * - Handle advanced interactions (shadow DOM, dynamic locators, retries, drag and drop)
  */
+
+import { expect } from '@playwright/test';
 
 class WebInteractions {
   constructor(page) {
@@ -22,7 +24,7 @@ class WebInteractions {
 
   async getText(selector) {
     if (!selector) throw new Error('Selector is required');
-    const element = await this.page.locator(selector);
+    const element = this.page.locator(selector);
     const text = await element.textContent();
     if (text === null) {
       throw new Error(`No text content found for selector: ${selector}`);
@@ -58,10 +60,11 @@ class WebInteractions {
 
   async uploadFile(selector, filePath) {
     if (!selector || !filePath) throw new Error('Selector and file path are required');
-    if (!require('fs').existsSync(filePath)) {
+    const { existsSync } = await import('fs');
+    if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
     }
-    const fileInput = await this.page.locator(selector);
+    const fileInput = this.page.locator(selector);
     await fileInput.setInputFiles(filePath);
   }
 
@@ -79,7 +82,7 @@ class WebInteractions {
   }
 
   async handleAlert(accept) {
-    const dialogPromise = new Promise((resolve) => {
+    await new Promise((resolve) => {
       this.page.once('dialog', (dialog) => {
         if (accept) {
           dialog.accept();
@@ -89,12 +92,11 @@ class WebInteractions {
         resolve();
       });
     });
-    await dialogPromise;
   }
 
   async handleFrame(frameSelector) {
     if (!frameSelector) throw new Error('Frame selector is required');
-    const frame = await this.page.frameLocator(frameSelector);
+    const frame = this.page.frameLocator(frameSelector);
     if (!frame) {
       throw new Error(`Frame not found for selector: ${frameSelector}`);
     }
@@ -125,7 +127,7 @@ class WebInteractions {
     if (!hostSelector || !innerSelector) {
       throw new Error('Host selector and inner selector are required');
     }
-    const host = await this.page.locator(hostSelector);
+    const host = this.page.locator(hostSelector);
     const shadowRoot = await host.evaluateHandle((el) => el.shadowRoot);
     const element = await shadowRoot.$(innerSelector);
     if (!element) {
@@ -138,7 +140,7 @@ class WebInteractions {
     if (!hostSelector || !innerSelector) {
       throw new Error('Host selector and inner selector are required');
     }
-    const host = await this.page.locator(hostSelector);
+    const host = this.page.locator(hostSelector);
     const shadowRoot = await host.evaluateHandle((el) => el.shadowRoot);
     const element = await shadowRoot.$(innerSelector);
     if (!element) {
@@ -185,8 +187,8 @@ class WebInteractions {
     if (!sourceSelector || !targetSelector) {
       throw new Error('Source and target selectors are required');
     }
-    const source = await this.page.locator(sourceSelector);
-    const target = await this.page.locator(targetSelector);
+    const source = this.page.locator(sourceSelector);
+    const target = this.page.locator(targetSelector);
     await source.dragTo(target);
   }
 
@@ -236,7 +238,7 @@ class WebInteractions {
 
   async dragByOffset(selector, xOffset, yOffset) {
     if (!selector) throw new Error('Selector is required');
-    const element = await this.page.locator(selector);
+    const element = this.page.locator(selector);
     const box = await element.boundingBox();
     if (!box) {
       throw new Error(`Bounding box not found for ${selector}`);
@@ -251,4 +253,4 @@ class WebInteractions {
   }
 }
 
-module.exports = WebInteractions;
+export default WebInteractions;

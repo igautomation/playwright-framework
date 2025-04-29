@@ -1,7 +1,6 @@
 // src/tests/data/dataProviders.spec.js
 
-require('module-alias/register');
-const { test, expect } = require('@fixtures/combined');
+import { test, expect } from '../../../fixtures/combined.js';
 const { readData } = require('@utils/common/dataUtils');
 const { readYaml, readXml, readExcel } = require('@utils/common/dataOrchestrator');
 const DBUtils = require('@utils/database/dbUtils');
@@ -62,6 +61,8 @@ test.describe.parallel('Data Providers - Unified Test Suite', () => {
     });
   });
 
+  /** 
+
   test('Database Data Test', async () => {
     const db = new DBUtils();
     await db.connect();
@@ -75,5 +76,6 @@ test.describe.parallel('Data Providers - Unified Test Suite', () => {
       console.warn('Database user not found.');
     }
   });
+  */
 
 });

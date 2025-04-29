@@ -1,7 +1,7 @@
 // src/utils/common/retryWithBackoff.js
 
 /**
- * Retry Utility with Exponential Backoff for Playwright Framework.
+ * Retry Utility with Exponential Backoff for Playwright Framework (ESM Compliant).
  *
  * Responsibilities:
  * - Retry any asynchronous operation multiple times with delays
@@ -9,56 +9,50 @@
  * - Log each retry attempt through the reporting utility
  */
 
-const ReportUtils = require("../reporting/reportUtils");
+import ReportUtils from '../reporting/reportUtils.js';
 
-/**
- * Constructor for RetryWithBackoff utility.
- */
-function RetryWithBackoff() {
-  this.report = new ReportUtils();
-}
-
-/**
- * Retries a given asynchronous operation with exponential backoff delay.
- *
- * @param {Function} operation - The operation (async function) to retry.
- * @param {number} [maxRetries=3] - Maximum number of retry attempts.
- * @param {number} [baseDelay=1000] - Base delay in milliseconds for backoff calculation.
- * @returns {Promise<any>} Resolves to the operation result or throws an error after maximum retries.
- * @throws {Error} If the operation fails after all retries.
- */
-RetryWithBackoff.prototype.retry = async function (
-  operation,
-  maxRetries = 3,
-  baseDelay = 1000
-) {
-  if (typeof operation !== "function") {
-    throw new Error("Operation must be a function");
+class RetryWithBackoff {
+  constructor() {
+    this.report = new ReportUtils();
   }
 
-  let attempt = 0;
+  /**
+   * Retries a given asynchronous operation with exponential backoff delay.
+   *
+   * @param {Function} operation - The operation (async function) to retry.
+   * @param {number} [maxRetries=3] - Maximum number of retry attempts.
+   * @param {number} [baseDelay=1000] - Base delay in milliseconds.
+   * @returns {Promise<any>} Resolves the operation result or throws after retries.
+   */
+  async retry(operation, maxRetries = 3, baseDelay = 1000) {
+    if (typeof operation !== 'function') {
+      throw new Error('Operation must be a function');
+    }
 
-  while (attempt < maxRetries) {
-    try {
-      return await operation();
-    } catch (error) {
-      attempt++;
+    let attempt = 0;
 
-      this.report.attachLog(
-        `Retry attempt ${attempt}/${maxRetries} failed: ${error.message}`,
-        `Retry ${attempt}`
-      );
+    while (attempt < maxRetries) {
+      try {
+        return await operation();
+      } catch (error) {
+        attempt++;
 
-      if (attempt === maxRetries) {
-        throw new Error(
-          `Operation failed after ${maxRetries} retries: ${error.message}`
+        this.report.attachLog(
+          `Retry attempt ${attempt}/${maxRetries} failed: ${error.message}`,
+          `Retry ${attempt}`
         );
-      }
 
-      const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff delay
-      await new Promise((resolve) => setTimeout(resolve, delay));
+        if (attempt === maxRetries) {
+          throw new Error(
+            `Operation failed after ${maxRetries} retries: ${error.message}`
+          );
+        }
+
+        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
   }
-};
+}
 
-module.exports = RetryWithBackoff;
+export default RetryWithBackoff;

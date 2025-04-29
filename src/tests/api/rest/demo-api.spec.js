@@ -1,6 +1,5 @@
 // src/tests/api/rest/demo-api.spec.js
-require('module-alias/register');
-const { test, expect } = require('@fixtures/combined');
+import { test, expect } from '../../../fixtures/combined.js';
 const fetch = require('node-fetch');
 
 test('@api Demo API: List all products', async () => {
