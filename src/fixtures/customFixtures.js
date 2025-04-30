@@ -48,19 +48,14 @@ const customTest = baseTest.extend({
         `Navigating to ${baseURL}${loginPath} for test: ${testInfo.title}`
       );
       await page.goto(`${baseURL}${loginPath}`, { timeout: 10000 });
-
       logger.debug(`Filling username: ${usernameSelector} with ${username}`);
       await page.fill(usernameSelector, username);
-
       logger.debug(`Filling password: ${passwordSelector}`);
       await page.fill(passwordSelector, password);
-
       logger.debug(`Clicking submit: ${submitSelector}`);
       await page.click(submitSelector);
-
       logger.debug(`Waiting for dashboard: ${dashboardSelector}`);
       await page.waitForSelector(dashboardSelector, { timeout: 5000 });
-
       await use(page);
     } catch (error) {
       const errorMsg = `Failed to authenticate for test ${testInfo.title}: ${error.message}`;

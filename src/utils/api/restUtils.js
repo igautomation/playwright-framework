@@ -1,99 +1,66 @@
 // src/utils/api/restUtils.js
+import logger from "../common/logger.js";
 
 /**
- * REST Utilities for Playwright API Testing (ESM Compliant).
- *
- * Responsibilities:
- * - Perform HTTP REST requests with retry logic
- * - Handle batch API requests in parallel
- * - Automatically attach API Key authentication headers
+ * Utility class for REST API operations with retry logic.
  */
-
-import AuthUtils from "./auth.js";
-
-class RestUtils {
-  /**
-   * Constructor for RestUtils.
-   *
-   * @param {import('@playwright/test').APIRequestContext} request - Playwright APIRequestContext object.
-   * @throws {Error} If request is not provided.
-   */
+export default class RestUtils {
   constructor(request) {
-    if (!request) {
-      throw new Error("Request object is required");
-    }
     this.request = request;
-    this.auth = new AuthUtils();
   }
 
   /**
-   * Performs a REST API request with retry logic and exponential backoff.
-   *
-   * @param {string} method - HTTP method ('GET', 'POST', 'PUT', 'DELETE').
-   * @param {string} url - Request URL.
-   * @param {Object} [options={}] - Additional request options.
-   * @param {number} [retries=3] - Maximum number of retries.
-   * @returns {Promise<Response>} - Playwright API Response object.
+   * Sends an HTTP request with retry logic.
+   * @param {string} method - HTTP method (GET, POST, PUT, DELETE).
+   * @param {string} endpoint - API endpoint.
+   * @param {object} options - Request options (headers, params, data).
+   * @returns {Promise<object>} Response object.
    */
-  async requestWithRetry(method, url, options = {}, retries = 3) {
-    if (!["GET", "POST", "PUT", "DELETE"].includes(method.toUpperCase())) {
-      throw new Error("Invalid HTTP method");
-    }
-    if (!url) {
-      throw new Error("URL is required");
-    }
-
+  async requestWithRetry(method, endpoint, options = {}) {
+    const maxRetries = 2;
     let attempt = 0;
 
-    while (attempt < retries) {
+    while (attempt < maxRetries) {
       try {
-        const headers = { ...this.auth.getApiKeyHeaders(), ...options.headers };
-        const requestOptions = { ...options, headers };
-
-        switch (method.toUpperCase()) {
-          case "GET":
-            return await this.request.get(url, requestOptions);
-          case "POST":
-            return await this.request.post(url, requestOptions);
-          case "PUT":
-            return await this.request.put(url, requestOptions);
-          case "DELETE":
-            return await this.request.delete(url, requestOptions);
-          default:
-            throw new Error("Unsupported HTTP method");
-        }
+        logger.debug(`Attempt ${attempt + 1} for ${method} ${endpoint}`);
+        const response = await this.request[method.toLowerCase()](
+          endpoint,
+          options
+        );
+        return response;
       } catch (error) {
         attempt++;
-        if (attempt === retries) {
-          throw new Error(
-            `Request failed after ${retries} retries: ${error.message}`
+        if (attempt >= maxRetries) {
+          logger.error(
+            `Failed after ${maxRetries} attempts for ${method} ${endpoint}: ${error.message}`
           );
+          throw error;
         }
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+        logger.warn(
+          `Retry ${attempt} for ${method} ${endpoint}: ${error.message}`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
   }
 
   /**
-   * Performs multiple REST API requests in parallel (batch execution).
-   *
-   * @param {Array<{method: string, url: string, options?: Object}>} requests - Array of request objects.
-   * @returns {Promise<Array<Response>>} - Array of API Response objects.
+   * Sends batch HTTP requests.
+   * @param {Array<object>} requests - Array of request objects.
+   * @returns {Promise<Array<object>>} Array of responses.
    */
   async batchRequests(requests) {
-    if (!Array.isArray(requests)) {
-      throw new Error("Requests array is required");
-    }
-
     try {
-      const promises = requests.map((req) =>
-        this.requestWithRetry(req.method, req.url, req.options)
+      const responses = await Promise.all(
+        requests.map((req) =>
+          this.requestWithRetry(req.method, req.endpoint, req.options)
+        )
       );
-      return await Promise.all(promises);
+      logger.info(`Batch request completed with ${responses.length} responses`);
+      return responses;
     } catch (error) {
+      logger.error(`Batch request failed: ${error.message}`);
       throw new Error(`Batch request failed: ${error.message}`);
     }
   }
 }
-
-export default RestUtils;

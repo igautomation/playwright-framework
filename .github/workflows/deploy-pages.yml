@@ -3,11 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Trigger on pushes to the main branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,10 +18,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure deploy script is executable
+        run: chmod +x .github/pages/deploy-docusaurus.sh
+
       - name: Deploy Docusaurus to GitHub Pages
-        run: |
-          chmod +x .github/pages/deploy-docusaurus.sh
-          .github/pages/deploy-docusaurus.sh
+        run: .github/pages/deploy-docusaurus.sh
         env:
-          # GitHub token for deployment
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

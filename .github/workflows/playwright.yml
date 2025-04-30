@@ -1,5 +1,3 @@
-# .github/workflows/playwright.yml
-
 name: Playwright Tests
 
 on:
@@ -8,11 +6,10 @@ on:
   pull_request:
     branches: [ main, master ]
   schedule:
-    - cron: '0 0 * * *'  # Daily midnight run
+    - cron: '0 0 * * *'
 
 jobs:
-  
-  # Pre-checks: Lint, Audit, Format
+
   pre-checks:
     runs-on: ubuntu-latest
     steps:
@@ -29,15 +26,14 @@ jobs:
       - name: Run npm audit (temporary safe mode)
         run: npm audit || echo "Ignoring known xlsx vulnerability until fix released."
 
-      - name: Run ESLint (strict)
+      - name: Run ESLint
         run: npm run lint
         continue-on-error: false
 
-      - name: Run Prettier check (strict)
+      - name: Run Prettier check
         run: npm run format:check
         continue-on-error: false
 
-  # Select affected tests using Git diff
   select-tests:
     needs: pre-checks
     runs-on: ubuntu-latest
@@ -62,7 +58,6 @@ jobs:
           TESTS=$(npx framework select-tests origin/main HEAD | jq -R -s -c 'split("\n")[:-1]')
           echo "tests=$TESTS" >> $GITHUB_OUTPUT
 
-  # Main Playwright Test Execution
   test:
     needs: [ pre-checks, select-tests ]
     runs-on: ubuntu-latest
@@ -72,16 +67,6 @@ jobs:
         browser: [ chromium, firefox, webkit ]
         environment: [ development, qa, uat, prod ]
         shard: [ "1/3", "2/3", "3/3" ]
-    env:
-      NODE_ENV: ${{ matrix.environment }}
-      BASE_URL: ${{ secrets.BASE_URL }}
-      API_KEY: ${{ secrets.API_KEY }}
-      OAUTH2_TOKEN: ${{ secrets.OAUTH2_TOKEN }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-      XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
-      XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
-      TEST_EXECUTION_KEY: "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"
     steps:
       - uses: actions/checkout@v3
 
@@ -90,30 +75,25 @@ jobs:
           node-version: 18
           cache: 'npm'
 
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}
-
       - name: Install dependencies
         run: npm ci
+
+      - name: Install dotenv-cli
+        run: npm install -g dotenv-cli
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
       - name: Quarantine flaky tests
-        run: npx framework quarantine-flaky
+        run: dotenv -e .env -- npx framework quarantine-flaky
 
       - name: Run Playwright tests
-        run: npx framework run --tags "@smoke and not @flaky" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
+        run: dotenv -e .env -- npx framework run --tags "@smoke and not @flaky" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
 
-      # Report Generation
       - name: Generate Allure report
         if: always()
-        run: npx framework generate-report
+        run: dotenv -e .env -- npx framework generate-report
 
-      # Upload Reports and Artifacts
       - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v3
@@ -138,14 +118,11 @@ jobs:
             reports/traces/
             screenshots/
 
-      # Slack Notification on Failure
       - name: Notify Slack on failure
         if: failure()
         run: |
-          npx framework notify ${{ secrets.SLACK_WEBHOOK_URL }} \
-          "❌ Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard}}). Check run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          dotenv -e .env -- npx framework notify $SLACK_WEBHOOK_URL "Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard }}). Check run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-      # Push Results to Xray
       - name: Push results to Xray
         if: always()
-        run: npx framework push-to-xray "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"
+        run: dotenv -e .env -- npx framework push-to-xray "TEST_EXEC-${{ matrix.browser }}-${{ matrix.environment }}-${{ github.run_id }}"

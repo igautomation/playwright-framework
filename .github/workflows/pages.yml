@@ -1,10 +1,13 @@
 name: Deploy Docs to GitHub Pages
+
 on:
   push:
     branches: [main]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -15,36 +18,34 @@ jobs:
           node-version: 18
 
       - name: Install root dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Docusaurus dependencies
-        run: npm install
+        run: npm ci
         working-directory: docs/docusaurus
 
-      - name: Run pre-checks
+      - name: Run pre-checks (audit, lint, format)
+        working-directory: docs/docusaurus
         run: |
-          npm audit
-          npm run lint
-          npm run format:check
-        continue-on-error: true
+          npm audit || echo "Audit check failed"
+          npm run lint || echo "Lint check failed"
+          npm run format:check || echo "Format check failed"
 
       - name: Build Docusaurus site
+        working-directory: docs/docusaurus
         run: npm run docs:build
-        if: success()
 
       - name: Generate PDF
+        working-directory: docs/docusaurus
         run: npm run docs:pdf
-        if: success()
 
-      - name: Move PDF to Docusaurus static directory
+      - name: Move PDF to static directory
         run: |
           mkdir -p docs/docusaurus/static
           mv docs/user-guide.pdf docs/docusaurus/static/user-guide.pdf
-        if: success()
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/docusaurus/build
-        if: success()

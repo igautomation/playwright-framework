@@ -1,13 +1,13 @@
 // src/tests/api/rest/reqres-crud.spec.js
-import { test, expect } from "../../fixtures/combined.js";
+import { test, expect } from "../../../fixtures/combined.js";
 import {
   readYaml,
   readXml,
   readExcel,
-} from "../../utils/common/dataOrchestrator.js";
-import ApiUtils from "../../utils/api/apiUtils.js";
+} from "../../../utils/common/dataOrchestrator.js";
+import ApiUtils from "../../../utils/api/apiUtils.js";
 import fs from "fs";
-import logger from "../../utils/common/logger.js";
+import logger from "../../../utils/common/logger.js";
 
 // Schemas for Reqres.in responses
 const createUserSchema = {

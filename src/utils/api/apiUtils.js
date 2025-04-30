@@ -94,8 +94,8 @@ export class ApiUtils {
    */
   generateDynamicUser(overrides = {}) {
     const payload = {
-      name: faker.name.fullName(),
-      job: faker.name.jobTitle(),
+      name: faker.person.fullName(),
+      job: faker.person.jobTitle(),
       email: faker.internet.email(),
     };
     const dynamicPayload = { ...payload, ...overrides };
