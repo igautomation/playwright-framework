@@ -25,7 +25,7 @@ export const generateReportCommand = {
     // Spawn the report generation process
     const generate = spawn(command, args, {
       stdio: 'inherit',
-      shell: true,
+      shell: true
     });
 
     // Capture exit and show success/failure message
@@ -37,5 +37,5 @@ export const generateReportCommand = {
         process.exit(code);
       }
     });
-  },
+  }
 };

@@ -40,7 +40,7 @@ function loadEnvironmentVariables(projectDir) {
     loadEnv({
       allowEmptyValues: true,
       path: path.join(projectDir, `src/config/env/${envFileName}.env`),
-      example: path.join(projectDir, '.env.example'),
+      example: path.join(projectDir, '.env.example')
     });
 
     if (!process.env.BASE_URL) {
@@ -70,7 +70,7 @@ function loadEnvironmentVariables(projectDir) {
           yargs.option('dir', {
             describe: 'Directory to scaffold',
             type: 'string',
-            default: 'playwright-project',
+            default: 'playwright-project'
           }),
         async (argv) => {
           const projectDir = path.resolve(process.cwd(), argv.dir);
@@ -87,12 +87,12 @@ function loadEnvironmentVariables(projectDir) {
             .option('tags', { type: 'string', describe: 'Tags to filter' })
             .option('headed', {
               type: 'boolean',
-              describe: 'Run browser headed',
+              describe: 'Run browser headed'
             })
             .option('project', { type: 'array', describe: 'Project(s)' })
             .option('workers', {
               type: 'string',
-              describe: 'Number of workers',
+              describe: 'Number of workers'
             })
             .option('retries', { type: 'number', describe: 'Retry count' }),
         (argv) => run(argv)
@@ -105,7 +105,7 @@ function loadEnvironmentVariables(projectDir) {
           yargs
             .option('type', {
               choices: ['users', 'products'],
-              demandOption: true,
+              demandOption: true
             })
             .option('count', { type: 'number', default: 10 })
             .option('output', { type: 'string', demandOption: true }),
@@ -170,7 +170,7 @@ function loadEnvironmentVariables(projectDir) {
           await sendNotification({
             webhookUrl: argv.webhookUrl,
             message: argv.message,
-            channel: argv.channel,
+            channel: argv.channel
           });
           logger.info('Notification sent');
         }
@@ -214,7 +214,7 @@ function loadEnvironmentVariables(projectDir) {
         ciUtils.setupCiEnvironment({
           repoUrl: argv.repoUrl,
           branch: argv.branch,
-          repoPath: argv.repoPath,
+          repoPath: argv.repoPath
         });
         logger.info('CI setup completed');
       })

@@ -28,7 +28,7 @@ export function generateAllureReport() {
 
   try {
     execSync(`npx allure generate ${resolvedResults} -o ${resolvedOutput} --clean`, {
-      stdio: 'inherit',
+      stdio: 'inherit'
     });
 
     logger.info(`Allure report generated at ${resolvedOutput}`);
@@ -58,7 +58,7 @@ export function attachScreenshot(screenshotPath, name = 'Screenshot', testInfo) 
     const image = fs.readFileSync(resolved);
     testInfo.attach(name, {
       body: image,
-      contentType: 'image/png',
+      contentType: 'image/png'
     });
 
     logger.info(`Attached screenshot to report: ${name}`);
@@ -92,7 +92,7 @@ export function attachLog(content, name = 'Log', testInfo) {
 
     testInfo.attach(name, {
       body,
-      contentType: 'text/plain',
+      contentType: 'text/plain'
     });
 
     logger.info(`Attached log: ${name}`);
@@ -127,7 +127,7 @@ export async function sendNotification(config) {
     const response = await fetch(config.webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
@@ -163,5 +163,5 @@ export default {
   attachScreenshot,
   attachLog,
   sendNotification,
-  writeMetadataFile,
+  writeMetadataFile
 };

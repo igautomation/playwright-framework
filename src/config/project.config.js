@@ -15,17 +15,17 @@ const projectConfig = {
     envFile: join(__dirname, '..', 'config', 'env', 'dev.env'), // Optional .env file
     requiredEnvVars: ['BASE_URL', 'API_BASE_URL'], // Project-specific required variables
     ui: {
-      baseURL: process.env.BASE_URL || getConfig('ui', 'baseURL'),
+      baseURL: process.env.BASE_URL || getConfig('ui', 'baseURL')
     },
     api: {
-      baseURL: process.env.API_BASE_URL || getConfig('api', 'baseURL'),
+      baseURL: process.env.API_BASE_URL || getConfig('api', 'baseURL')
     },
     testPatterns: {
       ui: /.*\.ui\.spec\.js/,
       api: /.*\.api\.spec\.js/,
       unit: /.*\.unit\.spec\.js/,
       setup: /global\.setup\.js/,
-      teardown: /global\.teardown\.js/,
+      teardown: /global\.teardown\.js/
     },
     browsers: [
       { name: 'chromium', config: { ...devices['Desktop Chrome'] } },
@@ -35,12 +35,12 @@ const projectConfig = {
       { name: 'mobile-safari', config: { ...devices['iPhone 12'] } },
       {
         name: 'google-chrome',
-        config: { ...devices['Desktop Chrome'], channel: 'chrome' },
+        config: { ...devices['Desktop Chrome'], channel: 'chrome' }
       },
       {
         name: 'microsoft-edge',
-        config: { ...devices['Desktop Edge'], channel: 'msedge' },
-      },
+        config: { ...devices['Desktop Edge'], channel: 'msedge' }
+      }
     ],
     browserStack:
       process.env.BROWSERSTACK_USERNAME && process.env.BROWSERSTACK_ACCESS_KEY
@@ -57,22 +57,22 @@ const projectConfig = {
                 sessionName: 'Playwright Test',
                 local: false,
                 userName: process.env.BROWSERSTACK_USERNAME,
-                accessKey: process.env.BROWSERSTACK_ACCESS_KEY,
+                accessKey: process.env.BROWSERSTACK_ACCESS_KEY
               },
               connectOptions: {
                 wsEndpoint: `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(
                   JSON.stringify({
                     'bstack:options': {
                       userName: process.env.BROWSERSTACK_USERNAME,
-                      accessKey: process.env.BROWSERSTACK_ACCESS_KEY,
-                    },
+                      accessKey: process.env.BROWSERSTACK_ACCESS_KEY
+                    }
                   })
-                )}`,
-              },
-            },
+                )}`
+              }
+            }
           }
-        : { enabled: false },
-  },
+        : { enabled: false }
+  }
   // Add more projects here for new applications
   // Example:
   // myProject: {
@@ -131,15 +131,15 @@ export function getProjectConfig(projectName = 'default', env = 'dev') {
       baseURL:
         process.env[`${projectName.toUpperCase()}_BASE_URL`] ||
         process.env.BASE_URL ||
-        config.ui.baseURL,
+        config.ui.baseURL
     },
     api: {
       ...config.api,
       baseURL:
         process.env[`${projectName.toUpperCase()}_API_BASE_URL`] ||
         process.env.API_BASE_URL ||
-        config.api.baseURL,
-    },
+        config.api.baseURL
+    }
   };
 
   logger.info(`Loaded project configuration for ${projectName} (${env}):`, {
@@ -147,7 +147,7 @@ export function getProjectConfig(projectName = 'default', env = 'dev') {
     apiBaseURL: envConfig.api.baseURL,
     browsers: envConfig.browsers.map((b) => b.name),
     browserStack: envConfig.browserStack.enabled,
-    requiredEnvVars: envConfig.requiredEnvVars || [],
+    requiredEnvVars: envConfig.requiredEnvVars || []
   });
 
   return envConfig;

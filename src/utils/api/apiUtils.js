@@ -22,7 +22,7 @@ class ApiUtils {
     // Default headers for API requests (can be overridden per call)
     this.defaultHeaders = {
       'Content-Type': 'application/json',
-      Accept: 'application/json',
+      Accept: 'application/json'
     };
   }
 
@@ -45,7 +45,7 @@ class ApiUtils {
       const response = await this.apiClient[method.toLowerCase()](finalUrl, {
         headers: allHeaders,
         params: queryParams,
-        data: body,
+        data: body
       });
 
       const responseBody = await response.json().catch(() => ({}));
@@ -57,7 +57,7 @@ class ApiUtils {
       return {
         status: response.status(),
         body: responseBody,
-        headers: responseHeaders,
+        headers: responseHeaders
       };
     } catch (error) {
       logger.error(`Request failed: ${method} ${finalUrl} - ${error.message}`);
@@ -89,7 +89,7 @@ class ApiUtils {
     const base = {
       name: faker.person.fullName(),
       job: faker.person.jobTitle(),
-      email: faker.internet.email(),
+      email: faker.internet.email()
     };
 
     const merged = { ...base, ...overrides };

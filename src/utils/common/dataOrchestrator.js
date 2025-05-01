@@ -101,7 +101,7 @@ async function readExcel(filePath = EXCEL_PATH, requiredHeaders = ['name', 'job'
 async function getHybridTestData() {
   const envData = {
     username: process.env.LOGIN_USERNAME,
-    password: process.env.LOGIN_PASSWORD,
+    password: process.env.LOGIN_PASSWORD
   };
 
   const yamlData = readYaml();
@@ -116,7 +116,7 @@ async function getHybridTestData() {
     ...envData,
     ...yamlData.user,
     ...excelData,
-    dbUser,
+    dbUser
   };
 }
 

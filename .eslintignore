@@ -1,0 +1,7 @@
+node_modules/
+dist/
+reports/
+allure-results/
+playwright-report/
+test-results/
+sandbox/

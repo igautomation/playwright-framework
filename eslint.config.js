@@ -1,4 +1,4 @@
-// src/eslint.config.js
+// eslint.config.js
 
 import js from '@eslint/js';
 import globals from 'globals';
@@ -15,11 +15,11 @@ export default [
       }
     },
     rules: {
-      'no-unused-vars': 'warn',
-      'no-console': 'off',
-      semi: ['error', 'always'],
+      indent: ['error', 2],
       quotes: ['error', 'single'],
-      indent: ['error', 2]
+      semi: ['error', 'always'],
+      'no-unused-vars': 'warn',
+      'no-console': 'off'
     }
   }
 ];

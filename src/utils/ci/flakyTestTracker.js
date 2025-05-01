@@ -13,7 +13,7 @@ class FlakyTestTracker {
     let results = this.testResults.get(testId) || {
       runs: 0,
       failures: 0,
-      isFlaky,
+      isFlaky
     };
 
     results.runs++;

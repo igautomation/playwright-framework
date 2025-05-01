@@ -8,7 +8,7 @@ test.describe('Retry and Timeout Tests', () => {
   test.describe('Retry Tests', () => {
     test('@retry Demo: Retry test with navigation to products page', async ({
       authenticatedPage,
-      retryDiagnostics,
+      retryDiagnostics
     }, testInfo) => {
       try {
         const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
@@ -28,7 +28,7 @@ test.describe('Retry and Timeout Tests', () => {
   test.describe('Timeout Tests', () => {
     test('@timeout Demo: Slow test with extended expect timeout', async ({
       authenticatedPage,
-      retryDiagnostics,
+      retryDiagnostics
     }) => {
       try {
         test.slow();

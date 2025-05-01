@@ -31,7 +31,7 @@ const parsers = {
     const headers = Object.keys(parsed[0]);
     const requiredHeaders = {
       'src/data/csv/users.csv': ['username', 'password'],
-      'src/data/csv/products.csv': ['id', 'name', 'price'],
+      'src/data/csv/products.csv': ['id', 'name', 'price']
     };
     const required = requiredHeaders[path] || [];
     const missing = required.filter((header) => !headers.includes(header));
@@ -40,7 +40,7 @@ const parsers = {
     }
 
     return parsed;
-  },
+  }
 };
 
 /**

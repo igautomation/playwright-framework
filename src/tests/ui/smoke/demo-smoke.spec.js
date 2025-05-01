@@ -8,7 +8,7 @@ test.describe('XPath Practice Page UI Smoke Tests', () => {
   // Test: Verify form field interaction and validation messages
   test('Submit form with invalid email and verify validation', async ({
     authenticatedPage,
-    retryDiagnostics,
+    retryDiagnostics
   }, testInfo) => {
     try {
       // Navigate to the practice page
@@ -33,7 +33,7 @@ test.describe('XPath Practice Page UI Smoke Tests', () => {
   // Test: Fill form and submit with valid data
   test('Fill all fields and submit the form successfully', async ({
     authenticatedPage,
-    retryDiagnostics,
+    retryDiagnostics
   }, testInfo) => {
     try {
       // Go to the XPath practice page

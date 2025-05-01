@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run lint-staged to format and lint files
-echo "🧹 Running pre-commit checks (lint-staged)..."
-npx lint-staged
+echo "🔍 Running pre-commit linting..."
+npx lint-stagednpx lint-staged

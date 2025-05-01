@@ -20,12 +20,12 @@ function loadEnvironmentVariables(projectDir) {
     loadEnv({
       allowEmptyValues: true,
       example: path.join(projectDir, '.env.example'),
-      path: path.join(projectDir, `src/config/env/${envFileName}.env`),
+      path: path.join(projectDir, `src/config/env/${envFileName}.env`)
     });
 
     loadEnv({
       allowEmptyValues: true,
-      example: path.join(projectDir, '.env.example'),
+      example: path.join(projectDir, '.env.example')
     });
 
     if (!process.env.BASE_URL) {
@@ -87,7 +87,7 @@ export default function run(argv) {
   // Spawn the child process to run the Playwright CLI
   const testProcess = spawn(command, args, {
     stdio: 'inherit',
-    shell: true,
+    shell: true
   });
 
   // Handle child process exit status

@@ -39,7 +39,7 @@ const customTest = baseTest.extend({
         rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
       put: (endpoint, body, opts = {}) =>
         rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
-      delete: (endpoint, opts = {}) => rest.requestWithRetry('DELETE', endpoint, opts),
+      delete: (endpoint, opts = {}) => rest.requestWithRetry('DELETE', endpoint, opts)
     };
 
     await use(client);
@@ -62,7 +62,7 @@ const customTest = baseTest.extend({
         reportUtils.attachScreenshot(screenshotPath, `Attempt ${attempt}`, testInfo);
         await testInfo.attach('retry-failure', {
           body: await page.screenshot(),
-          contentType: 'image/png',
+          contentType: 'image/png'
         });
       } catch (e) {
         logger.warn('Retry screenshot capture failed: ' + e.message);
@@ -103,12 +103,12 @@ const customTest = baseTest.extend({
       username: process.env.USERNAME_SELECTOR || '#username',
       password: process.env.PASSWORD_SELECTOR || '#password',
       submit: process.env.SUBMIT_SELECTOR || '#submit',
-      dashboard: process.env.DASHBOARD_SELECTOR || '#dashboard',
+      dashboard: process.env.DASHBOARD_SELECTOR || '#dashboard'
     };
 
     const credentials = {
       username: process.env.LOGIN_USERNAME,
-      password: process.env.LOGIN_PASSWORD,
+      password: process.env.LOGIN_PASSWORD
     };
 
     if (!credentials.username || !credentials.password) {
@@ -126,7 +126,7 @@ const customTest = baseTest.extend({
       logger.error(`Login failed during authenticatedPage fixture: ${error.message}`);
       throw error;
     }
-  },
+  }
 });
 
 // Export the extended test object

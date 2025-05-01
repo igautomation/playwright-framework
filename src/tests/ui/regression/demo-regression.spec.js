@@ -4,7 +4,7 @@ import { test, expect } from '../../../fixtures/combined.js';
 test.describe('Regression Tests', () => {
   test('@regression Demo Regression: Product Search', async ({
     authenticatedPage,
-    retryDiagnostics,
+    retryDiagnostics
   }) => {
     try {
       const baseURL = process.env.BASE_URL || 'https://automationexercise.com';

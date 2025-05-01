@@ -56,7 +56,7 @@ export async function generateXrayResults() {
           status: convertStatus(spec.status),
           start: new Date(spec.startTime).toISOString(),
           finish: new Date(spec.endTime).toISOString(),
-          comment: spec.error ? spec.error.message : 'Test completed',
+          comment: spec.error ? spec.error.message : 'Test completed'
         });
       });
     });
@@ -67,9 +67,9 @@ export async function generateXrayResults() {
         description: process.env.XRAY_DESCRIPTION || 'Framework auto-generated Xray payload',
         user: process.env.XRAY_USER || 'automation-bot',
         startDate: new Date().toISOString(),
-        finishDate: new Date().toISOString(),
+        finishDate: new Date().toISOString()
       },
-      tests: tests,
+      tests: tests
     };
 
     await fs.outputJson(outputPath, payload, { spaces: 2 });

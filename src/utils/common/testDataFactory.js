@@ -31,7 +31,7 @@ function generateUserData(overrides = {}) {
     lastName: getLastName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
-    username: faker.internet.username(),
+    username: faker.internet.username()
   };
 
   return { ...defaultData, ...overrides };
@@ -48,7 +48,7 @@ function generateFormData(overrides = {}) {
     username: faker.internet.username(),
     password: faker.internet.password(8),
     email: faker.internet.email(),
-    phone: faker.phone.number(),
+    phone: faker.phone.number()
   };
   return { ...defaultData, ...overrides };
 }
@@ -70,7 +70,7 @@ function generateContactData(overrides = {}) {
     Email: `test-${timestamp}@example.com`,
     Phone: faker.phone.number(),
     Title: 'Test Contact',
-    Department: 'QA',
+    Department: 'QA'
   };
   return { ...defaultData, ...overrides };
 }
@@ -88,7 +88,7 @@ function generateAccountData(overrides = {}) {
     Phone: faker.phone.number(),
     Industry: 'Technology',
     Type: 'Customer',
-    Website: faker.internet.url(),
+    Website: faker.internet.url()
   };
   return { ...defaultData, ...overrides };
 }
@@ -105,7 +105,7 @@ function generateOpportunityData(overrides = {}) {
     Name: `TestOpp${timestamp}`,
     StageName: 'Prospecting',
     CloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    Amount: faker.finance.amount(1000, 10000),
+    Amount: faker.finance.amount(1000, 10000)
   };
   return { ...defaultData, ...overrides };
 }
@@ -155,12 +155,12 @@ async function generateProductsToCsv(count, outputPath) {
       name: faker.commerce.productName(),
       price: faker.commerce.price(),
       category: faker.commerce.department(),
-      stock: faker.number.int({ min: 0, max: 100 }),
+      stock: faker.number.int({ min: 0, max: 100 })
     }));
 
     const csvData = [
       'id,name,price,category,stock',
-      ...products.map((p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`),
+      ...products.map((p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`)
     ].join('\n');
 
     await fs.writeFile(outputPath, csvData);
@@ -177,5 +177,5 @@ export {
   generateOpportunityData,
   loadTestData,
   generateUsersToFile,
-  generateProductsToCsv,
+  generateProductsToCsv
 };

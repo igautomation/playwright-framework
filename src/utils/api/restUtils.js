@@ -28,7 +28,7 @@ class RestUtils {
 
       const context = await this.request.newContext({
         baseURL: this.baseURL,
-        extraHTTPHeaders: headers,
+        extraHTTPHeaders: headers
       });
 
       let response;

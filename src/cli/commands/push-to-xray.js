@@ -16,7 +16,7 @@ export const pushToXrayCommand = {
       alias: 'r',
       type: 'string',
       describe: 'Path to test result JSON file',
-      default: 'reports/xray-results.json',
+      default: 'reports/xray-results.json'
     });
   },
   handler: async (argv) => {
@@ -42,5 +42,5 @@ export const pushToXrayCommand = {
       logger.error(`Failed to push results to Xray: ${error.message}`);
       process.exit(1);
     }
-  },
+  }
 };

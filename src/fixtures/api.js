@@ -11,7 +11,7 @@ async function createRequestContext(baseURL, extraHTTPHeaders = {}) {
 
   return await request.newContext({
     baseURL: baseURL,
-    extraHTTPHeaders: extraHTTPHeaders,
+    extraHTTPHeaders: extraHTTPHeaders
   });
 }
 
@@ -23,7 +23,7 @@ async function makeApiRequest(context, method, endpoint, payload = {}, headers =
   }
 
   const options = {
-    headers: headers,
+    headers: headers
   };
 
   // Only attach data for non-GET requests

@@ -18,7 +18,7 @@ class DBUtils {
       throw new Error('DB_URL environment variable is required');
     }
     this.client = new Client({
-      connectionString: process.env.DB_URL,
+      connectionString: process.env.DB_URL
     });
   }
 
