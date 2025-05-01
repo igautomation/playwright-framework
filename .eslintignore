@@ -5,3 +5,4 @@ allure-results/
 playwright-report/
 test-results/
 sandbox/
+.history/
