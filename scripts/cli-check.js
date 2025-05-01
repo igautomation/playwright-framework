@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-/**
- * CLI utility for Salesforce Playwright framework
- */
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
@@ -10,12 +7,6 @@ import { getXrayTestCases, saveTestCasesToFile } from './utils/xray-integration.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Run command and stream output
- * @param {string} command - Command to run
- * @param {Array<string>} args - Command arguments
- * @returns {Promise<number>} Exit code
- */
 function runCommand(command, args) {
   return new Promise((resolve) => {
     const proc = spawn(command, args, { stdio: 'inherit' });
@@ -23,9 +14,6 @@ function runCommand(command, args) {
   });
 }
 
-/**
- * Print help message
- */
 function showHelp() {
   console.log(`
 Salesforce Playwright Test Framework CLI
@@ -43,19 +31,18 @@ Commands:
   xray:fetch              Fetch test cases from Xray
   xray:report             Upload test results to Xray
   clean                   Clean test reports and artifacts
+  report                  Generate Allure report
 
 Options:
   --browser=<name>        Specify browser (chromium, firefox, webkit)
   --env=<name>            Specify environment (development, qa, uat, production)
   --workers=<number>      Number of parallel workers
+  --tags=<pattern>        Test tag grep pattern
   --debug                 Run in debug mode
   --help                  Show this help
   `);
 }
 
-/**
- * Create folder structure
- */
 async function initializeProject() {
   const folders = [
     'tests/ui',
@@ -74,15 +61,12 @@ async function initializeProject() {
   for (const folder of folders) {
     const folderPath = path.join(__dirname, folder);
     await fs.mkdir(folderPath, { recursive: true });
-    console.log(`✅ Created ${folder}`);
+    console.log(`Created ${folder}`);
   }
 
-  console.log('🎉 Project structure initialized!');
+  console.log('Project structure initialized');
 }
 
-/**
- * Clean reports and artifacts
- */
 async function cleanArtifacts() {
   const folders = [
     'reports',
@@ -96,7 +80,7 @@ async function cleanArtifacts() {
     try {
       const folderPath = path.join(__dirname, folder);
       await fs.rm(folderPath, { recursive: true, force: true });
-      console.log(`✅ Cleaned ${folder}`);
+      console.log(`Cleaned ${folder}`);
     } catch (error) {
       if (error.code !== 'ENOENT') {
         console.error(`Failed to clean ${folder}:`, error);
@@ -105,9 +89,6 @@ async function cleanArtifacts() {
   }
 }
 
-/**
- * Main function
- */
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -117,7 +98,6 @@ async function main() {
     return;
   }
 
-  // Parse options
   const options = args.slice(1).reduce((opts, arg) => {
     if (arg.startsWith('--')) {
       const [key, value] = arg.substring(2).split('=');
@@ -129,46 +109,35 @@ async function main() {
     return opts;
   }, {});
 
-  // Set environment variable
   if (options.env) {
     process.env.NODE_ENV = options.env;
   }
 
-  // Prepare playwright options
   const playwrightArgs = [];
   if (options.browser) playwrightArgs.push(`--project=${options.browser}`);
   if (options.workers) playwrightArgs.push(`--workers=${options.workers}`);
   if (options.debug) playwrightArgs.push('--debug');
+  if (options.tags) playwrightArgs.push('--grep', options.tags);
 
   switch (command) {
     case 'run':
-      if (options._ && options._[0]) {
-        await runCommand('npx', ['playwright', 'test', ...playwrightArgs, options._[0]]);
-      } else {
-        await runCommand('npx', ['playwright', 'test', ...playwrightArgs]);
-      }
+      await runCommand('npx', ['playwright', 'test', ...playwrightArgs, ...(options._ || [])]);
       break;
-
     case 'run:smoke':
       await runCommand('npx', ['playwright', 'test', ...playwrightArgs, '--grep', '@smoke']);
       break;
-
     case 'run:regression':
       await runCommand('npx', ['playwright', 'test', ...playwrightArgs, '--grep', '@regression']);
       break;
-
     case 'run:api':
       await runCommand('npx', ['playwright', 'test', ...playwrightArgs, '--grep', '@api']);
       break;
-
     case 'run:ui':
       await runCommand('npx', ['playwright', 'test', ...playwrightArgs, '--grep', '@ui']);
       break;
-
     case 'init':
       await initializeProject();
       break;
-
     case 'xray:fetch':
       try {
         const jql = options.jql || '';
@@ -180,11 +149,15 @@ async function main() {
         process.exit(1);
       }
       break;
-
+    case 'xray:report':
+      await runCommand('npx', ['framework', 'push-to-xray']);
+      break;
+    case 'report':
+      await runCommand('npx', ['framework', 'generate-report']);
+      break;
     case 'clean':
       await cleanArtifacts();
       break;
-
     default:
       console.error(`Unknown command: ${command}`);
       showHelp();

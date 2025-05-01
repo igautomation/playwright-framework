@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🧪 Test Runner (Playwright CLI wrapper)"
+echo "Test Runner - Playwright CLI Wrapper"
 
 # Default values
 NODE_ENV="dev"
@@ -24,7 +24,7 @@ RETRIES=${input_retries:-$RETRIES}
 WORKERS=${input_workers:-$WORKERS}
 
 echo ""
-echo "🔧 Configuration:"
+echo "Configuration:"
 echo "  NODE_ENV: $NODE_ENV"
 echo "  TAGS: $TAGS"
 echo "  PROJECT: $PROJECT"
@@ -33,7 +33,7 @@ echo "  WORKERS: $WORKERS"
 echo ""
 
 # Run the test with constructed command
-echo "🚀 Executing test run..."
+echo "Executing test run..."
 NODE_ENV=$NODE_ENV npx dotenv -e .env -- npx framework run \
   --tags "$TAGS" \
   --project "$PROJECT" \

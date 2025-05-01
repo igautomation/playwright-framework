@@ -9,14 +9,22 @@ const { config: loadEnv } = require('dotenv-safe');
 // - Falls back to `.env.example` for validation of required variables
 const env = process.env.NODE_ENV || 'development';
 const envFileName = env === 'development' ? 'dev' : env;
+
 try {
+  // Load environment variables from the corresponding env file
   loadEnv({
     allowEmptyValues: true,
     example: '.env.example',
     path: `src/config/env/${envFileName}.env`
   });
-  loadEnv({ allowEmptyValues: true, example: '.env.example' });
+
+  // Fallback load to revalidate against .env.example even if other file loads
+  loadEnv({
+    allowEmptyValues: true,
+    example: '.env.example'
+  });
 } catch (error) {
+  // Exit script if validation fails
   console.error(`Failed to load environment variables: ${error.message}`);
   process.exit(1);
 }

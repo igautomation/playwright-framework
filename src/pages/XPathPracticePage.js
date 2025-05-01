@@ -2,18 +2,27 @@
 import BasePage from './BasePage.js';
 import WebInteractions from '../utils/web/webInteractions.js';
 
-class XPathPracticePage {
+class XPathPracticePage extends BasePage {
   constructor(page) {
-    this.page = page;
-    this.usernameInput = '#userId';
-    this.passwordInput = '#pass';
-    this.submitButton = '#userId + input[type="password"] + input[type="submit"]';
+    super(page);
+    this.web = new WebInteractions(page);
+    this.usernameSelector = '#userId';
+    this.passwordSelector = '#pass';
+    this.loginButton = 'button[type="submit"]';
+  }
+
+  async goto() {
+    await this.page.goto(`${process.env.BASE_URL}`);
   }
 
   async login(username, password) {
-    await this.page.fill(this.usernameInput, username);
-    await this.page.fill(this.passwordInput, password);
-    await this.page.click(this.submitButton);
+    await this.web.clearAndType(this.usernameSelector, username);
+    await this.web.clearAndType(this.passwordSelector, password);
+    await this.web.safeClick(this.loginButton);
+  }
+
+  async logout() {
+    await this.web.safeClick('button[type="logout"]');
   }
 }
 
