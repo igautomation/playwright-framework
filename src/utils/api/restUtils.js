@@ -26,9 +26,9 @@ class RestUtils {
         logger.debug(`Payload: ${JSON.stringify(payload)}`);
       }
 
-      const context = await this.request.newContext({
+      this.context = await request.newContext({
         baseURL: this.baseURL,
-        extraHTTPHeaders: headers
+        extraHTTPHeaders: this.headers
       });
 
       let response;

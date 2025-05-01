@@ -23,7 +23,7 @@ export default [
     settings: {
       'import/resolver': {
         node: {
-          paths: ['src'],
+          paths: ['src']
         },
         alias: {
           map: [
