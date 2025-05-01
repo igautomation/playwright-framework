@@ -18,7 +18,6 @@ import logger from '../utils/common/logger.js';
  * - authenticatedPage: Auto-login flow for UI testing
  */
 const customTest = baseTest.extend({
-
   /**
    * Fixture: apiClient
    * Injects a reusable client for REST API testing.
@@ -36,8 +35,10 @@ const customTest = baseTest.extend({
 
     const client = {
       get: (endpoint, opts = {}) => rest.requestWithRetry('GET', endpoint, opts),
-      post: (endpoint, body, opts = {}) => rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
-      put: (endpoint, body, opts = {}) => rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
+      post: (endpoint, body, opts = {}) =>
+        rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
+      put: (endpoint, body, opts = {}) =>
+        rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
       delete: (endpoint, opts = {}) => rest.requestWithRetry('DELETE', endpoint, opts)
     };
 

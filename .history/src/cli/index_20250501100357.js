@@ -63,38 +63,48 @@ function loadEnvironmentVariables(projectDir) {
     loadEnvironmentVariables(projectDir);
 
     yargs(hideBin(process.argv))
-      .command('init [dir]', 'Initialize project', (yargs) =>
-        yargs.option('dir', {
-          describe: 'Directory to scaffold',
-          type: 'string',
-          default: 'playwright-project'
-        }), async (argv) => {
-        const projectDir = path.resolve(process.cwd(), argv.dir);
-        await fs.mkdirp(projectDir);
-        logger.info(`Project initialized at ${projectDir}`);
-      }
+      .command(
+        'init [dir]',
+        'Initialize project',
+        (yargs) =>
+          yargs.option('dir', {
+            describe: 'Directory to scaffold',
+            type: 'string',
+            default: 'playwright-project'
+          }),
+        async (argv) => {
+          const projectDir = path.resolve(process.cwd(), argv.dir);
+          await fs.mkdirp(projectDir);
+          logger.info(`Project initialized at ${projectDir}`);
+        }
       )
 
-      .command('run [files..]', 'Run Playwright tests', (yargs) =>
-        yargs
-          .option('tags', { type: 'string', describe: 'Tags to filter' })
-          .option('headed', { type: 'boolean', describe: 'Run browser headed' })
-          .option('project', { type: 'array', describe: 'Project(s)' })
-          .option('workers', { type: 'string', describe: 'Number of workers' })
-          .option('retries', { type: 'number', describe: 'Retry count' }),
-      (argv) => run(argv)
+      .command(
+        'run [files..]',
+        'Run Playwright tests',
+        (yargs) =>
+          yargs
+            .option('tags', { type: 'string', describe: 'Tags to filter' })
+            .option('headed', { type: 'boolean', describe: 'Run browser headed' })
+            .option('project', { type: 'array', describe: 'Project(s)' })
+            .option('workers', { type: 'string', describe: 'Number of workers' })
+            .option('retries', { type: 'number', describe: 'Retry count' }),
+        (argv) => run(argv)
       )
 
-      .command('generate-data', 'Generate test users/products', (yargs) =>
-        yargs
-          .option('type', { choices: ['users', 'products'], demandOption: true })
-          .option('count', { type: 'number', default: 10 })
-          .option('output', { type: 'string', demandOption: true }),
-      async (argv) => {
-        if (argv.type === 'users') await generateUsersToFile(argv.count, argv.output);
-        else await generateProductsToCsv(argv.count, argv.output);
-        logger.info('Test data generated');
-      }
+      .command(
+        'generate-data',
+        'Generate test users/products',
+        (yargs) =>
+          yargs
+            .option('type', { choices: ['users', 'products'], demandOption: true })
+            .option('count', { type: 'number', default: 10 })
+            .option('output', { type: 'string', demandOption: true }),
+        async (argv) => {
+          if (argv.type === 'users') await generateUsersToFile(argv.count, argv.output);
+          else await generateProductsToCsv(argv.count, argv.output);
+          logger.info('Test data generated');
+        }
       )
 
       .command('list-tags', 'List @tags in test files', {}, async () => {
@@ -120,13 +130,18 @@ function loadEnvironmentVariables(projectDir) {
         logger.info('Results pushed to Xray');
       })
 
-      .command('select-tests [baseCommit] [headCommit]', 'Select changed tests from Git diff', {}, (argv) => {
-        const selected = testSelector.selectTestsByDiff(
-          argv.baseCommit || 'origin/main',
-          argv.headCommit || 'HEAD'
-        );
-        logger.info('Selected Tests:\n' + JSON.stringify(selected, null, 2));
-      })
+      .command(
+        'select-tests [baseCommit] [headCommit]',
+        'Select changed tests from Git diff',
+        {},
+        (argv) => {
+          const selected = testSelector.selectTestsByDiff(
+            argv.baseCommit || 'origin/main',
+            argv.headCommit || 'HEAD'
+          );
+          logger.info('Selected Tests:\n' + JSON.stringify(selected, null, 2));
+        }
+      )
 
       .command('quarantine-flaky', 'Mark flaky tests from last run', {}, () => {
         const quarantined = flakyTracker.quarantineFlakyTests();
@@ -138,14 +153,19 @@ function loadEnvironmentVariables(projectDir) {
         logger.info('Allure report generated');
       })
 
-      .command('notify <webhookUrl> <message> [channel]', 'Send notification to webhook', {}, async (argv) => {
-        await sendNotification({
-          webhookUrl: argv.webhookUrl,
-          message: argv.message,
-          channel: argv.channel
-        });
-        logger.info('Notification sent');
-      })
+      .command(
+        'notify <webhookUrl> <message> [channel]',
+        'Send notification to webhook',
+        {},
+        async (argv) => {
+          await sendNotification({
+            webhookUrl: argv.webhookUrl,
+            message: argv.message,
+            channel: argv.channel
+          });
+          logger.info('Notification sent');
+        }
+      )
 
       .command('install-vscode', 'Install Playwright VS Code extension', {}, () => {
         setupUtils.installPlaywrightVSCode();
@@ -195,7 +215,6 @@ function loadEnvironmentVariables(projectDir) {
 
       .demandCommand()
       .help().argv;
-
   } catch (error) {
     logger.error(`CLI error: ${error.message}`);
     process.exit(1);

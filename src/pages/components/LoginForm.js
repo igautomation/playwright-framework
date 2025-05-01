@@ -1,34 +1,30 @@
 // src/pages/components/LoginForm.js
-import SelfHealingLocator from "#locators/SelfHealingLocator.js";
+import SelfHealingLocator from '#locators/SelfHealingLocator.js';
 class LoginForm {
   constructor(page) {
     this.page = page;
     // Use self-healing locators for form elements
-    this.form = SelfHealingLocator.create(page, "form#login-form", {
-      tag: "form",
+    this.form = SelfHealingLocator.create(page, 'form#login-form', {
+      tag: 'form'
     });
-    this.usernameInput = SelfHealingLocator.create(page, "#username", {
-      role: "textbox",
-      name: "username",
-      tag: "input",
+    this.usernameInput = SelfHealingLocator.create(page, '#username', {
+      role: 'textbox',
+      name: 'username',
+      tag: 'input'
     });
-    this.passwordInput = SelfHealingLocator.create(page, "#password", {
-      role: "textbox",
-      name: "password",
-      tag: "input",
+    this.passwordInput = SelfHealingLocator.create(page, '#password', {
+      role: 'textbox',
+      name: 'password',
+      tag: 'input'
     });
-    this.submitButton = SelfHealingLocator.create(
-      page,
-      'button[type="submit"]',
-      {
-        role: "button",
-        name: "submit",
-        text: "Login",
-        tag: "button",
-      }
-    );
-    this.errorMessage = SelfHealingLocator.create(page, ".error-message", {
-      tag: "div",
+    this.submitButton = SelfHealingLocator.create(page, 'button[type="submit"]', {
+      role: 'button',
+      name: 'submit',
+      text: 'Login',
+      tag: 'button'
+    });
+    this.errorMessage = SelfHealingLocator.create(page, '.error-message', {
+      tag: 'div'
     });
   }
 
@@ -44,9 +40,7 @@ class LoginForm {
 
   async getErrorMessage() {
     const errorLocator = await this.errorMessage.locate();
-    return (await errorLocator.isVisible())
-      ? await errorLocator.textContent()
-      : null;
+    return (await errorLocator.isVisible()) ? await errorLocator.textContent() : null;
   }
 
   async isVisible() {

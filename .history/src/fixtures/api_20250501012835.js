@@ -11,25 +11,19 @@ async function createRequestContext(baseURL, extraHTTPHeaders = {}) {
 
   return await request.newContext({
     baseURL: baseURL,
-    extraHTTPHeaders: extraHTTPHeaders,
+    extraHTTPHeaders: extraHTTPHeaders
   });
 }
 
 // Core function to issue HTTP requests using a method + endpoint
 // Accepts method, endpoint, payload (if applicable), and headers
-async function makeApiRequest(
-  context,
-  method,
-  endpoint,
-  payload = {},
-  headers = {}
-) {
+async function makeApiRequest(context, method, endpoint, payload = {}, headers = {}) {
   if (!context || !method || !endpoint) {
     throw new Error('API context, method, and endpoint are required.');
   }
 
   const options = {
-    headers: headers,
+    headers: headers
   };
 
   // Only attach data for non-GET requests
@@ -38,16 +32,16 @@ async function makeApiRequest(
   }
 
   switch (method.toUpperCase()) {
-  case 'GET':
-    return await context.get(endpoint, options);
-  case 'POST':
-    return await context.post(endpoint, options);
-  case 'PUT':
-    return await context.put(endpoint, options);
-  case 'DELETE':
-    return await context.delete(endpoint, options);
-  default:
-    throw new Error(`Unsupported HTTP method: ${method}`);
+    case 'GET':
+      return await context.get(endpoint, options);
+    case 'POST':
+      return await context.post(endpoint, options);
+    case 'PUT':
+      return await context.put(endpoint, options);
+    case 'DELETE':
+      return await context.delete(endpoint, options);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
   }
 }
 

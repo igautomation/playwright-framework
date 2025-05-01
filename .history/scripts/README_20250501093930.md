@@ -31,10 +31,10 @@ This folder is used for **internal testing, demos, and experimentation** that ar
 ## Git Ignore
 
 The following are excluded from version control:
+
 - `sandbox/dist/`, `sandbox/build/`
 - `sandbox/node_modules/`
 - `sandbox/.env`
 - Temp and log files
 
 You can safely use this folder for any experimental development without affecting the reusable Playwright automation framework.
-

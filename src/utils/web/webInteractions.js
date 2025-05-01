@@ -8,12 +8,12 @@
  * - Handle advanced interactions (shadow DOM, dynamic locators, retries, drag and drop)
  */
 
-import { expect } from "@playwright/test";
+import { expect } from '@playwright/test';
 
 class WebInteractions {
   constructor(page) {
     if (!page) {
-      throw new Error("Page object is required");
+      throw new Error('Page object is required');
     }
     this.page = page;
   }
@@ -23,7 +23,7 @@ class WebInteractions {
   // ---------------------------------------
 
   async getText(selector) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     const element = this.page.locator(selector);
     const text = await element.textContent();
     if (text === null) {
@@ -34,38 +34,33 @@ class WebInteractions {
 
   async verifyText(selector, expectedText) {
     if (!selector || !expectedText) {
-      throw new Error("Selector and expected text are required");
+      throw new Error('Selector and expected text are required');
     }
     const actualText = await this.getText(selector);
     return actualText.trim() === expectedText.trim();
   }
 
   async handleDropdown(selector, value) {
-    if (!selector || !value) throw new Error("Selector and value are required");
+    if (!selector || !value) throw new Error('Selector and value are required');
     await this.page.selectOption(selector, value);
   }
 
   async verifyDropdownValues(selector, expectedValues) {
     if (!selector || !Array.isArray(expectedValues)) {
-      throw new Error("Selector and expected values are required");
+      throw new Error('Selector and expected values are required');
     }
-    const options = await this.page
-      .locator(`${selector} option`)
-      .allTextContents();
-    return (
-      JSON.stringify(options.sort()) === JSON.stringify(expectedValues.sort())
-    );
+    const options = await this.page.locator(`${selector} option`).allTextContents();
+    return JSON.stringify(options.sort()) === JSON.stringify(expectedValues.sort());
   }
 
   async mouseHover(selector) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     await this.page.hover(selector);
   }
 
   async uploadFile(selector, filePath) {
-    if (!selector || !filePath)
-      throw new Error("Selector and file path are required");
-    const { existsSync } = await import("fs");
+    if (!selector || !filePath) throw new Error('Selector and file path are required');
+    const { existsSync } = await import('fs');
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
     }
@@ -74,15 +69,13 @@ class WebInteractions {
   }
 
   async keyboardAction(key) {
-    if (!key) throw new Error("Key is required");
+    if (!key) throw new Error('Key is required');
     await this.page.keyboard.press(key);
   }
 
   async handleAutocomplete(inputSelector, value, optionSelector) {
     if (!inputSelector || !value || !optionSelector) {
-      throw new Error(
-        "Input selector, value, and option selector are required"
-      );
+      throw new Error('Input selector, value, and option selector are required');
     }
     await this.page.fill(inputSelector, value);
     await this.page.click(optionSelector);
@@ -90,7 +83,7 @@ class WebInteractions {
 
   async handleAlert(accept) {
     await new Promise((resolve) => {
-      this.page.once("dialog", (dialog) => {
+      this.page.once('dialog', (dialog) => {
         if (accept) {
           dialog.accept();
         } else {
@@ -102,7 +95,7 @@ class WebInteractions {
   }
 
   async handleFrame(frameSelector) {
-    if (!frameSelector) throw new Error("Frame selector is required");
+    if (!frameSelector) throw new Error('Frame selector is required');
     const frame = this.page.frameLocator(frameSelector);
     if (!frame) {
       throw new Error(`Frame not found for selector: ${frameSelector}`);
@@ -111,8 +104,8 @@ class WebInteractions {
   }
 
   async switchTab(index) {
-    if (typeof index !== "number" || index < 0) {
-      throw new Error("Valid tab index is required");
+    if (typeof index !== 'number' || index < 0) {
+      throw new Error('Valid tab index is required');
     }
     const pages = await this.page.context().pages();
     if (index >= pages.length) {
@@ -132,7 +125,7 @@ class WebInteractions {
 
   async clickInsideShadow(hostSelector, innerSelector) {
     if (!hostSelector || !innerSelector) {
-      throw new Error("Host selector and inner selector are required");
+      throw new Error('Host selector and inner selector are required');
     }
     const host = this.page.locator(hostSelector);
     const shadowRoot = await host.evaluateHandle((el) => el.shadowRoot);
@@ -145,7 +138,7 @@ class WebInteractions {
 
   async getTextInsideShadow(hostSelector, innerSelector) {
     if (!hostSelector || !innerSelector) {
-      throw new Error("Host selector and inner selector are required");
+      throw new Error('Host selector and inner selector are required');
     }
     const host = this.page.locator(hostSelector);
     const shadowRoot = await host.evaluateHandle((el) => el.shadowRoot);
@@ -161,13 +154,13 @@ class WebInteractions {
   // ---------------------------------------
 
   buildLocatorByPartialText(text) {
-    if (!text) throw new Error("Text is required");
+    if (!text) throw new Error('Text is required');
     return this.page.getByText(text, { exact: false });
   }
 
   buildLocatorByAttribute(attribute, value) {
     if (!attribute || !value) {
-      throw new Error("Attribute and value are required");
+      throw new Error('Attribute and value are required');
     }
     return this.page.locator(`[${attribute}="${value}"]`);
   }
@@ -177,22 +170,22 @@ class WebInteractions {
   // ---------------------------------------
 
   async safeClick(selector) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     const element = this.page.locator(selector);
-    await element.waitFor({ state: "visible", timeout: 5000 });
+    await element.waitFor({ state: 'visible', timeout: 5000 });
     await element.click();
   }
 
   async clearAndType(selector, text) {
-    if (!selector || !text) throw new Error("Selector and text are required");
+    if (!selector || !text) throw new Error('Selector and text are required');
     const input = this.page.locator(selector);
-    await input.fill("");
+    await input.fill('');
     await input.type(text);
   }
 
   async dragAndDrop(sourceSelector, targetSelector) {
     if (!sourceSelector || !targetSelector) {
-      throw new Error("Source and target selectors are required");
+      throw new Error('Source and target selectors are required');
     }
     const source = this.page.locator(sourceSelector);
     const target = this.page.locator(targetSelector);
@@ -200,20 +193,20 @@ class WebInteractions {
   }
 
   async scrollIntoView(selector) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     const element = this.page.locator(selector);
     await element.scrollIntoViewIfNeeded();
   }
 
   async waitForClickable(selector, timeout = 5000) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     const element = this.page.locator(selector);
-    await element.waitFor({ state: "visible", timeout });
+    await element.waitFor({ state: 'visible', timeout });
     await expect(element).toBeEnabled({ timeout });
   }
 
   async retryClick(selector, retries = 3, delayMs = 1000) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const element = this.page.locator(selector);
@@ -221,9 +214,7 @@ class WebInteractions {
         return;
       } catch (error) {
         if (attempt === retries) {
-          throw new Error(
-            `Retry click failed after ${retries} attempts: ${error.message}`
-          );
+          throw new Error(`Retry click failed after ${retries} attempts: ${error.message}`);
         }
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
@@ -231,22 +222,22 @@ class WebInteractions {
   }
 
   async doubleClick(selector) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     await this.page.dblclick(selector);
   }
 
   async rightClick(selector) {
-    if (!selector) throw new Error("Selector is required");
-    await this.page.click(selector, { button: "right" });
+    if (!selector) throw new Error('Selector is required');
+    await this.page.click(selector, { button: 'right' });
   }
 
   async waitForUrl(urlPart, timeout = 10000) {
-    if (!urlPart) throw new Error("URL part is required");
+    if (!urlPart) throw new Error('URL part is required');
     await this.page.waitForURL(`**${urlPart}**`, { timeout });
   }
 
   async dragByOffset(selector, xOffset, yOffset) {
-    if (!selector) throw new Error("Selector is required");
+    if (!selector) throw new Error('Selector is required');
     const element = this.page.locator(selector);
     const box = await element.boundingBox();
     if (!box) {
@@ -254,10 +245,7 @@ class WebInteractions {
     }
     await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await this.page.mouse.down();
-    await this.page.mouse.move(
-      box.x + box.width / 2 + xOffset,
-      box.y + box.height / 2 + yOffset
-    );
+    await this.page.mouse.move(box.x + box.width / 2 + xOffset, box.y + box.height / 2 + yOffset);
     await this.page.mouse.up();
   }
 }

@@ -10,12 +10,12 @@ import logger from '../../utils/common/logger.js';
 export const generateXrayPayloadCommand = {
   command: 'generate-xray-payload',
   describe: 'Convert Playwright results to Xray-compatible JSON',
-  handler: async () => {  
+  handler: async () => {
     try {
       await generateXrayResults();
     } catch (error) {
       logger.error(`Xray payload generation failed: ${error.message}`);
       process.exit(1);
     }
-  },
+  }
 };

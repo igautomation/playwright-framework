@@ -1,1 +1,1 @@
-# Configuration\nConfigure  and .
+# Configuration\nConfigure and .

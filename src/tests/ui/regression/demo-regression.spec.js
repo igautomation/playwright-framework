@@ -1,20 +1,18 @@
 // src/tests/ui/regression/demo-regression.spec.js
-import { test, expect } from "../../../fixtures/combined.js";
+import { test, expect } from '../../../fixtures/combined.js';
 
-test.describe("Regression Tests", () => {
-  test("@regression Demo Regression: Product Search", async ({
+test.describe('Regression Tests', () => {
+  test('@regression Demo Regression: Product Search', async ({
     authenticatedPage,
-    retryDiagnostics,
+    retryDiagnostics
   }) => {
     try {
-      const baseURL = process.env.BASE_URL || "https://automationexercise.com";
+      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
       await authenticatedPage.goto(`${baseURL}/products`);
-      await authenticatedPage.fill("input#search_product", "T-shirt");
-      await authenticatedPage.click("button#submit_search");
+      await authenticatedPage.fill('input#search_product', 'T-shirt');
+      await authenticatedPage.click('button#submit_search');
 
-      await expect(authenticatedPage.locator(".features_items")).toContainText(
-        /T-shirt/i
-      );
+      await expect(authenticatedPage.locator('.features_items')).toContainText(/T-shirt/i);
     } catch (error) {
       await retryDiagnostics(error);
       throw error;

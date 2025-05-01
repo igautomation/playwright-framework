@@ -51,7 +51,6 @@ class RestUtils {
       }
 
       return response;
-
     } catch (error) {
       logger.error(`REST call failed: ${method} ${endpoint} - ${error.message}`);
       throw error;

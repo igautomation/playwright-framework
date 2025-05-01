@@ -70,7 +70,6 @@ export async function generateXrayResults() {
     await fs.outputJson(outputPath, payload, { spaces: 2 });
 
     logger.info('Xray results written to: ' + outputPath);
-
   } catch (error) {
     logger.error('❌ Error generating Xray results: ' + error.message);
     process.exit(1);

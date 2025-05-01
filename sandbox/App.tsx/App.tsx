@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import React from "react";
+import React from 'react';
 import {
   Terminal,
   Code2,
@@ -9,11 +9,11 @@ import {
   PlayCircle,
   Layers,
   FileSearch,
-  CheckCircle2,
-} from "lucide-react";
+  CheckCircle2
+} from 'lucide-react';
 
 function App() {
-  const frameworkName = "Enterprise Playwright Framework";
+  const frameworkName = 'Enterprise Playwright Framework';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
@@ -24,7 +24,7 @@ function App() {
             <span className="text-xl font-bold">{frameworkName}</span>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
-            {["Features", "Architecture", "Usage", "Reports"].map((item) => (
+            {['Features', 'Architecture', 'Usage', 'Reports'].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
@@ -44,11 +44,10 @@ function App() {
         {/* Hero Section */}
         <section className="py-16 px-4 md:px-8 lg:px-16 text-center">
           <div className="container mx-auto max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {frameworkName}
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{frameworkName}</h1>
             <p className="text-gray-300 text-lg mb-10">
-              A production-grade Playwright framework for Web UI, API, Hybrid, CI/CD, and Xray integration. Built for Enterprise Quality Engineering.
+              A production-grade Playwright framework for Web UI, API, Hybrid, CI/CD, and Xray
+              integration. Built for Enterprise Quality Engineering.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button className="bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-8 rounded-md flex items-center gap-2 transition-colors">
@@ -71,36 +70,39 @@ function App() {
               {[
                 {
                   icon: <Layers className="w-10 h-10 text-emerald-400" />,
-                  title: "Page Object Model",
-                  description: "Clean POM for UI automation across any platform",
+                  title: 'Page Object Model',
+                  description: 'Clean POM for UI automation across any platform'
                 },
                 {
                   icon: <TerminalSquare className="w-10 h-10 text-emerald-400" />,
-                  title: "API Testing",
-                  description: "Powerful REST/GraphQL API testing with POJO models",
+                  title: 'API Testing',
+                  description: 'Powerful REST/GraphQL API testing with POJO models'
                 },
                 {
                   icon: <GitBranch className="w-10 h-10 text-emerald-400" />,
-                  title: "CI/CD Ready",
-                  description: "Built-in GitHub Actions and Jenkins support",
+                  title: 'CI/CD Ready',
+                  description: 'Built-in GitHub Actions and Jenkins support'
                 },
                 {
                   icon: <FileSearch className="w-10 h-10 text-emerald-400" />,
-                  title: "Xray/Jira Integration",
-                  description: "Full test case management with Xray Cloud",
+                  title: 'Xray/Jira Integration',
+                  description: 'Full test case management with Xray Cloud'
                 },
                 {
                   icon: <CheckCircle2 className="w-10 h-10 text-emerald-400" />,
-                  title: "Smart Automation",
-                  description: "Retries, flaky detection, self-healing locators",
+                  title: 'Smart Automation',
+                  description: 'Retries, flaky detection, self-healing locators'
                 },
                 {
                   icon: <Terminal className="w-10 h-10 text-emerald-400" />,
-                  title: "Multi-Environment",
-                  description: "Run tests easily across Dev, QA, UAT, Prod",
-                },
+                  title: 'Multi-Environment',
+                  description: 'Run tests easily across Dev, QA, UAT, Prod'
+                }
               ].map((feature, index) => (
-                <div key={feature.title} className="bg-gray-800 p-6 rounded-lg hover:shadow-md hover:shadow-emerald-900/30 transition-all">
+                <div
+                  key={feature.title}
+                  className="bg-gray-800 p-6 rounded-lg hover:shadow-md hover:shadow-emerald-900/30 transition-all"
+                >
                   <div className="mb-4">{feature.icon}</div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-gray-400">{feature.description}</p>

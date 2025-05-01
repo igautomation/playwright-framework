@@ -6,16 +6,16 @@
  * Used by test cases to load consistent, parameterized test data.
  */
 
-import fs from "fs-extra";
-import path from "path";
-import yaml from "js-yaml";
-import { XMLParser } from "fast-xml-parser";
-import ExcelJS from "exceljs";
-import DBUtils from "../database/dbUtils.js";
+import fs from 'fs-extra';
+import path from 'path';
+import yaml from 'js-yaml';
+import { XMLParser } from 'fast-xml-parser';
+import ExcelJS from 'exceljs';
+import DBUtils from '../database/dbUtils.js';
 
 // Default file paths are configurable via .env or hardcoded fallback
-const YAML_PATH = process.env.YAML_TEST_DATA || "src/data/testData.yaml";
-const EXCEL_PATH = process.env.EXCEL_TEST_DATA || "src/data/testData.xlsx";
+const YAML_PATH = process.env.YAML_TEST_DATA || 'src/data/testData.yaml';
+const EXCEL_PATH = process.env.EXCEL_TEST_DATA || 'src/data/testData.xlsx';
 
 /**
  * Reads and parses a YAML file from disk.
@@ -23,7 +23,7 @@ const EXCEL_PATH = process.env.EXCEL_TEST_DATA || "src/data/testData.xlsx";
  */
 function readYaml(filePath = YAML_PATH) {
   const resolved = path.resolve(filePath);
-  const raw = fs.readFileSync(resolved, "utf8");
+  const raw = fs.readFileSync(resolved, 'utf8');
   return yaml.load(raw);
 }
 
@@ -33,7 +33,7 @@ function readYaml(filePath = YAML_PATH) {
  */
 function readXml(filePath) {
   const resolved = path.resolve(filePath);
-  const raw = fs.readFileSync(resolved, "utf8");
+  const raw = fs.readFileSync(resolved, 'utf8');
   const parser = new XMLParser();
   return parser.parse(raw);
 }
@@ -42,10 +42,7 @@ function readXml(filePath) {
  * Loads and validates an Excel file (.xlsx).
  * Returns parsed rows as objects using the first sheet.
  */
-async function readExcel(
-  filePath = EXCEL_PATH,
-  requiredHeaders = ["name", "job", "email"]
-) {
+async function readExcel(filePath = EXCEL_PATH, requiredHeaders = ['name', 'job', 'email']) {
   const resolved = path.resolve(filePath);
 
   if (!fs.existsSync(resolved)) {
@@ -73,7 +70,7 @@ async function readExcel(
       headers = row.values.slice(1); // skip first empty index
       const missing = requiredHeaders.filter((h) => !headers.includes(h));
       if (missing.length > 0) {
-        throw new Error(`Excel headers missing: ${missing.join(", ")}`);
+        throw new Error(`Excel headers missing: ${missing.join(', ')}`);
       }
       return;
     }
@@ -104,7 +101,7 @@ async function readExcel(
 async function getHybridTestData() {
   const envData = {
     username: process.env.LOGIN_USERNAME,
-    password: process.env.LOGIN_PASSWORD,
+    password: process.env.LOGIN_PASSWORD
   };
 
   const yamlData = readYaml();
@@ -119,7 +116,7 @@ async function getHybridTestData() {
     ...envData,
     ...yamlData.user,
     ...excelData,
-    dbUser,
+    dbUser
   };
 }
 

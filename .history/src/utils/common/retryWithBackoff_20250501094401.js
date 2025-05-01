@@ -40,7 +40,6 @@ class RetryWithBackoff {
         }
 
         return result;
-
       } catch (error) {
         attempt++;
 

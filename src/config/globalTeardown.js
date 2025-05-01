@@ -8,15 +8,14 @@
  * to ensure a clean CI/CD environment.
  */
 
-import fs from "fs-extra";
-import path from "path";
-import logger from "../utils/common/logger.js";
+import fs from 'fs-extra';
+import path from 'path';
+import logger from '../utils/common/logger.js';
 
 export default async function globalTeardown() {
-  const storageStatePath =
-    process.env.STORAGE_STATE || "test-results/storageState.json";
+  const storageStatePath = process.env.STORAGE_STATE || 'test-results/storageState.json';
 
-  logger.info("Global teardown started.");
+  logger.info('Global teardown started.');
 
   try {
     if (await fs.pathExists(storageStatePath)) {
@@ -29,7 +28,7 @@ export default async function globalTeardown() {
     // Optional: remove trace or session dumps if needed
     // await fs.remove('test-results/setup-trace.zip');
 
-    logger.info("Global teardown completed.");
+    logger.info('Global teardown completed.');
   } catch (error) {
     logger.error(`Error during global teardown: ${error.message}`);
     process.exit(1); // Fail the teardown process if cleanup fails

@@ -1,5 +1,5 @@
 // src/utils/api/restUtils.js
-import logger from "../common/logger.js";
+import logger from '../common/logger.js';
 
 /**
  * Utility class for REST API operations with retry logic.
@@ -23,10 +23,7 @@ export default class RestUtils {
     while (attempt < maxRetries) {
       try {
         logger.debug(`Attempt ${attempt + 1} for ${method} ${endpoint}`);
-        const response = await this.request[method.toLowerCase()](
-          endpoint,
-          options
-        );
+        const response = await this.request[method.toLowerCase()](endpoint, options);
         return response;
       } catch (error) {
         attempt++;
@@ -36,9 +33,7 @@ export default class RestUtils {
           );
           throw error;
         }
-        logger.warn(
-          `Retry ${attempt} for ${method} ${endpoint}: ${error.message}`
-        );
+        logger.warn(`Retry ${attempt} for ${method} ${endpoint}: ${error.message}`);
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
@@ -52,9 +47,7 @@ export default class RestUtils {
   async batchRequests(requests) {
     try {
       const responses = await Promise.all(
-        requests.map((req) =>
-          this.requestWithRetry(req.method, req.endpoint, req.options)
-        )
+        requests.map((req) => this.requestWithRetry(req.method, req.endpoint, req.options))
       );
       logger.info(`Batch request completed with ${responses.length} responses`);
       return responses;

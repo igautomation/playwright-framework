@@ -11,7 +11,6 @@ import logger from '../utils/common/logger.js';
 
 // Extend Playwright's base test with custom fixtures
 const customTest = baseTest.extend({
-
   // Provide apiClient using injected request and .env configs
   apiClient: async ({ request }, use) => {
     // Ensure API_BASE_URL is defined
@@ -28,8 +27,10 @@ const customTest = baseTest.extend({
 
     const client = {
       get: async (endpoint, opts = {}) => rest.requestWithRetry('GET', endpoint, opts),
-      post: async (endpoint, body, opts = {}) => rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
-      put: async (endpoint, body, opts = {}) => rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
+      post: async (endpoint, body, opts = {}) =>
+        rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
+      put: async (endpoint, body, opts = {}) =>
+        rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
       delete: async (endpoint, opts = {}) => rest.requestWithRetry('DELETE', endpoint, opts)
     };
 

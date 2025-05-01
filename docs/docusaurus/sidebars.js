@@ -6,8 +6,8 @@ module.exports = {
       items: [
         'docusaurus/docs/intro',
         'docusaurus/docs/installation',
-        'docusaurus/docs/configuration',
-      ],
+        'docusaurus/docs/configuration'
+      ]
     },
     {
       type: 'category',
@@ -16,8 +16,8 @@ module.exports = {
         'docusaurus/docs/writing-tests',
         'docusaurus/docs/extending',
         'docusaurus/docs/ci-cd',
-        'docusaurus/docs/jira-xray',
-      ],
+        'docusaurus/docs/jira-xray'
+      ]
     },
     {
       type: 'category',
@@ -26,8 +26,8 @@ module.exports = {
         'docusaurus/docs/cli',
         'docusaurus/docs/utilities',
         'docusaurus/docs/page-objects',
-        'docusaurus/docs/pojos',
-      ],
-    },
-  ],
+        'docusaurus/docs/pojos'
+      ]
+    }
+  ]
 };

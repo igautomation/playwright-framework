@@ -11,15 +11,15 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.node,
-        ...globals.browser,
-      },
+        ...globals.browser
+      }
     },
     rules: {
       'no-unused-vars': 'warn',
       'no-console': 'off',
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'indent': ['error', 2],
-    },
-  },
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      indent: ['error', 2]
+    }
+  }
 ];

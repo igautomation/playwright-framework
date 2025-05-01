@@ -22,9 +22,7 @@ class TestSelector {
    * @returns {Array<string>} List of changed test file paths.
    */
   selectTestsByDiff(baseCommit, headCommit) {
-    console.log(
-      `Simulating test selection between ${baseCommit} and ${headCommit}`
-    );
+    console.log(`Simulating test selection between ${baseCommit} and ${headCommit}`);
 
     // Mock output: list of test files changed
     // To implement real behavior:
@@ -32,10 +30,7 @@ class TestSelector {
     // - Execute: `git diff --name-only baseCommit headCommit`
     // - Filter files ending with `.spec.js`
 
-    return [
-      "src/tests/ui/product-listing.spec.js",
-      "src/tests/api/product-list-api.spec.js",
-    ];
+    return ['src/tests/ui/product-listing.spec.js', 'src/tests/api/product-list-api.spec.js'];
   }
 }
 

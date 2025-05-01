@@ -15,8 +15,7 @@ class AuthUtils {
     this.apiKey = process.env.API_KEY || null;
     this.tokenUrl = process.env.OAUTH_TOKEN_URL || null;
     this.clientId = process.env.OAUTH_CLIENT_ID || process.env.XRAY_CLIENT_ID;
-    this.clientSecret =
-      process.env.OAUTH_CLIENT_SECRET || process.env.XRAY_CLIENT_SECRET;
+    this.clientSecret = process.env.OAUTH_CLIENT_SECRET || process.env.XRAY_CLIENT_SECRET;
     this.oauthToken = null;
   }
 
@@ -27,14 +26,14 @@ class AuthUtils {
   async getOAuthToken() {
     if (!this.tokenUrl || !this.clientId || !this.clientSecret) {
       throw new Error(
-        "Missing OAuth credentials. Ensure OAUTH_TOKEN_URL, CLIENT_ID, and CLIENT_SECRET are set in .env"
+        'Missing OAuth credentials. Ensure OAUTH_TOKEN_URL, CLIENT_ID, and CLIENT_SECRET are set in .env'
       );
     }
 
     const response = await fetch(this.tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`
     });
 
     if (!response.ok) {
@@ -53,11 +52,11 @@ class AuthUtils {
    */
   getApiKeyHeaders() {
     if (!this.apiKey) {
-      throw new Error("API_KEY not set. Define it in your .env file.");
+      throw new Error('API_KEY not set. Define it in your .env file.');
     }
 
     return {
-      "x-api-key": this.apiKey,
+      'x-api-key': this.apiKey
     };
   }
 
@@ -67,13 +66,11 @@ class AuthUtils {
    */
   getOAuthHeaders() {
     if (!this.oauthToken) {
-      throw new Error(
-        "OAuth token not initialized. Call getOAuthToken() first."
-      );
+      throw new Error('OAuth token not initialized. Call getOAuthToken() first.');
     }
 
     return {
-      Authorization: `Bearer ${this.oauthToken}`,
+      Authorization: `Bearer ${this.oauthToken}`
     };
   }
 }

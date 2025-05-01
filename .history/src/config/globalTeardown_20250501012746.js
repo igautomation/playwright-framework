@@ -13,8 +13,7 @@ import path from 'path';
 import logger from '../utils/common/logger.js';
 
 export default async function globalTeardown() {
-  const storageStatePath =
-    process.env.STORAGE_STATE || 'test-results/storageState.json';
+  const storageStatePath = process.env.STORAGE_STATE || 'test-results/storageState.json';
 
   logger.info('Global teardown started.');
 

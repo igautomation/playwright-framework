@@ -9,21 +9,20 @@
  * - Enable bulk test data creation for automation scripts
  */
 
-import { faker } from "@faker-js/faker";
-import { v4 as uuidv4 } from "uuid";
-import { promises as fs } from "fs";
-import yaml from "js-yaml";
-import { parse as parseCsv } from "csv-parse/sync";
+import { faker } from '@faker-js/faker';
+import { v4 as uuidv4 } from 'uuid';
+import { promises as fs } from 'fs';
+import yaml from 'js-yaml';
+import { parse as parseCsv } from 'csv-parse/sync';
 
 /**
  * Generates random user data for tests.
  */
 function generateUserData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
-  const getFirstName = () =>
-    faker.person?.firstName() || faker.name?.firstName();
+  const getFirstName = () => faker.person?.firstName() || faker.name?.firstName();
   const getLastName = () => faker.person?.lastName() || faker.name?.lastName();
 
   const defaultData = {
@@ -32,7 +31,7 @@ function generateUserData(overrides = {}) {
     lastName: getLastName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
-    username: faker.internet.username(),
+    username: faker.internet.username()
   };
 
   return { ...defaultData, ...overrides };
@@ -42,14 +41,14 @@ function generateUserData(overrides = {}) {
  * Generates random form input data for UI tests.
  */
 function generateFormData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
   const defaultData = {
     username: faker.internet.username(),
     password: faker.internet.password(8),
     email: faker.internet.email(),
-    phone: faker.phone.number(),
+    phone: faker.phone.number()
   };
   return { ...defaultData, ...overrides };
 }
@@ -58,12 +57,11 @@ function generateFormData(overrides = {}) {
  * Generates random contact data.
  */
 function generateContactData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
   const timestamp = Date.now();
-  const getFirstName = () =>
-    faker.person?.firstName() || faker.name?.firstName();
+  const getFirstName = () => faker.person?.firstName() || faker.name?.firstName();
   const getLastName = () => faker.person?.lastName() || faker.name?.lastName();
 
   const defaultData = {
@@ -71,8 +69,8 @@ function generateContactData(overrides = {}) {
     LastName: getLastName(),
     Email: `test-${timestamp}@example.com`,
     Phone: faker.phone.number(),
-    Title: "Test Contact",
-    Department: "QA",
+    Title: 'Test Contact',
+    Department: 'QA'
   };
   return { ...defaultData, ...overrides };
 }
@@ -81,16 +79,16 @@ function generateContactData(overrides = {}) {
  * Generates random account data.
  */
 function generateAccountData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
   const timestamp = Date.now();
   const defaultData = {
     Name: `TestAccount${timestamp}`,
     Phone: faker.phone.number(),
-    Industry: "Technology",
-    Type: "Customer",
-    Website: faker.internet.url(),
+    Industry: 'Technology',
+    Type: 'Customer',
+    Website: faker.internet.url()
   };
   return { ...defaultData, ...overrides };
 }
@@ -99,17 +97,15 @@ function generateAccountData(overrides = {}) {
  * Generates random opportunity data.
  */
 function generateOpportunityData(overrides = {}) {
-  if (typeof overrides !== "object") {
-    throw new Error("Overrides must be an object");
+  if (typeof overrides !== 'object') {
+    throw new Error('Overrides must be an object');
   }
   const timestamp = Date.now();
   const defaultData = {
     Name: `TestOpp${timestamp}`,
-    StageName: "Prospecting",
-    CloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0],
-    Amount: faker.finance.amount(1000, 10000),
+    StageName: 'Prospecting',
+    CloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    Amount: faker.finance.amount(1000, 10000)
   };
   return { ...defaultData, ...overrides };
 }
@@ -119,14 +115,14 @@ function generateOpportunityData(overrides = {}) {
  */
 async function loadTestData(path) {
   try {
-    const ext = path.split(".").pop().toLowerCase();
-    const data = await fs.readFile(path, "utf8");
+    const ext = path.split('.').pop().toLowerCase();
+    const data = await fs.readFile(path, 'utf8');
 
-    if (ext === "json") {
+    if (ext === 'json') {
       return JSON.parse(data);
-    } else if (ext === "yaml" || ext === "yml") {
+    } else if (ext === 'yaml' || ext === 'yml') {
       return yaml.load(data);
-    } else if (ext === "csv") {
+    } else if (ext === 'csv') {
       return parseCsv(data, { columns: true, skip_empty_lines: true });
     } else {
       throw new Error(`Unsupported file format: ${ext}`);
@@ -159,15 +155,13 @@ async function generateProductsToCsv(count, outputPath) {
       name: faker.commerce.productName(),
       price: faker.commerce.price(),
       category: faker.commerce.department(),
-      stock: faker.number.int({ min: 0, max: 100 }),
+      stock: faker.number.int({ min: 0, max: 100 })
     }));
 
     const csvData = [
-      "id,name,price,category,stock",
-      ...products.map(
-        (p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`
-      ),
-    ].join("\n");
+      'id,name,price,category,stock',
+      ...products.map((p) => `${p.id},${p.name},${p.price},${p.category},${p.stock}`)
+    ].join('\n');
 
     await fs.writeFile(outputPath, csvData);
   } catch (error) {
@@ -183,5 +177,5 @@ export {
   generateOpportunityData,
   loadTestData,
   generateUsersToFile,
-  generateProductsToCsv,
+  generateProductsToCsv
 };

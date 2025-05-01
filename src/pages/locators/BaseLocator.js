@@ -1,6 +1,6 @@
 // src/pages/locators/BaseLocator.js
 
-import { expect } from "@playwright/test";
+import { expect } from '@playwright/test';
 
 /**
  * Base class for managing self-healing and pattern-based locators

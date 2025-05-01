@@ -1,16 +1,15 @@
 // src/utils/reporting/reportUtils.js
 
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
-import logger from "../common/logger.js";
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import logger from '../common/logger.js';
 
 /**
  * Path configurations (can be overridden using .env)
  */
-const ALLURE_RESULTS_DIR = process.env.ALLURE_RESULTS_DIR || "reports/allure";
-const ALLURE_REPORT_DIR =
-  process.env.ALLURE_REPORT_DIR || "reports/allure-report";
+const ALLURE_RESULTS_DIR = process.env.ALLURE_RESULTS_DIR || 'reports/allure';
+const ALLURE_REPORT_DIR = process.env.ALLURE_REPORT_DIR || 'reports/allure-report';
 
 /**
  * Generates an Allure HTML report by reading raw results.
@@ -28,12 +27,9 @@ export function generateAllureReport() {
   }
 
   try {
-    execSync(
-      `npx allure generate ${resolvedResults} -o ${resolvedOutput} --clean`,
-      {
-        stdio: "inherit",
-      }
-    );
+    execSync(`npx allure generate ${resolvedResults} -o ${resolvedOutput} --clean`, {
+      stdio: 'inherit'
+    });
 
     logger.info(`Allure report generated at ${resolvedOutput}`);
   } catch (error) {
@@ -50,11 +46,7 @@ export function generateAllureReport() {
  * @param {string} name - Display name for the screenshot in the report
  * @param {object} testInfo - Playwright testInfo object (injected automatically)
  */
-export function attachScreenshot(
-  screenshotPath,
-  name = "Screenshot",
-  testInfo
-) {
+export function attachScreenshot(screenshotPath, name = 'Screenshot', testInfo) {
   const resolved = path.resolve(screenshotPath);
 
   if (!fs.existsSync(resolved)) {
@@ -66,7 +58,7 @@ export function attachScreenshot(
     const image = fs.readFileSync(resolved);
     testInfo.attach(name, {
       body: image,
-      contentType: "image/png",
+      contentType: 'image/png'
     });
 
     logger.info(`Attached screenshot to report: ${name}`);
@@ -83,11 +75,11 @@ export function attachScreenshot(
  * @param {string} name - Label in the report
  * @param {object} testInfo - Playwright testInfo object
  */
-export function attachLog(content, name = "Log", testInfo) {
+export function attachLog(content, name = 'Log', testInfo) {
   let body;
 
   if (!content) {
-    logger.warn("No log content provided for attachment");
+    logger.warn('No log content provided for attachment');
     return;
   }
 
@@ -95,12 +87,12 @@ export function attachLog(content, name = "Log", testInfo) {
     if (fs.existsSync(content)) {
       body = fs.readFileSync(content);
     } else {
-      body = Buffer.from(content, "utf-8");
+      body = Buffer.from(content, 'utf-8');
     }
 
     testInfo.attach(name, {
       body,
-      contentType: "text/plain",
+      contentType: 'text/plain'
     });
 
     logger.info(`Attached log: ${name}`);
@@ -120,12 +112,12 @@ export function attachLog(content, name = "Log", testInfo) {
  */
 export async function sendNotification(config) {
   if (!config || !config.webhookUrl || !config.message) {
-    logger.error("Missing webhookUrl or message in notification config");
+    logger.error('Missing webhookUrl or message in notification config');
     return;
   }
 
   try {
-    const fetch = (await import("node-fetch")).default;
+    const fetch = (await import('node-fetch')).default;
     const payload = { text: config.message };
 
     if (config.channel) {
@@ -133,18 +125,16 @@ export async function sendNotification(config) {
     }
 
     const response = await fetch(config.webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
-      throw new Error(
-        `Notification failed: ${response.status} ${response.statusText}`
-      );
+      throw new Error(`Notification failed: ${response.status} ${response.statusText}`);
     }
 
-    logger.info("Notification sent successfully");
+    logger.info('Notification sent successfully');
   } catch (error) {
     logger.error(`Notification error: ${error.message}`);
   }
@@ -159,7 +149,7 @@ export async function sendNotification(config) {
  */
 export async function writeMetadataFile(fileName, data) {
   try {
-    const outputPath = path.resolve("reports", fileName);
+    const outputPath = path.resolve('reports', fileName);
     fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
     logger.info(`Metadata file written: ${outputPath}`);
   } catch (error) {
@@ -173,5 +163,5 @@ export default {
   attachScreenshot,
   attachLog,
   sendNotification,
-  writeMetadataFile,
+  writeMetadataFile
 };

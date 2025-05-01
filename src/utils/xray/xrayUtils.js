@@ -10,17 +10,16 @@
  * - Import Gherkin .feature files into Jira
  */
 
-import { GraphQLClient, gql } from "graphql-request";
-import logger from "../common/logger.js";
-import AuthUtils from "../api/auth.js";
-import fs from "fs";
-import fetch from "node-fetch";
-import path from "path";
+import { GraphQLClient, gql } from 'graphql-request';
+import logger from '../common/logger.js';
+import AuthUtils from '../api/auth.js';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import path from 'path';
 
 class XrayUtils {
   constructor() {
-    this.apiBase =
-      process.env.XRAY_API_BASE_URL || "https://xray.cloud.getxray.app/api/v2";
+    this.apiBase = process.env.XRAY_API_BASE_URL || 'https://xray.cloud.getxray.app/api/v2';
     this.clientId = process.env.XRAY_CLIENT_ID;
     this.clientSecret = process.env.XRAY_CLIENT_SECRET;
     this.token = null;
@@ -38,10 +37,10 @@ class XrayUtils {
     );
 
     if (!this.token) {
-      throw new Error("Failed to authenticate with Xray. Token is null.");
+      throw new Error('Failed to authenticate with Xray. Token is null.');
     }
 
-    logger.info("Xray token retrieved successfully");
+    logger.info('Xray token retrieved successfully');
   }
 
   /**
@@ -55,7 +54,7 @@ class XrayUtils {
 
     const graphQLUrl = `${this.apiBase}/graphql`;
     const client = new GraphQLClient(graphQLUrl, {
-      headers: { Authorization: `Bearer ${this.token}` },
+      headers: { Authorization: `Bearer ${this.token}` }
     });
 
     const query = gql`
@@ -84,9 +83,7 @@ class XrayUtils {
     }
 
     if (!testExecutionKey || !Array.isArray(results)) {
-      throw new Error(
-        "Invalid input: testExecutionKey and results array are required."
-      );
+      throw new Error('Invalid input: testExecutionKey and results array are required.');
     }
 
     const payload = {
@@ -95,29 +92,27 @@ class XrayUtils {
         testKey: result.testKey,
         start: new Date(result.startTime).toISOString(),
         finish: new Date(result.endTime).toISOString(),
-        status: result.status === "passed" ? "PASS" : "FAIL",
-        comment: result.error || "",
-      })),
+        status: result.status === 'passed' ? 'PASS' : 'FAIL',
+        comment: result.error || ''
+      }))
     };
 
     const response = await fetch(`${this.apiBase}/import/execution`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${this.token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
       const text = await response.text();
-      logger.error(
-        `Failed to push results to Xray: ${response.statusText}\n${text}`
-      );
-      throw new Error("Xray result push failed");
+      logger.error(`Failed to push results to Xray: ${response.statusText}\n${text}`);
+      throw new Error('Xray result push failed');
     }
 
-    logger.info("Xray test execution results uploaded successfully");
+    logger.info('Xray test execution results uploaded successfully');
   }
 
   /**
@@ -134,30 +129,23 @@ class XrayUtils {
     }
 
     const fileName = path.basename(featurePath);
-    const fileContent = fs.readFileSync(featurePath, "utf8");
+    const fileContent = fs.readFileSync(featurePath, 'utf8');
 
-    const response = await fetch(
-      `${this.apiBase}/import/feature?projectKey=${projectKey}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-          "Content-Type": "text/plain",
-        },
-        body: fileContent,
-      }
-    );
+    const response = await fetch(`${this.apiBase}/import/feature?projectKey=${projectKey}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'text/plain'
+      },
+      body: fileContent
+    });
 
     if (!response.ok) {
-      logger.error(
-        `Failed to import Gherkin: ${response.status} ${response.statusText}`
-      );
-      throw new Error("Xray Gherkin import failed");
+      logger.error(`Failed to import Gherkin: ${response.status} ${response.statusText}`);
+      throw new Error('Xray Gherkin import failed');
     }
 
-    logger.info(
-      `Gherkin feature "${fileName}" imported to project ${projectKey}`
-    );
+    logger.info(`Gherkin feature "${fileName}" imported to project ${projectKey}`);
   }
 
   /**

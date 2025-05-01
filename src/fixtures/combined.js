@@ -9,8 +9,8 @@
  *   import { test, expect } from '../../../fixtures/combined.js';
  */
 
-import { expect } from "@playwright/test";
-import { customTest } from "./customFixtures.js";
+import { expect } from '@playwright/test';
+import { customTest } from './customFixtures.js';
 
 // Extend the base test from our custom fixtures (apiClient, retryDiagnostics, etc.)
 const test = customTest.extend({});

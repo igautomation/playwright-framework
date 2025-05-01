@@ -14,13 +14,13 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/igautomation/playwright-framework/edit/main/docs/',
+          editUrl: 'https://github.com/igautomation/playwright-framework/edit/main/docs/'
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
-        },
-      },
-    ],
+          customCss: require.resolve('./src/css/custom.css')
+        }
+      }
+    ]
   ],
   themeConfig: {
     navbar: {
@@ -29,8 +29,12 @@ module.exports = {
         { to: '/', label: 'Home', position: 'left' },
         { to: '/docusaurus/docs/intro', label: 'Docs', position: 'left' },
         { to: '/docusaurus/docs/api', label: 'API', position: 'left' },
-        { href: '/playwright-framework/static/user-guide.pdf', label: 'PDF Guide', position: 'right' },
-      ],
-    },
-  },
+        {
+          href: '/playwright-framework/static/user-guide.pdf',
+          label: 'PDF Guide',
+          position: 'right'
+        }
+      ]
+    }
+  }
 };

@@ -1,6 +1,6 @@
 // src/utils/ci/flakyTestTracker.js
 
-import { attachLog } from "../reporting/reportUtils.js";
+import { attachLog } from '../reporting/reportUtils.js';
 
 class FlakyTestTracker {
   constructor() {
@@ -13,11 +13,11 @@ class FlakyTestTracker {
     let results = this.testResults.get(testId) || {
       runs: 0,
       failures: 0,
-      isFlaky,
+      isFlaky
     };
 
     results.runs++;
-    if (testInfo.status !== "passed") {
+    if (testInfo.status !== 'passed') {
       results.failures++;
     }
 
@@ -26,7 +26,7 @@ class FlakyTestTracker {
     if (results.failures > 0 && results.runs > 1) {
       attachLog(
         `Flaky test detected: ${testInfo.title} (Failures: ${results.failures}/${results.runs})`,
-        "Flaky Test"
+        'Flaky Test'
       );
     }
   }

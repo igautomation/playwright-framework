@@ -25,14 +25,12 @@ const customTest = baseTest.extend({
     const rest = new RestUtils(request, baseUrl, headers);
 
     const client = {
-      get: async (endpoint, opts = {}) =>
-        rest.requestWithRetry('GET', endpoint, opts),
+      get: async (endpoint, opts = {}) => rest.requestWithRetry('GET', endpoint, opts),
       post: async (endpoint, body, opts = {}) =>
         rest.requestWithRetry('POST', endpoint, { ...opts, data: body }),
       put: async (endpoint, body, opts = {}) =>
         rest.requestWithRetry('PUT', endpoint, { ...opts, data: body }),
-      delete: async (endpoint, opts = {}) =>
-        rest.requestWithRetry('DELETE', endpoint, opts),
+      delete: async (endpoint, opts = {}) => rest.requestWithRetry('DELETE', endpoint, opts)
     };
 
     await use(client);
@@ -50,14 +48,10 @@ const customTest = baseTest.extend({
 
       try {
         await page.screenshot({ path: screenshotPath });
-        reportUtils.attachScreenshot(
-          screenshotPath,
-          `Attempt ${attempt}`,
-          testInfo
-        );
+        reportUtils.attachScreenshot(screenshotPath, `Attempt ${attempt}`, testInfo);
         await testInfo.attach('screenshot', {
           body: await page.screenshot(),
-          contentType: 'image/png',
+          contentType: 'image/png'
         });
       } catch (e) {
         logger.warn('Failed to capture retry screenshot: ' + e.message);
@@ -88,12 +82,12 @@ const customTest = baseTest.extend({
       username: process.env.USERNAME_SELECTOR || '#username',
       password: process.env.PASSWORD_SELECTOR || '#password',
       submit: process.env.SUBMIT_SELECTOR || '#submit',
-      dashboard: process.env.DASHBOARD_SELECTOR || '#dashboard',
+      dashboard: process.env.DASHBOARD_SELECTOR || '#dashboard'
     };
 
     const credentials = {
       username: process.env.LOGIN_USERNAME,
-      password: process.env.LOGIN_PASSWORD,
+      password: process.env.LOGIN_PASSWORD
     };
 
     if (!credentials.username || !credentials.password) {
@@ -111,7 +105,7 @@ const customTest = baseTest.extend({
       logger.error(`Authentication failed: ${error.message}`);
       throw error;
     }
-  },
+  }
 });
 
 // Export the extended test object

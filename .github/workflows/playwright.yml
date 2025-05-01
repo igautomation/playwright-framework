@@ -2,14 +2,13 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   schedule:
     - cron: '0 0 * * *'
 
 jobs:
-
   pre-checks:
     runs-on: ubuntu-latest
     steps:
@@ -59,14 +58,14 @@ jobs:
           echo "tests=$TESTS" >> $GITHUB_OUTPUT
 
   test:
-    needs: [ pre-checks, select-tests ]
+    needs: [pre-checks, select-tests]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        browser: [ chromium, firefox, webkit ]
-        environment: [ development, qa, uat, prod ]
-        shard: [ "1/3", "2/3", "3/3" ]
+        browser: [chromium, firefox, webkit]
+        environment: [development, qa, uat, prod]
+        shard: ['1/3', '2/3', '3/3']
     steps:
       - uses: actions/checkout@v3
 

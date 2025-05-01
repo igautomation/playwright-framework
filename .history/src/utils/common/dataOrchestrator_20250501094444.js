@@ -120,9 +120,4 @@ async function getHybridTestData() {
   };
 }
 
-export {
-  readYaml,
-  readXml,
-  readExcel,
-  getHybridTestData
-};
+export { readYaml, readXml, readExcel, getHybridTestData };

@@ -4,269 +4,232 @@
  * Modify the docusaurus.config.js file at your site's root instead.
  */
 export default {
-  "title": "Playwright Framework",
-  "tagline": "Enterprise-grade test automation with Playwright",
-  "url": "https://igautomation.github.io",
-  "baseUrl": "/playwright-framework/",
-  "onBrokenLinks": "throw",
-  "onBrokenMarkdownLinks": "warn",
-  "favicon": "img/favicon.ico",
-  "organizationName": "igautomation",
-  "projectName": "playwright-framework",
-  "presets": [
+  title: 'Playwright Framework',
+  tagline: 'Enterprise-grade test automation with Playwright',
+  url: 'https://igautomation.github.io',
+  baseUrl: '/playwright-framework/',
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'warn',
+  favicon: 'img/favicon.ico',
+  organizationName: 'igautomation',
+  projectName: 'playwright-framework',
+  presets: [
     [
-      "@docusaurus/preset-classic",
+      '@docusaurus/preset-classic',
       {
-        "docs": {
-          "sidebarPath": "/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/sidebars.js",
-          "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/"
+        docs: {
+          sidebarPath:
+            '/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/sidebars.js',
+          editUrl: 'https://github.com/igautomation/playwright-framework/edit/main/docs/'
         },
-        "theme": {
-          "customCss": "/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/src/css/custom.css"
+        theme: {
+          customCss:
+            '/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/src/css/custom.css'
         }
       }
     ]
   ],
-  "themeConfig": {
-    "navbar": {
-      "title": "Playwright Framework",
-      "items": [
+  themeConfig: {
+    navbar: {
+      title: 'Playwright Framework',
+      items: [
         {
-          "to": "/",
-          "label": "Home",
-          "position": "left"
+          to: '/',
+          label: 'Home',
+          position: 'left'
         },
         {
-          "to": "/docusaurus/docs/intro",
-          "label": "Docs",
-          "position": "left"
+          to: '/docusaurus/docs/intro',
+          label: 'Docs',
+          position: 'left'
         },
         {
-          "to": "/docusaurus/docs/api",
-          "label": "API",
-          "position": "left"
+          to: '/docusaurus/docs/api',
+          label: 'API',
+          position: 'left'
         },
         {
-          "href": "/playwright-framework/static/user-guide.pdf",
-          "label": "PDF Guide",
-          "position": "right"
+          href: '/playwright-framework/static/user-guide.pdf',
+          label: 'PDF Guide',
+          position: 'right'
         }
       ],
-      "hideOnScroll": false
+      hideOnScroll: false
     },
-    "colorMode": {
-      "defaultMode": "light",
-      "disableSwitch": false,
-      "respectPrefersColorScheme": false
+    colorMode: {
+      defaultMode: 'light',
+      disableSwitch: false,
+      respectPrefersColorScheme: false
     },
-    "docs": {
-      "versionPersistence": "localStorage",
-      "sidebar": {
-        "hideable": false,
-        "autoCollapseCategories": false
+    docs: {
+      versionPersistence: 'localStorage',
+      sidebar: {
+        hideable: false,
+        autoCollapseCategories: false
       }
     },
-    "blog": {
-      "sidebar": {
-        "groupByYear": true
+    blog: {
+      sidebar: {
+        groupByYear: true
       }
     },
-    "metadata": [],
-    "prism": {
-      "additionalLanguages": [],
-      "theme": {
-        "plain": {
-          "color": "#bfc7d5",
-          "backgroundColor": "#292d3e"
+    metadata: [],
+    prism: {
+      additionalLanguages: [],
+      theme: {
+        plain: {
+          color: '#bfc7d5',
+          backgroundColor: '#292d3e'
         },
-        "styles": [
+        styles: [
           {
-            "types": [
-              "comment"
-            ],
-            "style": {
-              "color": "rgb(105, 112, 152)",
-              "fontStyle": "italic"
+            types: ['comment'],
+            style: {
+              color: 'rgb(105, 112, 152)',
+              fontStyle: 'italic'
             }
           },
           {
-            "types": [
-              "string",
-              "inserted"
-            ],
-            "style": {
-              "color": "rgb(195, 232, 141)"
+            types: ['string', 'inserted'],
+            style: {
+              color: 'rgb(195, 232, 141)'
             }
           },
           {
-            "types": [
-              "number"
-            ],
-            "style": {
-              "color": "rgb(247, 140, 108)"
+            types: ['number'],
+            style: {
+              color: 'rgb(247, 140, 108)'
             }
           },
           {
-            "types": [
-              "builtin",
-              "char",
-              "constant",
-              "function"
-            ],
-            "style": {
-              "color": "rgb(130, 170, 255)"
+            types: ['builtin', 'char', 'constant', 'function'],
+            style: {
+              color: 'rgb(130, 170, 255)'
             }
           },
           {
-            "types": [
-              "punctuation",
-              "selector"
-            ],
-            "style": {
-              "color": "rgb(199, 146, 234)"
+            types: ['punctuation', 'selector'],
+            style: {
+              color: 'rgb(199, 146, 234)'
             }
           },
           {
-            "types": [
-              "variable"
-            ],
-            "style": {
-              "color": "rgb(191, 199, 213)"
+            types: ['variable'],
+            style: {
+              color: 'rgb(191, 199, 213)'
             }
           },
           {
-            "types": [
-              "class-name",
-              "attr-name"
-            ],
-            "style": {
-              "color": "rgb(255, 203, 107)"
+            types: ['class-name', 'attr-name'],
+            style: {
+              color: 'rgb(255, 203, 107)'
             }
           },
           {
-            "types": [
-              "tag",
-              "deleted"
-            ],
-            "style": {
-              "color": "rgb(255, 85, 114)"
+            types: ['tag', 'deleted'],
+            style: {
+              color: 'rgb(255, 85, 114)'
             }
           },
           {
-            "types": [
-              "operator"
-            ],
-            "style": {
-              "color": "rgb(137, 221, 255)"
+            types: ['operator'],
+            style: {
+              color: 'rgb(137, 221, 255)'
             }
           },
           {
-            "types": [
-              "boolean"
-            ],
-            "style": {
-              "color": "rgb(255, 88, 116)"
+            types: ['boolean'],
+            style: {
+              color: 'rgb(255, 88, 116)'
             }
           },
           {
-            "types": [
-              "keyword"
-            ],
-            "style": {
-              "fontStyle": "italic"
+            types: ['keyword'],
+            style: {
+              fontStyle: 'italic'
             }
           },
           {
-            "types": [
-              "doctype"
-            ],
-            "style": {
-              "color": "rgb(199, 146, 234)",
-              "fontStyle": "italic"
+            types: ['doctype'],
+            style: {
+              color: 'rgb(199, 146, 234)',
+              fontStyle: 'italic'
             }
           },
           {
-            "types": [
-              "namespace"
-            ],
-            "style": {
-              "color": "rgb(178, 204, 214)"
+            types: ['namespace'],
+            style: {
+              color: 'rgb(178, 204, 214)'
             }
           },
           {
-            "types": [
-              "url"
-            ],
-            "style": {
-              "color": "rgb(221, 221, 221)"
+            types: ['url'],
+            style: {
+              color: 'rgb(221, 221, 221)'
             }
           }
         ]
       },
-      "magicComments": [
+      magicComments: [
         {
-          "className": "theme-code-block-highlighted-line",
-          "line": "highlight-next-line",
-          "block": {
-            "start": "highlight-start",
-            "end": "highlight-end"
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {
+            start: 'highlight-start',
+            end: 'highlight-end'
           }
         }
       ]
     },
-    "tableOfContents": {
-      "minHeadingLevel": 2,
-      "maxHeadingLevel": 3
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 3
     }
   },
-  "baseUrlIssueBanner": true,
-  "i18n": {
-    "defaultLocale": "en",
-    "path": "i18n",
-    "locales": [
-      "en"
-    ],
-    "localeConfigs": {}
+  baseUrlIssueBanner: true,
+  i18n: {
+    defaultLocale: 'en',
+    path: 'i18n',
+    locales: ['en'],
+    localeConfigs: {}
   },
-  "future": {
-    "experimental_faster": {
-      "swcJsLoader": false,
-      "swcJsMinimizer": false,
-      "swcHtmlMinimizer": false,
-      "lightningCssMinimizer": false,
-      "mdxCrossCompilerCache": false,
-      "rspackBundler": false
+  future: {
+    experimental_faster: {
+      swcJsLoader: false,
+      swcJsMinimizer: false,
+      swcHtmlMinimizer: false,
+      lightningCssMinimizer: false,
+      mdxCrossCompilerCache: false,
+      rspackBundler: false
     },
-    "experimental_storage": {
-      "type": "localStorage",
-      "namespace": false
+    experimental_storage: {
+      type: 'localStorage',
+      namespace: false
     },
-    "experimental_router": "browser"
+    experimental_router: 'browser'
   },
-  "onBrokenAnchors": "warn",
-  "onDuplicateRoutes": "warn",
-  "staticDirectories": [
-    "static"
-  ],
-  "customFields": {},
-  "plugins": [],
-  "themes": [],
-  "scripts": [],
-  "headTags": [],
-  "stylesheets": [],
-  "clientModules": [],
-  "titleDelimiter": "|",
-  "noIndex": false,
-  "markdown": {
-    "format": "mdx",
-    "mermaid": false,
-    "mdx1Compat": {
-      "comments": true,
-      "admonitions": true,
-      "headingIds": true
+  onBrokenAnchors: 'warn',
+  onDuplicateRoutes: 'warn',
+  staticDirectories: ['static'],
+  customFields: {},
+  plugins: [],
+  themes: [],
+  scripts: [],
+  headTags: [],
+  stylesheets: [],
+  clientModules: [],
+  titleDelimiter: '|',
+  noIndex: false,
+  markdown: {
+    format: 'mdx',
+    mermaid: false,
+    mdx1Compat: {
+      comments: true,
+      admonitions: true,
+      headingIds: true
     },
-    "anchors": {
-      "maintainCase": false
+    anchors: {
+      maintainCase: false
     }
   }
 };

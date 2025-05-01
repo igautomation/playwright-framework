@@ -10,10 +10,7 @@ import { config as loadEnv } from 'dotenv-safe';
 
 // Internal utilities and helpers
 import logger from '../utils/common/logger.js';
-import {
-  generateUsersToFile,
-  generateProductsToCsv,
-} from '../utils/common/testDataFactory.js';
+import { generateUsersToFile, generateProductsToCsv } from '../utils/common/testDataFactory.js';
 import XrayUtils from '../utils/xray/xrayUtils.js';
 import reportUtils from '../utils/reporting/reportUtils.js';
 import SetupUtils from '../utils/setup/setupUtils.js';
@@ -30,8 +27,7 @@ const flakyTracker = new FlakyTestTracker();
 const ciUtils = new CIUtils();
 const xrayClient = new XrayUtils();
 const setupUtils = new SetupUtils();
-const { generateAllureReport, attachScreenshot, attachLog, sendNotification } =
-  reportUtils;
+const { generateAllureReport, attachScreenshot, attachLog, sendNotification } = reportUtils;
 
 // Load .env file based on current NODE_ENV
 function loadEnvironmentVariables(projectDir) {
@@ -41,12 +37,12 @@ function loadEnvironmentVariables(projectDir) {
     loadEnv({
       allowEmptyValues: true,
       example: path.join(projectDir, '.env.example'),
-      path: path.join(projectDir, `src/config/env/${envFileName}.env`),
+      path: path.join(projectDir, `src/config/env/${envFileName}.env`)
     });
 
     loadEnv({
       allowEmptyValues: true,
-      example: path.join(projectDir, '.env.example'),
+      example: path.join(projectDir, '.env.example')
     });
 
     if (!process.env.BASE_URL) {
@@ -73,7 +69,7 @@ function loadEnvironmentVariables(projectDir) {
           return yargs.option('dir', {
             describe: 'Directory to scaffold',
             type: 'string',
-            default: 'playwright-project',
+            default: 'playwright-project'
           });
         },
         async (argv) => {
@@ -91,12 +87,12 @@ function loadEnvironmentVariables(projectDir) {
             .option('tags', { describe: 'Tags to filter', type: 'string' })
             .option('headed', {
               describe: 'Run browser headed',
-              type: 'boolean',
+              type: 'boolean'
             })
             .option('project', { describe: 'Project(s)', type: 'array' })
             .option('workers', {
               describe: 'Number of workers',
-              type: 'string',
+              type: 'string'
             })
             .option('retries', { describe: 'Retry count', type: 'number' });
         },
@@ -112,7 +108,7 @@ function loadEnvironmentVariables(projectDir) {
           return yargs
             .option('type', {
               choices: ['users', 'products'],
-              demandOption: true,
+              demandOption: true
             })
             .option('count', { type: 'number', default: 10 })
             .option('output', { type: 'string', demandOption: true });
@@ -132,10 +128,7 @@ function loadEnvironmentVariables(projectDir) {
         const tags = new Set();
         files.forEach((file) => {
           if (typeof file === 'string' && file.endsWith('.spec.js')) {
-            const content = fs.readFileSync(
-              path.join('src/tests', file),
-              'utf-8'
-            );
+            const content = fs.readFileSync(path.join('src/tests', file), 'utf-8');
             const matches = content.match(/@\w+/g);
             if (matches) matches.forEach((tag) => tags.add(tag));
           }
@@ -143,46 +136,31 @@ function loadEnvironmentVariables(projectDir) {
         logger.info('Available Tags:\n' + [...tags].sort().join('\n'));
       })
 
-      .command(
-        'push-to-xray <testExecutionKey>',
-        'Push results to Xray',
-        {},
-        async (argv) => {
-          await xrayClient.authenticate();
-          const dummyResults = [
-            {
-              testKey: 'TEST-123',
-              status: 'passed',
-              startTime: Date.now(),
-              endTime: Date.now(),
-            },
-          ];
-          await xrayClient.pushExecutionResults(
-            argv.testExecutionKey,
-            dummyResults
-          );
-          logger.info('Results pushed to Xray.');
-        }
-      )
+      .command('push-to-xray <testExecutionKey>', 'Push results to Xray', {}, async (argv) => {
+        await xrayClient.authenticate();
+        const dummyResults = [
+          {
+            testKey: 'TEST-123',
+            status: 'passed',
+            startTime: Date.now(),
+            endTime: Date.now()
+          }
+        ];
+        await xrayClient.pushExecutionResults(argv.testExecutionKey, dummyResults);
+        logger.info('Results pushed to Xray.');
+      })
 
-      .command(
-        'select-tests [baseCommit] [headCommit]',
-        'Select tests by Git diff',
-        {},
-        (argv) => {
-          const selected = testSelector.selectTestsByDiff(
-            argv.baseCommit || 'origin/main',
-            argv.headCommit || 'HEAD'
-          );
-          logger.info('Selected Tests:\n' + JSON.stringify(selected, null, 2));
-        }
-      )
+      .command('select-tests [baseCommit] [headCommit]', 'Select tests by Git diff', {}, (argv) => {
+        const selected = testSelector.selectTestsByDiff(
+          argv.baseCommit || 'origin/main',
+          argv.headCommit || 'HEAD'
+        );
+        logger.info('Selected Tests:\n' + JSON.stringify(selected, null, 2));
+      })
 
       .command('quarantine-flaky', 'Mark flaky tests', {}, () => {
         const quarantined = flakyTracker.quarantineFlakyTests();
-        logger.info(
-          'Quarantined Tests:\n' + JSON.stringify(quarantined, null, 2)
-        );
+        logger.info('Quarantined Tests:\n' + JSON.stringify(quarantined, null, 2));
       })
 
       .command('generate-report', 'Generate Allure report', {}, () => {
@@ -190,44 +168,29 @@ function loadEnvironmentVariables(projectDir) {
         logger.info('Allure report generated.');
       })
 
-      .command(
-        'notify <webhookUrl> <message> [channel]',
-        'Send notification',
-        {},
-        async (argv) => {
-          await sendNotification({
-            webhookUrl: argv.webhookUrl,
-            message: argv.message,
-            channel: argv.channel,
-          });
-          logger.info('Notification sent.');
-        }
-      )
+      .command('notify <webhookUrl> <message> [channel]', 'Send notification', {}, async (argv) => {
+        await sendNotification({
+          webhookUrl: argv.webhookUrl,
+          message: argv.message,
+          channel: argv.channel
+        });
+        logger.info('Notification sent.');
+      })
 
-      .command(
-        'install-vscode',
-        'Install Playwright VS Code extension',
-        {},
-        () => {
-          setupUtils.installPlaywrightVSCode();
-          logger.info('VS Code Playwright extension installed.');
-        }
-      )
+      .command('install-vscode', 'Install Playwright VS Code extension', {}, () => {
+        setupUtils.installPlaywrightVSCode();
+        logger.info('VS Code Playwright extension installed.');
+      })
 
       .command('configure-retry <retries>', 'Configure retries', {}, (argv) => {
         setupUtils.configureRetry(argv.retries);
         logger.info(`Retries configured: ${argv.retries}`);
       })
 
-      .command(
-        'git-clone <repoUrl> [destPath]',
-        'Clone Git repo',
-        {},
-        (argv) => {
-          ciUtils.git.clone(argv.repoUrl, argv.destPath);
-          logger.info('Repository cloned.');
-        }
-      )
+      .command('git-clone <repoUrl> [destPath]', 'Clone Git repo', {}, (argv) => {
+        ciUtils.git.clone(argv.repoUrl, argv.destPath);
+        logger.info('Repository cloned.');
+      })
 
       .command('git-status [repoPath]', 'Git status', {}, (argv) => {
         logger.info(ciUtils.git.status(argv.repoPath));
@@ -248,19 +211,14 @@ function loadEnvironmentVariables(projectDir) {
         logger.info('Git push completed.');
       })
 
-      .command(
-        'setup-ci <repoUrl> [branch] [repoPath]',
-        'Setup CI environment',
-        {},
-        (argv) => {
-          ciUtils.setupCiEnvironment({
-            repoUrl: argv.repoUrl,
-            branch: argv.branch,
-            repoPath: argv.repoPath,
-          });
-          logger.info('CI environment setup completed.');
-        }
-      )
+      .command('setup-ci <repoUrl> [branch] [repoPath]', 'Setup CI environment', {}, (argv) => {
+        ciUtils.setupCiEnvironment({
+          repoUrl: argv.repoUrl,
+          branch: argv.branch,
+          repoPath: argv.repoPath
+        });
+        logger.info('CI environment setup completed.');
+      })
 
       .demandCommand()
       .help().argv;

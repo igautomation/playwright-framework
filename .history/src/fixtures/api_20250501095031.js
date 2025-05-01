@@ -63,10 +63,4 @@ async function del(context, endpoint, headers = {}) {
 }
 
 // Export all API helpers
-export {
-  createRequestContext,
-  get,
-  post,
-  put,
-  del
-};
+export { createRequestContext, get, post, put, del };

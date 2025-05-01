@@ -1,11 +1,11 @@
 // src/utils/api/restUtils.js
 
-import logger from "../common/logger.js";
+import logger from '../common/logger.js';
 
 class RestUtils {
   constructor(request, baseURL, defaultHeaders = {}) {
     if (!request || !baseURL) {
-      throw new Error("Request object and baseURL are required for RestUtils");
+      throw new Error('Request object and baseURL are required for RestUtils');
     }
 
     this.request = request;
@@ -28,22 +28,22 @@ class RestUtils {
 
       const context = await this.request.newContext({
         baseURL: this.baseURL,
-        extraHTTPHeaders: headers,
+        extraHTTPHeaders: headers
       });
 
       let response;
 
       switch (method.toUpperCase()) {
-        case "GET":
+        case 'GET':
           response = await context.get(endpoint);
           break;
-        case "POST":
+        case 'POST':
           response = await context.post(endpoint, { data: payload });
           break;
-        case "PUT":
+        case 'PUT':
           response = await context.put(endpoint, { data: payload });
           break;
-        case "DELETE":
+        case 'DELETE':
           response = await context.delete(endpoint);
           break;
         default:
@@ -52,9 +52,7 @@ class RestUtils {
 
       return response;
     } catch (error) {
-      logger.error(
-        `REST call failed: ${method} ${endpoint} - ${error.message}`
-      );
+      logger.error(`REST call failed: ${method} ${endpoint} - ${error.message}`);
       throw error;
     }
   }

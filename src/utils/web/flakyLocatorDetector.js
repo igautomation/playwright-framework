@@ -9,7 +9,7 @@
  * - Report flaky locators based on failure rates
  */
 
-import ReportUtils from "../reporting/reportUtils.js";
+import ReportUtils from '../reporting/reportUtils.js';
 
 class FlakyLocatorDetector {
   /**
@@ -17,7 +17,7 @@ class FlakyLocatorDetector {
    */
   constructor(page) {
     if (!page) {
-      throw new Error("Page object is required");
+      throw new Error('Page object is required');
     }
     this.page = page;
     this.report = new ReportUtils();
@@ -33,8 +33,8 @@ class FlakyLocatorDetector {
    * @throws {Error} If action fails after retries.
    */
   async trackLocator(locator, action) {
-    if (!locator || typeof action !== "function") {
-      throw new Error("Locator and action are required");
+    if (!locator || typeof action !== 'function') {
+      throw new Error('Locator and action are required');
     }
 
     const key = locator;
@@ -51,7 +51,7 @@ class FlakyLocatorDetector {
 
       this.report.attachLog(
         `Flaky locator detected: ${locator} (Failures: ${attempts.failures}/${attempts.count})`,
-        "Flaky Locator"
+        'Flaky Locator'
       );
 
       throw new Error(`Locator action failed: ${error.message}`);
@@ -70,7 +70,7 @@ class FlakyLocatorDetector {
       if (failures > 0) {
         flaky.push({
           locator,
-          failureRate: (failures / count) * 100,
+          failureRate: (failures / count) * 100
         });
       }
     }

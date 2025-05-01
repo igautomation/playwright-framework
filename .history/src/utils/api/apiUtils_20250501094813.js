@@ -31,12 +31,7 @@ class ApiUtils {
    * Supports GET, POST, PUT, DELETE.
    */
   async sendRequest(method, endpoint, options = {}) {
-    const {
-      payload,
-      headers = {},
-      queryParams = {},
-      delay
-    } = options;
+    const { payload, headers = {}, queryParams = {}, delay } = options;
 
     const finalUrl = delay ? `${endpoint}?delay=${delay}` : endpoint;
     const body = payload ? JSON.stringify(payload) : null;
@@ -64,7 +59,6 @@ class ApiUtils {
         body: responseBody,
         headers: responseHeaders
       };
-
     } catch (error) {
       logger.error(`Request failed: ${method} ${finalUrl} - ${error.message}`);
       throw new Error(`API request failed: ${method} ${finalUrl} - ${error.message}`);
@@ -78,9 +72,7 @@ class ApiUtils {
     const validate = ajv.compile(schema);
 
     if (!validate(data)) {
-      const errors = validate.errors.map(
-        (err) => `${err.instancePath || 'root'} ${err.message}`
-      );
+      const errors = validate.errors.map((err) => `${err.instancePath || 'root'} ${err.message}`);
 
       logger.error(`Schema validation failed for ${endpoint}: ${errors.join(', ')}`);
       throw new Error(`Schema validation failed for ${endpoint}: ${errors.join(', ')}`);
@@ -112,15 +104,23 @@ class ApiUtils {
     const { status, headers } = response;
 
     if (status !== expectedStatus) {
-      logger.error(`Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`);
-      throw new Error(`Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`);
+      logger.error(
+        `Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`
+      );
+      throw new Error(
+        `Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`
+      );
     }
 
     for (const [key, expected] of Object.entries(expectedHeaders)) {
       const actual = headers[key.toLowerCase()];
       if (actual !== expected) {
-        logger.error(`Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`);
-        throw new Error(`Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`);
+        logger.error(
+          `Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`
+        );
+        throw new Error(
+          `Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`
+        );
       }
     }
 

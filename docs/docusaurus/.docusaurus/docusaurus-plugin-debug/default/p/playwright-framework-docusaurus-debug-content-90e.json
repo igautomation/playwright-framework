@@ -1,1 +1,351 @@
-{"allContent":{"docusaurus-plugin-content-docs":{"default":{"loadedVersions":[{"versionName":"current","label":"Next","banner":null,"badge":false,"noIndex":false,"className":"docs-version-current","path":"/playwright-framework/docs","tagsPath":"/playwright-framework/docs/tags","editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs","editUrlLocalized":"https://github.com/igautomation/playwright-framework/edit/main/docs/i18n/en/docusaurus-plugin-content-docs/current","isLast":true,"routePriority":-1,"sidebarFilePath":"/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/sidebars.js","contentPath":"/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/docs","contentPathLocalized":"/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/i18n/en/docusaurus-plugin-content-docs/current","docs":[{"id":"docusaurus/docs/ci-cd","title":"CI/CD\\nSet up GitHub Actions and Jenkins.","description":"","source":"@site/docs/docusaurus/docs/ci-cd.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/ci-cd","permalink":"/playwright-framework/docs/docusaurus/docs/ci-cd","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/ci-cd.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Extending\\nAdd custom page objects in .","permalink":"/playwright-framework/docs/docusaurus/docs/extending"},"next":{"title":"Jira/Xray\\nIntegrate with Xray for test management.","permalink":"/playwright-framework/docs/docusaurus/docs/jira-xray"}},{"id":"docusaurus/docs/cli","title":"CLI\\nUse Error: No tests found to execute tests.","description":"","source":"@site/docs/docusaurus/docs/cli.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/cli","permalink":"/playwright-framework/docs/docusaurus/docs/cli","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/cli.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Jira/Xray\\nIntegrate with Xray for test management.","permalink":"/playwright-framework/docs/docusaurus/docs/jira-xray"},"next":{"title":"Utilities\\nReusable utilities in .","permalink":"/playwright-framework/docs/docusaurus/docs/utilities"}},{"id":"docusaurus/docs/configuration","title":"Configuration\\nConfigure  and .","description":"","source":"@site/docs/docusaurus/docs/configuration.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/configuration","permalink":"/playwright-framework/docs/docusaurus/docs/configuration","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/configuration.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Installation\\nInstall with .","permalink":"/playwright-framework/docs/docusaurus/docs/installation"},"next":{"title":"Writing Tests\\nUse POM for UI and POJOs for API.","permalink":"/playwright-framework/docs/docusaurus/docs/writing-tests"}},{"id":"docusaurus/docs/extending","title":"Extending\\nAdd custom page objects in .","description":"","source":"@site/docs/docusaurus/docs/extending.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/extending","permalink":"/playwright-framework/docs/docusaurus/docs/extending","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/extending.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Writing Tests\\nUse POM for UI and POJOs for API.","permalink":"/playwright-framework/docs/docusaurus/docs/writing-tests"},"next":{"title":"CI/CD\\nSet up GitHub Actions and Jenkins.","permalink":"/playwright-framework/docs/docusaurus/docs/ci-cd"}},{"id":"docusaurus/docs/installation","title":"Installation\\nInstall with .","description":"","source":"@site/docs/docusaurus/docs/installation.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/installation","permalink":"/playwright-framework/docs/docusaurus/docs/installation","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/installation.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Introduction\\nWelcome to the Playwright Framework.","permalink":"/playwright-framework/docs/docusaurus/docs/intro"},"next":{"title":"Configuration\\nConfigure  and .","permalink":"/playwright-framework/docs/docusaurus/docs/configuration"}},{"id":"docusaurus/docs/intro","title":"Introduction\\nWelcome to the Playwright Framework.","description":"","source":"@site/docs/docusaurus/docs/intro.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/intro","permalink":"/playwright-framework/docs/docusaurus/docs/intro","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/intro.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","next":{"title":"Installation\\nInstall with .","permalink":"/playwright-framework/docs/docusaurus/docs/installation"}},{"id":"docusaurus/docs/jira-xray","title":"Jira/Xray\\nIntegrate with Xray for test management.","description":"","source":"@site/docs/docusaurus/docs/jira-xray.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/jira-xray","permalink":"/playwright-framework/docs/docusaurus/docs/jira-xray","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/jira-xray.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"CI/CD\\nSet up GitHub Actions and Jenkins.","permalink":"/playwright-framework/docs/docusaurus/docs/ci-cd"},"next":{"title":"CLI\\nUse Error: No tests found to execute tests.","permalink":"/playwright-framework/docs/docusaurus/docs/cli"}},{"id":"docusaurus/docs/page-objects","title":"Page Objects\\nFollow POM best practices.","description":"","source":"@site/docs/docusaurus/docs/page-objects.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/page-objects","permalink":"/playwright-framework/docs/docusaurus/docs/page-objects","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/page-objects.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Utilities\\nReusable utilities in .","permalink":"/playwright-framework/docs/docusaurus/docs/utilities"},"next":{"title":"POJOs\\nUse POJOs for API testing.","permalink":"/playwright-framework/docs/docusaurus/docs/pojos"}},{"id":"docusaurus/docs/pojos","title":"POJOs\\nUse POJOs for API testing.","description":"","source":"@site/docs/docusaurus/docs/pojos.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/pojos","permalink":"/playwright-framework/docs/docusaurus/docs/pojos","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/pojos.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Page Objects\\nFollow POM best practices.","permalink":"/playwright-framework/docs/docusaurus/docs/page-objects"}},{"id":"docusaurus/docs/utilities","title":"Utilities\\nReusable utilities in .","description":"","source":"@site/docs/docusaurus/docs/utilities.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/utilities","permalink":"/playwright-framework/docs/docusaurus/docs/utilities","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/utilities.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"CLI\\nUse Error: No tests found to execute tests.","permalink":"/playwright-framework/docs/docusaurus/docs/cli"},"next":{"title":"Page Objects\\nFollow POM best practices.","permalink":"/playwright-framework/docs/docusaurus/docs/page-objects"}},{"id":"docusaurus/docs/writing-tests","title":"Writing Tests\\nUse POM for UI and POJOs for API.","description":"","source":"@site/docs/docusaurus/docs/writing-tests.md","sourceDirName":"docusaurus/docs","slug":"/docusaurus/docs/writing-tests","permalink":"/playwright-framework/docs/docusaurus/docs/writing-tests","draft":false,"unlisted":false,"editUrl":"https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/writing-tests.md","tags":[],"version":"current","frontMatter":{},"sidebar":"docs","previous":{"title":"Configuration\\nConfigure  and .","permalink":"/playwright-framework/docs/docusaurus/docs/configuration"},"next":{"title":"Extending\\nAdd custom page objects in .","permalink":"/playwright-framework/docs/docusaurus/docs/extending"}}],"drafts":[],"sidebars":{"docs":[{"type":"category","label":"Getting Started","items":[{"type":"doc","id":"docusaurus/docs/intro"},{"type":"doc","id":"docusaurus/docs/installation"},{"type":"doc","id":"docusaurus/docs/configuration"}],"collapsed":true,"collapsible":true},{"type":"category","label":"Guides","items":[{"type":"doc","id":"docusaurus/docs/writing-tests"},{"type":"doc","id":"docusaurus/docs/extending"},{"type":"doc","id":"docusaurus/docs/ci-cd"},{"type":"doc","id":"docusaurus/docs/jira-xray"}],"collapsed":true,"collapsible":true},{"type":"category","label":"API","items":[{"type":"doc","id":"docusaurus/docs/cli"},{"type":"doc","id":"docusaurus/docs/utilities"},{"type":"doc","id":"docusaurus/docs/page-objects"},{"type":"doc","id":"docusaurus/docs/pojos"}],"collapsed":true,"collapsible":true}]}}]}},"docusaurus-plugin-content-blog":{"default":{"blogSidebarTitle":"Recent posts","blogPosts":[],"blogListPaginated":[],"blogTags":{},"blogTagsListPath":"/playwright-framework/blog/tags"}},"docusaurus-plugin-content-pages":{"default":[{"type":"mdx","permalink":"/playwright-framework/","source":"@site/src/pages/index.md","title":"Welcome to Playwright Framework\\nThis is an enterprise-grade test automation framework built with Playwright.","frontMatter":{},"unlisted":false}]},"docusaurus-plugin-debug":{},"docusaurus-plugin-svgr":{},"docusaurus-theme-classic":{},"docusaurus-bootstrap-plugin":{},"docusaurus-mdx-fallback-plugin":{}}}
+{
+  "allContent": {
+    "docusaurus-plugin-content-docs": {
+      "default": {
+        "loadedVersions": [
+          {
+            "versionName": "current",
+            "label": "Next",
+            "banner": null,
+            "badge": false,
+            "noIndex": false,
+            "className": "docs-version-current",
+            "path": "/playwright-framework/docs",
+            "tagsPath": "/playwright-framework/docs/tags",
+            "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs",
+            "editUrlLocalized": "https://github.com/igautomation/playwright-framework/edit/main/docs/i18n/en/docusaurus-plugin-content-docs/current",
+            "isLast": true,
+            "routePriority": -1,
+            "sidebarFilePath": "/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/sidebars.js",
+            "contentPath": "/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/docs",
+            "contentPathLocalized": "/Users/mzahirudeen/Desktop/AgentSync/playwright_test_automation_framework/docs/docusaurus/i18n/en/docusaurus-plugin-content-docs/current",
+            "docs": [
+              {
+                "id": "docusaurus/docs/ci-cd",
+                "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/ci-cd.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/ci-cd",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/ci-cd.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Extending\\nAdd custom page objects in .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/extending"
+                },
+                "next": {
+                  "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray"
+                }
+              },
+              {
+                "id": "docusaurus/docs/cli",
+                "title": "CLI\\nUse Error: No tests found to execute tests.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/cli.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/cli",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/cli",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/cli.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray"
+                },
+                "next": {
+                  "title": "Utilities\\nReusable utilities in .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/utilities"
+                }
+              },
+              {
+                "id": "docusaurus/docs/configuration",
+                "title": "Configuration\\nConfigure  and .",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/configuration.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/configuration",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/configuration",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/configuration.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Installation\\nInstall with .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/installation"
+                },
+                "next": {
+                  "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/writing-tests"
+                }
+              },
+              {
+                "id": "docusaurus/docs/extending",
+                "title": "Extending\\nAdd custom page objects in .",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/extending.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/extending",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/extending",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/extending.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/writing-tests"
+                },
+                "next": {
+                  "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd"
+                }
+              },
+              {
+                "id": "docusaurus/docs/installation",
+                "title": "Installation\\nInstall with .",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/installation.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/installation",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/installation",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/installation.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Introduction\\nWelcome to the Playwright Framework.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/intro"
+                },
+                "next": {
+                  "title": "Configuration\\nConfigure  and .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/configuration"
+                }
+              },
+              {
+                "id": "docusaurus/docs/intro",
+                "title": "Introduction\\nWelcome to the Playwright Framework.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/intro.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/intro",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/intro",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/intro.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "next": {
+                  "title": "Installation\\nInstall with .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/installation"
+                }
+              },
+              {
+                "id": "docusaurus/docs/jira-xray",
+                "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/jira-xray.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/jira-xray",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/jira-xray",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/jira-xray.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/ci-cd"
+                },
+                "next": {
+                  "title": "CLI\\nUse Error: No tests found to execute tests.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/cli"
+                }
+              },
+              {
+                "id": "docusaurus/docs/page-objects",
+                "title": "Page Objects\\nFollow POM best practices.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/page-objects.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/page-objects",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/page-objects",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/page-objects.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Utilities\\nReusable utilities in .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/utilities"
+                },
+                "next": {
+                  "title": "POJOs\\nUse POJOs for API testing.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/pojos"
+                }
+              },
+              {
+                "id": "docusaurus/docs/pojos",
+                "title": "POJOs\\nUse POJOs for API testing.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/pojos.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/pojos",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/pojos",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/pojos.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Page Objects\\nFollow POM best practices.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/page-objects"
+                }
+              },
+              {
+                "id": "docusaurus/docs/utilities",
+                "title": "Utilities\\nReusable utilities in .",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/utilities.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/utilities",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/utilities",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/utilities.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "CLI\\nUse Error: No tests found to execute tests.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/cli"
+                },
+                "next": {
+                  "title": "Page Objects\\nFollow POM best practices.",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/page-objects"
+                }
+              },
+              {
+                "id": "docusaurus/docs/writing-tests",
+                "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+                "description": "",
+                "source": "@site/docs/docusaurus/docs/writing-tests.md",
+                "sourceDirName": "docusaurus/docs",
+                "slug": "/docusaurus/docs/writing-tests",
+                "permalink": "/playwright-framework/docs/docusaurus/docs/writing-tests",
+                "draft": false,
+                "unlisted": false,
+                "editUrl": "https://github.com/igautomation/playwright-framework/edit/main/docs/docs/docusaurus/docs/writing-tests.md",
+                "tags": [],
+                "version": "current",
+                "frontMatter": {},
+                "sidebar": "docs",
+                "previous": {
+                  "title": "Configuration\\nConfigure  and .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/configuration"
+                },
+                "next": {
+                  "title": "Extending\\nAdd custom page objects in .",
+                  "permalink": "/playwright-framework/docs/docusaurus/docs/extending"
+                }
+              }
+            ],
+            "drafts": [],
+            "sidebars": {
+              "docs": [
+                {
+                  "type": "category",
+                  "label": "Getting Started",
+                  "items": [
+                    { "type": "doc", "id": "docusaurus/docs/intro" },
+                    { "type": "doc", "id": "docusaurus/docs/installation" },
+                    { "type": "doc", "id": "docusaurus/docs/configuration" }
+                  ],
+                  "collapsed": true,
+                  "collapsible": true
+                },
+                {
+                  "type": "category",
+                  "label": "Guides",
+                  "items": [
+                    { "type": "doc", "id": "docusaurus/docs/writing-tests" },
+                    { "type": "doc", "id": "docusaurus/docs/extending" },
+                    { "type": "doc", "id": "docusaurus/docs/ci-cd" },
+                    { "type": "doc", "id": "docusaurus/docs/jira-xray" }
+                  ],
+                  "collapsed": true,
+                  "collapsible": true
+                },
+                {
+                  "type": "category",
+                  "label": "API",
+                  "items": [
+                    { "type": "doc", "id": "docusaurus/docs/cli" },
+                    { "type": "doc", "id": "docusaurus/docs/utilities" },
+                    { "type": "doc", "id": "docusaurus/docs/page-objects" },
+                    { "type": "doc", "id": "docusaurus/docs/pojos" }
+                  ],
+                  "collapsed": true,
+                  "collapsible": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "docusaurus-plugin-content-blog": {
+      "default": {
+        "blogSidebarTitle": "Recent posts",
+        "blogPosts": [],
+        "blogListPaginated": [],
+        "blogTags": {},
+        "blogTagsListPath": "/playwright-framework/blog/tags"
+      }
+    },
+    "docusaurus-plugin-content-pages": {
+      "default": [
+        {
+          "type": "mdx",
+          "permalink": "/playwright-framework/",
+          "source": "@site/src/pages/index.md",
+          "title": "Welcome to Playwright Framework\\nThis is an enterprise-grade test automation framework built with Playwright.",
+          "frontMatter": {},
+          "unlisted": false
+        }
+      ]
+    },
+    "docusaurus-plugin-debug": {},
+    "docusaurus-plugin-svgr": {},
+    "docusaurus-theme-classic": {},
+    "docusaurus-bootstrap-plugin": {},
+    "docusaurus-mdx-fallback-plugin": {}
+  }
+}

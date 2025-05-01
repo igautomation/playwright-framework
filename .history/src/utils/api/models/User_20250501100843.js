@@ -14,17 +14,17 @@ class User {
    * @param {string} [params.role] - User role
    */
   constructor({ id, name, email, password, role }) {
-    if (!id) throw new Error("User ID is required");
-    if (!name) throw new Error("User name is required");
+    if (!id) throw new Error('User ID is required');
+    if (!name) throw new Error('User name is required');
     if (!email || !this.isValidEmail(email)) {
-      throw new Error("Valid email is required");
+      throw new Error('Valid email is required');
     }
 
     this._id = id;
     this._name = name;
     this._email = email;
     this._password = password || null;
-    this._role = role || "user";
+    this._role = role || 'user';
   }
 
   /**
@@ -42,7 +42,7 @@ class User {
   }
 
   setName(name) {
-    if (!name) throw new Error("User name cannot be empty");
+    if (!name) throw new Error('User name cannot be empty');
     this._name = name;
   }
 
@@ -52,7 +52,7 @@ class User {
 
   setEmail(email) {
     if (!email || !this.isValidEmail(email)) {
-      throw new Error("Valid email is required");
+      throw new Error('Valid email is required');
     }
     this._email = email;
   }
@@ -70,7 +70,7 @@ class User {
   }
 
   setRole(role) {
-    this._role = role || "user";
+    this._role = role || 'user';
   }
 
   getRole() {
@@ -87,7 +87,7 @@ class User {
       name: this._name,
       email: this._email,
       password: this._password,
-      role: this._role,
+      role: this._role
     };
   }
 }

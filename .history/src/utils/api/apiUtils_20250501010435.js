@@ -1,8 +1,8 @@
 // src/utils/api/apiUtils.js
 
-import Ajv from "ajv";
-import { faker } from "@faker-js/faker";
-import logger from "../common/logger.js";
+import Ajv from 'ajv';
+import { faker } from '@faker-js/faker';
+import logger from '../common/logger.js';
 
 // Initialize AJV JSON Schema Validator
 const ajv = new Ajv({ allErrors: true, verbose: true });
@@ -14,15 +14,15 @@ const ajv = new Ajv({ allErrors: true, verbose: true });
 class ApiUtils {
   constructor(apiClient) {
     if (!apiClient) {
-      throw new Error("apiClient must be provided to ApiUtils.");
+      throw new Error('apiClient must be provided to ApiUtils.');
     }
 
     this.apiClient = apiClient;
 
     // Default headers for API requests (can be overridden per call)
     this.defaultHeaders = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
     };
   }
 
@@ -37,9 +37,7 @@ class ApiUtils {
     const body = payload ? JSON.stringify(payload) : null;
     const allHeaders = { ...this.defaultHeaders, ...headers };
 
-    logger.info(
-      `Sending ${method} request to ${finalUrl} with payload: ${body || "none"}`
-    );
+    logger.info(`Sending ${method} request to ${finalUrl} with payload: ${body || 'none'}`);
     logger.debug(`Headers: ${JSON.stringify(allHeaders)}`);
     logger.debug(`Query Params: ${JSON.stringify(queryParams)}`);
 
@@ -47,27 +45,23 @@ class ApiUtils {
       const response = await this.apiClient[method.toLowerCase()](finalUrl, {
         headers: allHeaders,
         params: queryParams,
-        data: body,
+        data: body
       });
 
       const responseBody = await response.json().catch(() => ({}));
       const responseHeaders = response.headers();
 
-      logger.info(
-        `Received response for ${finalUrl}: ${JSON.stringify(responseBody)}`
-      );
+      logger.info(`Received response for ${finalUrl}: ${JSON.stringify(responseBody)}`);
       logger.debug(`Response headers: ${JSON.stringify(responseHeaders)}`);
 
       return {
         status: response.status(),
         body: responseBody,
-        headers: responseHeaders,
+        headers: responseHeaders
       };
     } catch (error) {
       logger.error(`Request failed: ${method} ${finalUrl} - ${error.message}`);
-      throw new Error(
-        `API request failed: ${method} ${finalUrl} - ${error.message}`
-      );
+      throw new Error(`API request failed: ${method} ${finalUrl} - ${error.message}`);
     }
   }
 
@@ -78,16 +72,10 @@ class ApiUtils {
     const validate = ajv.compile(schema);
 
     if (!validate(data)) {
-      const errors = validate.errors.map(
-        (err) => `${err.instancePath || "root"} ${err.message}`
-      );
+      const errors = validate.errors.map((err) => `${err.instancePath || 'root'} ${err.message}`);
 
-      logger.error(
-        `Schema validation failed for ${endpoint}: ${errors.join(", ")}`
-      );
-      throw new Error(
-        `Schema validation failed for ${endpoint}: ${errors.join(", ")}`
-      );
+      logger.error(`Schema validation failed for ${endpoint}: ${errors.join(', ')}`);
+      throw new Error(`Schema validation failed for ${endpoint}: ${errors.join(', ')}`);
     }
 
     logger.info(`Schema validation passed for ${endpoint}`);
@@ -101,7 +89,7 @@ class ApiUtils {
     const base = {
       name: faker.person.fullName(),
       job: faker.person.jobTitle(),
-      email: faker.internet.email(),
+      email: faker.internet.email()
     };
 
     const merged = { ...base, ...overrides };

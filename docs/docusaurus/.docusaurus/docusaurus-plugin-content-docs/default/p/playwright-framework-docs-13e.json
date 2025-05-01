@@ -1,1 +1,185 @@
-{"version":{"pluginId":"default","version":"current","label":"Next","banner":null,"badge":false,"noIndex":false,"className":"docs-version-current","isLast":true,"docsSidebars":{"docs":[{"type":"category","label":"Getting Started","items":[{"type":"link","label":"Introduction\\nWelcome to the Playwright Framework.","href":"/playwright-framework/docs/docusaurus/docs/intro","docId":"docusaurus/docs/intro","unlisted":false},{"type":"link","label":"Installation\\nInstall with .","href":"/playwright-framework/docs/docusaurus/docs/installation","docId":"docusaurus/docs/installation","unlisted":false},{"type":"link","label":"Configuration\\nConfigure  and .","href":"/playwright-framework/docs/docusaurus/docs/configuration","docId":"docusaurus/docs/configuration","unlisted":false}],"collapsed":true,"collapsible":true},{"type":"category","label":"Guides","items":[{"type":"link","label":"Writing Tests\\nUse POM for UI and POJOs for API.","href":"/playwright-framework/docs/docusaurus/docs/writing-tests","docId":"docusaurus/docs/writing-tests","unlisted":false},{"type":"link","label":"Extending\\nAdd custom page objects in .","href":"/playwright-framework/docs/docusaurus/docs/extending","docId":"docusaurus/docs/extending","unlisted":false},{"type":"link","label":"CI/CD\\nSet up GitHub Actions and Jenkins.","href":"/playwright-framework/docs/docusaurus/docs/ci-cd","docId":"docusaurus/docs/ci-cd","unlisted":false},{"type":"link","label":"Jira/Xray\\nIntegrate with Xray for test management.","href":"/playwright-framework/docs/docusaurus/docs/jira-xray","docId":"docusaurus/docs/jira-xray","unlisted":false}],"collapsed":true,"collapsible":true},{"type":"category","label":"API","items":[{"type":"link","label":"CLI\\nUse Error: No tests found to execute tests.","href":"/playwright-framework/docs/docusaurus/docs/cli","docId":"docusaurus/docs/cli","unlisted":false},{"type":"link","label":"Utilities\\nReusable utilities in .","href":"/playwright-framework/docs/docusaurus/docs/utilities","docId":"docusaurus/docs/utilities","unlisted":false},{"type":"link","label":"Page Objects\\nFollow POM best practices.","href":"/playwright-framework/docs/docusaurus/docs/page-objects","docId":"docusaurus/docs/page-objects","unlisted":false},{"type":"link","label":"POJOs\\nUse POJOs for API testing.","href":"/playwright-framework/docs/docusaurus/docs/pojos","docId":"docusaurus/docs/pojos","unlisted":false}],"collapsed":true,"collapsible":true}]},"docs":{"docusaurus/docs/ci-cd":{"id":"docusaurus/docs/ci-cd","title":"CI/CD\\nSet up GitHub Actions and Jenkins.","description":"","sidebar":"docs"},"docusaurus/docs/cli":{"id":"docusaurus/docs/cli","title":"CLI\\nUse Error: No tests found to execute tests.","description":"","sidebar":"docs"},"docusaurus/docs/configuration":{"id":"docusaurus/docs/configuration","title":"Configuration\\nConfigure  and .","description":"","sidebar":"docs"},"docusaurus/docs/extending":{"id":"docusaurus/docs/extending","title":"Extending\\nAdd custom page objects in .","description":"","sidebar":"docs"},"docusaurus/docs/installation":{"id":"docusaurus/docs/installation","title":"Installation\\nInstall with .","description":"","sidebar":"docs"},"docusaurus/docs/intro":{"id":"docusaurus/docs/intro","title":"Introduction\\nWelcome to the Playwright Framework.","description":"","sidebar":"docs"},"docusaurus/docs/jira-xray":{"id":"docusaurus/docs/jira-xray","title":"Jira/Xray\\nIntegrate with Xray for test management.","description":"","sidebar":"docs"},"docusaurus/docs/page-objects":{"id":"docusaurus/docs/page-objects","title":"Page Objects\\nFollow POM best practices.","description":"","sidebar":"docs"},"docusaurus/docs/pojos":{"id":"docusaurus/docs/pojos","title":"POJOs\\nUse POJOs for API testing.","description":"","sidebar":"docs"},"docusaurus/docs/utilities":{"id":"docusaurus/docs/utilities","title":"Utilities\\nReusable utilities in .","description":"","sidebar":"docs"},"docusaurus/docs/writing-tests":{"id":"docusaurus/docs/writing-tests","title":"Writing Tests\\nUse POM for UI and POJOs for API.","description":"","sidebar":"docs"}}}}
+{
+  "version": {
+    "pluginId": "default",
+    "version": "current",
+    "label": "Next",
+    "banner": null,
+    "badge": false,
+    "noIndex": false,
+    "className": "docs-version-current",
+    "isLast": true,
+    "docsSidebars": {
+      "docs": [
+        {
+          "type": "category",
+          "label": "Getting Started",
+          "items": [
+            {
+              "type": "link",
+              "label": "Introduction\\nWelcome to the Playwright Framework.",
+              "href": "/playwright-framework/docs/docusaurus/docs/intro",
+              "docId": "docusaurus/docs/intro",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Installation\\nInstall with .",
+              "href": "/playwright-framework/docs/docusaurus/docs/installation",
+              "docId": "docusaurus/docs/installation",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Configuration\\nConfigure  and .",
+              "href": "/playwright-framework/docs/docusaurus/docs/configuration",
+              "docId": "docusaurus/docs/configuration",
+              "unlisted": false
+            }
+          ],
+          "collapsed": true,
+          "collapsible": true
+        },
+        {
+          "type": "category",
+          "label": "Guides",
+          "items": [
+            {
+              "type": "link",
+              "label": "Writing Tests\\nUse POM for UI and POJOs for API.",
+              "href": "/playwright-framework/docs/docusaurus/docs/writing-tests",
+              "docId": "docusaurus/docs/writing-tests",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Extending\\nAdd custom page objects in .",
+              "href": "/playwright-framework/docs/docusaurus/docs/extending",
+              "docId": "docusaurus/docs/extending",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+              "href": "/playwright-framework/docs/docusaurus/docs/ci-cd",
+              "docId": "docusaurus/docs/ci-cd",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Jira/Xray\\nIntegrate with Xray for test management.",
+              "href": "/playwright-framework/docs/docusaurus/docs/jira-xray",
+              "docId": "docusaurus/docs/jira-xray",
+              "unlisted": false
+            }
+          ],
+          "collapsed": true,
+          "collapsible": true
+        },
+        {
+          "type": "category",
+          "label": "API",
+          "items": [
+            {
+              "type": "link",
+              "label": "CLI\\nUse Error: No tests found to execute tests.",
+              "href": "/playwright-framework/docs/docusaurus/docs/cli",
+              "docId": "docusaurus/docs/cli",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Utilities\\nReusable utilities in .",
+              "href": "/playwright-framework/docs/docusaurus/docs/utilities",
+              "docId": "docusaurus/docs/utilities",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "Page Objects\\nFollow POM best practices.",
+              "href": "/playwright-framework/docs/docusaurus/docs/page-objects",
+              "docId": "docusaurus/docs/page-objects",
+              "unlisted": false
+            },
+            {
+              "type": "link",
+              "label": "POJOs\\nUse POJOs for API testing.",
+              "href": "/playwright-framework/docs/docusaurus/docs/pojos",
+              "docId": "docusaurus/docs/pojos",
+              "unlisted": false
+            }
+          ],
+          "collapsed": true,
+          "collapsible": true
+        }
+      ]
+    },
+    "docs": {
+      "docusaurus/docs/ci-cd": {
+        "id": "docusaurus/docs/ci-cd",
+        "title": "CI/CD\\nSet up GitHub Actions and Jenkins.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/cli": {
+        "id": "docusaurus/docs/cli",
+        "title": "CLI\\nUse Error: No tests found to execute tests.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/configuration": {
+        "id": "docusaurus/docs/configuration",
+        "title": "Configuration\\nConfigure  and .",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/extending": {
+        "id": "docusaurus/docs/extending",
+        "title": "Extending\\nAdd custom page objects in .",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/installation": {
+        "id": "docusaurus/docs/installation",
+        "title": "Installation\\nInstall with .",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/intro": {
+        "id": "docusaurus/docs/intro",
+        "title": "Introduction\\nWelcome to the Playwright Framework.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/jira-xray": {
+        "id": "docusaurus/docs/jira-xray",
+        "title": "Jira/Xray\\nIntegrate with Xray for test management.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/page-objects": {
+        "id": "docusaurus/docs/page-objects",
+        "title": "Page Objects\\nFollow POM best practices.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/pojos": {
+        "id": "docusaurus/docs/pojos",
+        "title": "POJOs\\nUse POJOs for API testing.",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/utilities": {
+        "id": "docusaurus/docs/utilities",
+        "title": "Utilities\\nReusable utilities in .",
+        "description": "",
+        "sidebar": "docs"
+      },
+      "docusaurus/docs/writing-tests": {
+        "id": "docusaurus/docs/writing-tests",
+        "title": "Writing Tests\\nUse POM for UI and POJOs for API.",
+        "description": "",
+        "sidebar": "docs"
+      }
+    }
+  }
+}

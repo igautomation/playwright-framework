@@ -13,7 +13,7 @@ try {
   loadEnv({
     allowEmptyValues: true,
     example: '.env.example',
-    path: `src/config/env/${envFileName}.env`,
+    path: `src/config/env/${envFileName}.env`
   });
   loadEnv({ allowEmptyValues: true, example: '.env.example' });
 } catch (error) {

@@ -51,69 +51,102 @@ export default [
             routes: [
               {
                 path: '/playwright-framework/docs/docusaurus/docs/ci-cd',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/ci-cd', 'e87'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/ci-cd',
+                  'e87'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/cli',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/cli', 'bcb'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/cli',
+                  'bcb'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/configuration',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/configuration', 'af4'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/configuration',
+                  'af4'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/extending',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/extending', '0a7'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/extending',
+                  '0a7'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/installation',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/installation', '8ee'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/installation',
+                  '8ee'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/intro',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/intro', 'ee9'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/intro',
+                  'ee9'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/jira-xray',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/jira-xray', 'e58'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/jira-xray',
+                  'e58'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/page-objects',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/page-objects', '97a'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/page-objects',
+                  '97a'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/pojos',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/pojos', '2f1'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/pojos',
+                  '2f1'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/utilities',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/utilities', 'f8c'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/utilities',
+                  'f8c'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               },
               {
                 path: '/playwright-framework/docs/docusaurus/docs/writing-tests',
-                component: ComponentCreator('/playwright-framework/docs/docusaurus/docs/writing-tests', '541'),
+                component: ComponentCreator(
+                  '/playwright-framework/docs/docusaurus/docs/writing-tests',
+                  '541'
+                ),
                 exact: true,
-                sidebar: "docs"
+                sidebar: 'docs'
               }
             ]
           }
@@ -128,6 +161,6 @@ export default [
   },
   {
     path: '*',
-    component: ComponentCreator('*'),
-  },
+    component: ComponentCreator('*')
+  }
 ];

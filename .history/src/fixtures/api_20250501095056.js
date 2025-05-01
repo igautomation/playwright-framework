@@ -32,16 +32,16 @@ async function makeApiRequest(context, method, endpoint, payload = {}, headers =
   }
 
   switch (method.toUpperCase()) {
-  case 'GET':
-    return await context.get(endpoint, options);
-  case 'POST':
-    return await context.post(endpoint, options);
-  case 'PUT':
-    return await context.put(endpoint, options);
-  case 'DELETE':
-    return await context.delete(endpoint, options);
-  default:
-    throw new Error(`Unsupported HTTP method: ${method}`);
+    case 'GET':
+      return await context.get(endpoint, options);
+    case 'POST':
+      return await context.post(endpoint, options);
+    case 'PUT':
+      return await context.put(endpoint, options);
+    case 'DELETE':
+      return await context.delete(endpoint, options);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
   }
 }
 
@@ -63,10 +63,4 @@ async function del(context, endpoint, headers = {}) {
 }
 
 // Export all API helpers
-export {
-  createRequestContext,
-  get,
-  post,
-  put,
-  del
-};
+export { createRequestContext, get, post, put, del };

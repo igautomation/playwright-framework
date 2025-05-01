@@ -21,7 +21,7 @@ class User {
     this._name = name;
     this._email = email;
     this._password = password || null;
-    this._role = role || "user";
+    this._role = role || 'user';
   }
 
   /**
@@ -30,11 +30,11 @@ class User {
    */
   validate() {
     if (!this._name) {
-      throw new Error("User name is required");
+      throw new Error('User name is required');
     }
 
     if (!this._email || !this.isValidEmail(this._email)) {
-      throw new Error("Valid email is required");
+      throw new Error('Valid email is required');
     }
   }
 
@@ -63,7 +63,7 @@ class User {
   }
 
   setName(name) {
-    if (!name) throw new Error("Name cannot be empty");
+    if (!name) throw new Error('Name cannot be empty');
     this._name = name;
   }
 
@@ -73,7 +73,7 @@ class User {
 
   setEmail(email) {
     if (!this.isValidEmail(email)) {
-      throw new Error("Invalid email");
+      throw new Error('Invalid email');
     }
     this._email = email;
   }
@@ -91,7 +91,7 @@ class User {
   }
 
   setRole(role) {
-    this._role = role || "user";
+    this._role = role || 'user';
   }
 
   /**
@@ -105,7 +105,7 @@ class User {
       name: this._name,
       email: this._email,
       password: this._password,
-      role: this._role,
+      role: this._role
     };
   }
 }

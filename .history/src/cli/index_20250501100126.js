@@ -30,47 +30,61 @@ const xrayClient = new XrayUtils();
 const setupUtils = new SetupUtils();
 const { generateAllureReport, attachScreenshot, attachLog, sendNotification } = reportUtils;
 
-
 // CLI Entry Point
 (async () => {
   try {
     yargs(hideBin(process.argv))
-      .command('init [dir]', 'Initialize project', (yargs) => {
-        return yargs.option('dir', {
-          describe: 'Directory to scaffold',
-          type: 'string',
-          default: 'playwright-project'
-        });
-      }, async (argv) => {
-        const projectDir = path.resolve(process.cwd(), argv.dir);
-        await fs.mkdirp(projectDir);
-        logger.info(`Project initialized at ${projectDir}`);
-      })
-
-      .command('run [files..]', 'Run Playwright tests', (yargs) => {
-        return yargs
-          .option('tags', { describe: 'Tags to filter', type: 'string' })
-          .option('headed', { describe: 'Run browser headed', type: 'boolean' })
-          .option('project', { describe: 'Project(s)', type: 'array' })
-          .option('workers', { describe: 'Number of workers', type: 'string' })
-          .option('retries', { describe: 'Retry count', type: 'number' });
-      }, (argv) => {
-        run(argv);
-      })
-
-      .command('generate-data', 'Generate sample users/products', (yargs) => {
-        return yargs
-          .option('type', { choices: ['users', 'products'], demandOption: true })
-          .option('count', { type: 'number', default: 10 })
-          .option('output', { type: 'string', demandOption: true });
-      }, async (argv) => {
-        if (argv.type === 'users') {
-          await generateUsersToFile(argv.count, argv.output);
-        } else if (argv.type === 'products') {
-          await generateProductsToCsv(argv.count, argv.output);
+      .command(
+        'init [dir]',
+        'Initialize project',
+        (yargs) => {
+          return yargs.option('dir', {
+            describe: 'Directory to scaffold',
+            type: 'string',
+            default: 'playwright-project'
+          });
+        },
+        async (argv) => {
+          const projectDir = path.resolve(process.cwd(), argv.dir);
+          await fs.mkdirp(projectDir);
+          logger.info(`Project initialized at ${projectDir}`);
         }
-        logger.info('Test data generated.');
-      })
+      )
+
+      .command(
+        'run [files..]',
+        'Run Playwright tests',
+        (yargs) => {
+          return yargs
+            .option('tags', { describe: 'Tags to filter', type: 'string' })
+            .option('headed', { describe: 'Run browser headed', type: 'boolean' })
+            .option('project', { describe: 'Project(s)', type: 'array' })
+            .option('workers', { describe: 'Number of workers', type: 'string' })
+            .option('retries', { describe: 'Retry count', type: 'number' });
+        },
+        (argv) => {
+          run(argv);
+        }
+      )
+
+      .command(
+        'generate-data',
+        'Generate sample users/products',
+        (yargs) => {
+          return yargs
+            .option('type', { choices: ['users', 'products'], demandOption: true })
+            .option('count', { type: 'number', default: 10 })
+            .option('output', { type: 'string', demandOption: true });
+        },
+        async (argv) => {
+          if (argv.type === 'users') {
+            await generateUsersToFile(argv.count, argv.output);
+          } else if (argv.type === 'products') {
+            await generateProductsToCsv(argv.count, argv.output);
+          }
+          logger.info('Test data generated.');
+        }
+      )
 
       .command('list-tags', 'List @tags from test files', {}, async () => {
         const files = fs.readdirSync('src/tests', { recursive: true });
@@ -171,7 +185,6 @@ const { generateAllureReport, attachScreenshot, attachLog, sendNotification } = 
 
       .demandCommand()
       .help().argv;
-
   } catch (error) {
     logger.error(`Framework CLI error: ${error.message}\n${error.stack}`);
     process.exit(1);

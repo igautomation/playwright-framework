@@ -34,24 +34,23 @@ class RestUtils {
       let response;
 
       switch (method.toUpperCase()) {
-      case 'GET':
-        response = await context.get(endpoint);
-        break;
-      case 'POST':
-        response = await context.post(endpoint, { data: payload });
-        break;
-      case 'PUT':
-        response = await context.put(endpoint, { data: payload });
-        break;
-      case 'DELETE':
-        response = await context.delete(endpoint);
-        break;
-      default:
-        throw new Error(`Unsupported method: ${method}`);
+        case 'GET':
+          response = await context.get(endpoint);
+          break;
+        case 'POST':
+          response = await context.post(endpoint, { data: payload });
+          break;
+        case 'PUT':
+          response = await context.put(endpoint, { data: payload });
+          break;
+        case 'DELETE':
+          response = await context.delete(endpoint);
+          break;
+        default:
+          throw new Error(`Unsupported method: ${method}`);
       }
 
       return response;
-
     } catch (error) {
       logger.error(`REST call failed: ${method} ${endpoint} - ${error.message}`);
       throw error;

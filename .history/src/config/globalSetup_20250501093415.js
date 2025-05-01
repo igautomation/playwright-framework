@@ -65,7 +65,6 @@ export default async function globalSetup(config) {
 
     await browser.close();
     logger.info('Global setup completed');
-
   } catch (error) {
     const failTrace = `./test-results/failed-setup-trace-${Date.now()}.zip`;
     await basePage.takeScreenshot('global-setup-failure');

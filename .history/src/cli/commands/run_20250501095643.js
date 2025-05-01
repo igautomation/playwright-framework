@@ -31,7 +31,6 @@ function loadEnvironmentVariables(projectDir) {
     if (!process.env.BASE_URL) {
       throw new Error('BASE_URL environment variable is required.');
     }
-
   } catch (error) {
     logger.error(`Environment load failed: ${error.message}`);
     process.exit(1);

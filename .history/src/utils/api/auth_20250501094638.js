@@ -25,7 +25,9 @@ class AuthUtils {
    */
   async getOAuthToken() {
     if (!this.tokenUrl || !this.clientId || !this.clientSecret) {
-      throw new Error('Missing OAuth credentials. Ensure OAUTH_TOKEN_URL, CLIENT_ID, and CLIENT_SECRET are set in .env');
+      throw new Error(
+        'Missing OAuth credentials. Ensure OAUTH_TOKEN_URL, CLIENT_ID, and CLIENT_SECRET are set in .env'
+      );
     }
 
     const response = await fetch(this.tokenUrl, {

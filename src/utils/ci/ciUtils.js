@@ -9,9 +9,9 @@
  * - CI environment bootstrap (clone repository, install dependencies)
  */
 
-import GitUtils from "../git/gitUtils.js";
-import { execSync } from "child_process";
-import { writeFileSync } from "fs";
+import GitUtils from '../git/gitUtils.js';
+import { execSync } from 'child_process';
+import { writeFileSync } from 'fs';
 
 class CIUtils {
   constructor() {
@@ -25,9 +25,9 @@ class CIUtils {
    * @param {string} [commitMessage='Automated CI push'] - Commit message to use.
    * @param {string} [repoPath] - Optional path to the repository (default: current working directory).
    */
-  pushToGitHub(branch, commitMessage = "Automated CI push", repoPath) {
+  pushToGitHub(branch, commitMessage = 'Automated CI push', repoPath) {
     if (!branch) {
-      throw new Error("Branch is required");
+      throw new Error('Branch is required');
     }
     try {
       this.git.commit(commitMessage, repoPath);
@@ -46,13 +46,13 @@ class CIUtils {
    */
   configureJenkinsPipeline(config) {
     if (!config || !config.jobName) {
-      throw new Error("Jenkins job name is required");
+      throw new Error('Jenkins job name is required');
     }
     try {
       console.log(`Configuring Jenkins pipeline for job: ${config.jobName}`);
       if (config.pipelineScript) {
-        console.log("Writing Jenkinsfile with provided pipeline script.");
-        writeFileSync("Jenkinsfile", config.pipelineScript);
+        console.log('Writing Jenkinsfile with provided pipeline script.');
+        writeFileSync('Jenkinsfile', config.pipelineScript);
       }
     } catch (error) {
       throw new Error(`Failed to configure Jenkins pipeline: ${error.message}`);
@@ -69,17 +69,16 @@ class CIUtils {
    */
   setupCiEnvironment(config) {
     if (!config || !config.repoUrl) {
-      throw new Error("Repository URL is required");
+      throw new Error('Repository URL is required');
     }
     try {
-      const repoPath =
-        config.repoPath || config.repoUrl.split("/").pop().replace(".git", "");
-      const branch = config.branch || "main";
+      const repoPath = config.repoPath || config.repoUrl.split('/').pop().replace('.git', '');
+      const branch = config.branch || 'main';
 
       this.git.clone(config.repoUrl, repoPath);
       this.git.checkout(branch, repoPath);
 
-      execSync("npm install", { cwd: repoPath, stdio: "inherit" });
+      execSync('npm install', { cwd: repoPath, stdio: 'inherit' });
       console.log(`CI environment set up at: ${repoPath}`);
     } catch (error) {
       throw new Error(`Failed to set up CI environment: ${error.message}`);
