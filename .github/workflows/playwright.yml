@@ -67,6 +67,10 @@ jobs:
         browser: [chromium, firefox, webkit]
         environment: [development, qa, uat, prod]
         shard: ['1/3', '2/3', '3/3']
+
+    env:
+      SHARD_SANITIZED: ${{ matrix.shard == '1/3' && '1-of-3' || matrix.shard == '2/3' && '2-of-3' || matrix.shard == '3/3' && '3-of-3' }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -86,33 +90,39 @@ jobs:
 
       - name: Quarantine flaky tests
         run: dotenv -e .env -- npx framework quarantine-flaky
+        continue-on-error: true
 
       - name: Run Playwright tests
         run: dotenv -e .env -- npx framework run --tags "@smoke or @regression or @api or @ui or @flaky or @e2e or @sanity" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
 
       - name: Generate Allure report
         if: always()
-        run: dotenv -e .env -- npx framework generate-report
+        run: |
+          if [ -d "reports/allure" ]; then
+            dotenv -e .env -- npx framework generate-report
+          else
+            echo "⚠️ Skipping Allure report generation: reports/allure not found"
+          fi
 
       - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+          name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ env.SHARD_SANITIZED }}
           path: reports/allure-report/
 
       - name: Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-html-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+          name: playwright-html-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ env.SHARD_SANITIZED }}
           path: playwright-report/
 
       - name: Upload Screenshots and Traces
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: traces-and-screenshots-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
+          name: traces-and-screenshots-${{ matrix.browser }}-${{ matrix.environment }}-${{ env.SHARD_SANITIZED }}
           path: |
             test-results/
             reports/traces/
@@ -121,7 +131,8 @@ jobs:
       - name: Notify Slack on failure
         if: failure()
         run: |
-          dotenv -e .env -- npx framework notify $SLACK_WEBHOOK_URL "Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} environment (shard ${{ matrix.shard }}). Check run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          dotenv -e .env -- npx framework notify $SLACK_WEBHOOK_URL \
+          "Playwright tests failed for ${{ matrix.browser }} in ${{ matrix.environment }} (shard ${{ env.SHARD_SANITIZED }}). Check run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Push results to Xray
         if: always()
