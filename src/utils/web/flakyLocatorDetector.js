@@ -70,7 +70,7 @@ class FlakyLocatorDetector {
       if (failures > 0) {
         flaky.push({
           locator,
-          failureRate: (failures / count) * 100
+          failureRate: (failures / count) * 100,
         });
       }
     }

@@ -42,3 +42,7 @@ sandbox/*.log
 sandbox/*.tmp
 sandbox/.env
 sandbox/.DS_Store
+
+# History Ignore
+history/
+*.history

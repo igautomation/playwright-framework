@@ -11,9 +11,9 @@ const createUserSchema = {
     id: { type: 'string' },
     name: { type: 'string' },
     job: { type: 'string' },
-    createdAt: { type: 'string' }
+    createdAt: { type: 'string' },
   },
-  required: ['id', 'name', 'job', 'createdAt']
+  required: ['id', 'name', 'job', 'createdAt'],
 };
 
 // Schema for PUT /api/users response
@@ -22,9 +22,9 @@ const updateUserSchema = {
   properties: {
     name: { type: 'string' },
     job: { type: 'string' },
-    updatedAt: { type: 'string' }
+    updatedAt: { type: 'string' },
   },
-  required: ['name', 'job', 'updatedAt']
+  required: ['name', 'job', 'updatedAt'],
 };
 
 test.describe.parallel('Reqres.in API CRUD Tests', () => {

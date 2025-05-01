@@ -54,7 +54,7 @@ class XrayUtils {
 
     const graphQLUrl = `${this.apiBase}/graphql`;
     const client = new GraphQLClient(graphQLUrl, {
-      headers: { Authorization: `Bearer ${this.token}` }
+      headers: { Authorization: `Bearer ${this.token}` },
     });
 
     const query = gql`
@@ -93,17 +93,17 @@ class XrayUtils {
         start: new Date(result.startTime).toISOString(),
         finish: new Date(result.endTime).toISOString(),
         status: result.status === 'passed' ? 'PASS' : 'FAIL',
-        comment: result.error || ''
-      }))
+        comment: result.error || '',
+      })),
     };
 
     const response = await fetch(`${this.apiBase}/import/execution`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -135,9 +135,9 @@ class XrayUtils {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'text/plain'
+        'Content-Type': 'text/plain',
       },
-      body: fileContent
+      body: fileContent,
     });
 
     if (!response.ok) {

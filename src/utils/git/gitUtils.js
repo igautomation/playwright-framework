@@ -57,7 +57,7 @@ class GitUtils {
     try {
       return execSync('git status', {
         encoding: 'utf8',
-        cwd: repoPath || process.cwd()
+        cwd: repoPath || process.cwd(),
       });
     } catch (error) {
       throw new Error(`Failed to get Git status: ${error.message}`);
@@ -90,11 +90,11 @@ class GitUtils {
     try {
       execSync('git add .', {
         stdio: 'inherit',
-        cwd: repoPath || process.cwd()
+        cwd: repoPath || process.cwd(),
       });
       execSync(`git commit -m "${message}"`, {
         stdio: 'inherit',
-        cwd: repoPath || process.cwd()
+        cwd: repoPath || process.cwd(),
       });
     } catch (error) {
       throw new Error(`Failed to commit changes: ${error.message}`);
@@ -113,7 +113,7 @@ class GitUtils {
     try {
       execSync(`git push origin ${branch}`, {
         stdio: 'inherit',
-        cwd: repoPath || process.cwd()
+        cwd: repoPath || process.cwd(),
       });
     } catch (error) {
       throw new Error(`Failed to push to GitHub: ${error.message}`);

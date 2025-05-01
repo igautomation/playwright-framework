@@ -5,26 +5,26 @@ class LoginForm {
     this.page = page;
     // Use self-healing locators for form elements
     this.form = SelfHealingLocator.create(page, 'form#login-form', {
-      tag: 'form'
+      tag: 'form',
     });
     this.usernameInput = SelfHealingLocator.create(page, '#username', {
       role: 'textbox',
       name: 'username',
-      tag: 'input'
+      tag: 'input',
     });
     this.passwordInput = SelfHealingLocator.create(page, '#password', {
       role: 'textbox',
       name: 'password',
-      tag: 'input'
+      tag: 'input',
     });
     this.submitButton = SelfHealingLocator.create(page, 'button[type="submit"]', {
       role: 'button',
       name: 'submit',
       text: 'Login',
-      tag: 'button'
+      tag: 'button',
     });
     this.errorMessage = SelfHealingLocator.create(page, '.error-message', {
-      tag: 'div'
+      tag: 'div',
     });
   }
 

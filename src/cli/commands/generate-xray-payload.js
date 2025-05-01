@@ -17,5 +17,5 @@ export const generateXrayPayloadCommand = {
       logger.error(`Xray payload generation failed: ${error.message}`);
       process.exit(1);
     }
-  }
+  },
 };

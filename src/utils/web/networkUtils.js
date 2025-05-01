@@ -44,7 +44,7 @@ class NetworkUtils {
       route.fulfill({
         status,
         body: JSON.stringify(body),
-        headers: { 'Content-Type': 'application/json', ...headers }
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
     });
   }
@@ -88,7 +88,7 @@ class NetworkUtils {
       responseData = {
         status: response.status(),
         body: await response.json().catch(() => null),
-        headers: response.headers()
+        headers: response.headers(),
       };
       route.continue();
     });

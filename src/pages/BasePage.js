@@ -25,7 +25,7 @@ class BasePage {
       logger.info('Spinner detected, waiting for it to disappear');
       await this.page.waitForSelector(this.spinner, {
         state: 'hidden',
-        timeout: options.timeout
+        timeout: options.timeout,
       });
     }
     await this.page.waitForLoadState('networkidle');
@@ -47,7 +47,7 @@ class BasePage {
     logger.info('Waiting for toast message', { timeout: options.timeout });
     await this.page.waitForSelector(this.toast, {
       state: 'visible',
-      timeout: options.timeout
+      timeout: options.timeout,
     });
     const message = await this.getToastMessage();
     return message;
@@ -77,12 +77,12 @@ class BasePage {
     } else if (locators.text) {
       logger.debug('Trying text locator');
       return this.page.getByText(locators.text, {
-        exact: locators.exact ?? false
+        exact: locators.exact ?? false,
       });
     } else if (locators.label) {
       logger.debug('Trying label locator');
       return this.page.getByLabel(locators.label, {
-        exact: locators.exact ?? false
+        exact: locators.exact ?? false,
       });
     } else if (locators.testId) {
       logger.debug('Trying test ID locator');

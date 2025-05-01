@@ -6,7 +6,7 @@ class SetupUtils {
   installPlaywrightVSCode() {
     try {
       execSync('code --install-extension ms-playwright.playwright', {
-        stdio: 'inherit'
+        stdio: 'inherit',
       });
       console.log('Playwright VS Code extension installed successfully');
     } catch (error) {

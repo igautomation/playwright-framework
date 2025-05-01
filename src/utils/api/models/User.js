@@ -105,7 +105,7 @@ class User {
       name: this._name,
       email: this._email,
       password: this._password,
-      role: this._role
+      role: this._role,
     };
   }
 }

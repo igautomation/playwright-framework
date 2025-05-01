@@ -5,7 +5,7 @@ import logger from '../../utils/common/logger.js';
 test.describe('Shard Tests', () => {
   test('@shard Demo: Shard info and navigation to products page', async ({
     authenticatedPage,
-    retryDiagnostics
+    retryDiagnostics,
   }, testInfo) => {
     try {
       const shardInfo = testInfo.shard;

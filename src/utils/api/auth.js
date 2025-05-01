@@ -33,7 +33,7 @@ class AuthUtils {
     const response = await fetch(this.tokenUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`
+      body: `grant_type=client_credentials&client_id=${this.clientId}&client_secret=${this.clientSecret}`,
     });
 
     if (!response.ok) {
@@ -56,7 +56,7 @@ class AuthUtils {
     }
 
     return {
-      'x-api-key': this.apiKey
+      'x-api-key': this.apiKey,
     };
   }
 
@@ -70,7 +70,7 @@ class AuthUtils {
     }
 
     return {
-      Authorization: `Bearer ${this.oauthToken}`
+      Authorization: `Bearer ${this.oauthToken}`,
     };
   }
 }
