@@ -1,5 +1,5 @@
 // src/config/playwright.config.js
-
+import 'jsconfig-paths/register';
 import { defineConfig, devices } from '@playwright/test';
 import { loadEnv } from 'dotenv';
 import { join, dirname } from 'path';

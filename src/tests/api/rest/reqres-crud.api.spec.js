@@ -1,10 +1,13 @@
-// src/tests/api/rest/reqres-crud.spec.js
+// src/tests/api/rest/reqres-crud.api.spec.js
 
-import { test, expect } from '../../../../fixtures/combined.js';
-import ApiUtils from '../../../../utils/api/apiUtils.js';
-import { readYaml } from '../../../../utils/common/dataOrchestrator.js';
+import { test, expect } from '@fixtures/combined.js';
+import ApiUtils from '@utils/api/apiUtils.js';
+import { readYaml } from '@utils/common/dataOrchestrator.js';
 
-// Schema for POST /api/users response
+// Optional base path from environment or default
+const BASE_PATH = process.env.REQRES_USER_PATH || '/api/users';
+
+// JSON Schema for Create User response validation
 const createUserSchema = {
   type: 'object',
   properties: {
@@ -16,7 +19,7 @@ const createUserSchema = {
   required: ['id', 'name', 'job', 'createdAt']
 };
 
-// Schema for PUT /api/users response
+// JSON Schema for Update User response validation
 const updateUserSchema = {
   type: 'object',
   properties: {
@@ -27,21 +30,17 @@ const updateUserSchema = {
   required: ['name', 'job', 'updatedAt']
 };
 
-test.describe.parallel('Reqres.in API CRUD Tests', () => {
-  test('Create User', async ({ apiClient, retryDiagnostics }, testInfo) => {
+test.describe.parallel('@api @crud Reqres.in API CRUD Tests', () => {
+  test('@api @create Create User', async ({ apiClient, retryDiagnostics }, testInfo) => {
     const apiUtils = new ApiUtils(apiClient);
-
     try {
       const userData = readYaml('src/data/testData.yaml').user;
-
-      const { status, body } = await apiUtils.sendRequest('POST', '/api/users', userData);
+      const { status, body } = await apiUtils.sendRequest('POST', BASE_PATH, userData);
 
       expect(status).toBe(201);
       expect(body.name).toBe(userData.name);
       expect(body.job).toBe(userData.job);
-
       apiUtils.validateSchema(body, createUserSchema, 'POST /api/users');
-
       testInfo.annotations.push({ type: 'user_id', description: body.id });
     } catch (error) {
       await retryDiagnostics(error);
@@ -49,12 +48,10 @@ test.describe.parallel('Reqres.in API CRUD Tests', () => {
     }
   });
 
-  test('Read User List', async ({ apiClient, retryDiagnostics }, testInfo) => {
+  test('@api @read Read User List', async ({ apiClient, retryDiagnostics }, testInfo) => {
     const apiUtils = new ApiUtils(apiClient);
-
     try {
-      const { status, body } = await apiUtils.sendRequest('GET', '/api/users?page=2&delay=1');
-
+      const { status, body } = await apiUtils.sendRequest('GET', `${BASE_PATH}?page=2&delay=1`);
       expect(status).toBe(200);
       expect(Array.isArray(body.data)).toBe(true);
       expect(body.data.length).toBeGreaterThan(0);
@@ -64,27 +61,23 @@ test.describe.parallel('Reqres.in API CRUD Tests', () => {
     }
   });
 
-  test('Update User', async ({ apiClient, retryDiagnostics }, testInfo) => {
+  test('@api @update Update User', async ({ apiClient, retryDiagnostics }, testInfo) => {
     const apiUtils = new ApiUtils(apiClient);
-
     try {
       const userData = readYaml('src/data/testData.yaml').user;
-
-      const createResponse = await apiUtils.sendRequest('POST', '/api/users', userData);
+      const createResponse = await apiUtils.sendRequest('POST', BASE_PATH, userData);
       const userId = createResponse.body.id;
 
       const updatePayload = { name: 'Updated User', job: 'QA Lead' };
-
       const { status, body } = await apiUtils.sendRequest(
         'PUT',
-        `/api/users/${userId}`,
+        `${BASE_PATH}/${userId}`,
         updatePayload
       );
 
       expect(status).toBe(200);
       expect(body.name).toBe(updatePayload.name);
       expect(body.job).toBe(updatePayload.job);
-
       apiUtils.validateSchema(body, updateUserSchema, `PUT /api/users/${userId}`);
     } catch (error) {
       await retryDiagnostics(error);
@@ -92,19 +85,17 @@ test.describe.parallel('Reqres.in API CRUD Tests', () => {
     }
   });
 
-  test('Delete User', async ({ apiClient, retryDiagnostics }, testInfo) => {
+  test('@api @delete Delete User', async ({ apiClient, retryDiagnostics }, testInfo) => {
     const apiUtils = new ApiUtils(apiClient);
-
     try {
       const userData = readYaml('src/data/testData.yaml').user;
-
-      const createResponse = await apiUtils.sendRequest('POST', '/api/users', userData);
+      const createResponse = await apiUtils.sendRequest('POST', BASE_PATH, userData);
       const userId = createResponse.body.id;
 
-      const deleteResponse = await apiUtils.sendRequest('DELETE', `/api/users/${userId}`);
+      const deleteResponse = await apiUtils.sendRequest('DELETE', `${BASE_PATH}/${userId}`);
       expect(deleteResponse.status).toBe(204);
 
-      const repeatDelete = await apiUtils.sendRequest('DELETE', `/api/users/${userId}`);
+      const repeatDelete = await apiUtils.sendRequest('DELETE', `${BASE_PATH}/${userId}`);
       expect(repeatDelete.status).toBe(204);
     } catch (error) {
       await retryDiagnostics(error);

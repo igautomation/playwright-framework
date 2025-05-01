@@ -93,7 +93,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Playwright tests
-        run: dotenv -e .env -- npx framework run --tags "@smoke or @regression or @api or @ui or @flaky or @e2e or @sanity" --project=${{ matrix.browser }} --shard=${{ matrix.shard }} ${{ needs.select-tests.outputs.tests }}
+        run: dotenv -e .env -- npx framework run --project "${{ matrix.browser }}" --tags "(@smoke or @regression or @api or @ui or @flaky or @e2e or @sanity)"
 
       - name: Generate Allure report
         if: always()
@@ -101,7 +101,7 @@ jobs:
           if [ -d "reports/allure" ]; then
             dotenv -e .env -- npx framework generate-report
           else
-            echo "⚠️ Skipping Allure report generation: reports/allure not found"
+            echo "Skipping Allure report generation: reports/allure not found"
           fi
 
       - name: Upload Allure Report

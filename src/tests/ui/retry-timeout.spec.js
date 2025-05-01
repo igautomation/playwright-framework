@@ -1,47 +1,51 @@
 // src/tests/ui/retry-timeout.spec.js
-import { test, expect } from '../../fixtures/combined.js';
 
-// Configure timeout for all tests
+import { test, expect } from '@fixtures/combined.js';
+
+// Configure test suite-level timeout for all tests (30s)
 test.describe.configure({ timeout: 30000 });
 
-test.describe('Retry and Timeout Tests', () => {
-  test.describe('Retry Tests', () => {
-    test('@retry Demo: Retry test with navigation to products page', async ({
-      authenticatedPage,
-      retryDiagnostics
-    }, testInfo) => {
-      try {
-        const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
-        await authenticatedPage.goto(`${baseURL}/products`);
-        await expect(authenticatedPage.locator('h2.title.text-center')).toHaveText(
-          /all products/i,
-          { timeout: 10000 }
-        );
-        await retryDiagnostics(`Retry attempt number: ${testInfo.retry}`);
-      } catch (error) {
-        await retryDiagnostics(error);
-        throw error;
-      }
-    });
+test.describe('@ui Retry and Timeout Demo Tests', () => {
+  // Retry logic test with conditional assertion and retry annotation logging
+  test('@retry Should retry on product page header text mismatch', async ({
+    authenticatedPage,
+    retryDiagnostics
+  }, testInfo) => {
+    try {
+      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      await authenticatedPage.goto(`${baseURL}/products`);
+
+      await expect(authenticatedPage.locator('h2.title.text-center')).toHaveText(/all products/i, {
+        timeout: 10000
+      });
+
+      // Log retry attempt as annotation
+      await retryDiagnostics(`Retry attempt: ${testInfo.retry}`);
+    } catch (error) {
+      await retryDiagnostics(error);
+      throw new Error(`Retry test failed: ${error.message}`);
+    }
   });
 
-  test.describe('Timeout Tests', () => {
-    test('@timeout Demo: Slow test with extended expect timeout', async ({
-      authenticatedPage,
-      retryDiagnostics
-    }) => {
-      try {
-        test.slow();
-        const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
-        await authenticatedPage.goto(`${baseURL}/products`);
-        await expect(authenticatedPage.locator('h2.title.text-center')).toContainText(
-          /all products/i,
-          { timeout: 15000 }
-        );
-      } catch (error) {
-        await retryDiagnostics(error);
-        throw error;
-      }
-    });
+  // Timeout test with `test.slow()` and extended expect wait
+  test('@timeout Should handle slow UI interaction with extended timeout', async ({
+    authenticatedPage,
+    retryDiagnostics
+  }) => {
+    try {
+      test.slow(); // Marks the test as intentionally slow for reporting
+
+      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      await authenticatedPage.goto(`${baseURL}/products`);
+
+      // Simulate a slow verification to test extended timeout
+      await expect(authenticatedPage.locator('h2.title.text-center')).toContainText(
+        /all products/i,
+        { timeout: 15000 }
+      );
+    } catch (error) {
+      await retryDiagnostics(error);
+      throw new Error(`Timeout test failed: ${error.message}`);
+    }
   });
 });

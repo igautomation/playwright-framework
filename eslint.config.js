@@ -19,6 +19,20 @@ export default [
       semi: ['error', 'always'],
       'no-unused-vars': 'warn',
       'no-console': 'off'
+    },
+    settings: {
+      'import/resolver': {
+        node: {
+          paths: ['src'],
+        },
+        alias: {
+          map: [
+            ['@fixtures', './src/fixtures'],
+            ['@utils', './src/utils']
+          ],
+          extensions: ['.js', '.jsx']
+        }
+      }
     }
   }
 ];

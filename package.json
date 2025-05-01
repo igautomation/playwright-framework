@@ -9,8 +9,9 @@
   },
   "scripts": {
     "start": "framework help",
-    "test": "framework run",
+    "framework-test": "framework run",
     "run": "framework run",
+    "test": "NODE_OPTIONS='--import=jsconfig-paths/register' playwright test",
     "generate-data": "framework generate-data",
     "list-tags": "framework list-tags",
     "generate-report": "framework generate-report",
@@ -91,6 +92,7 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.2",
     "husky": "^8.0.3",
+    "jsconfig.json": "^2.3.3",
     "lint-staged": "^15.5.1",
     "prettier": "^2.8.8"
   },
@@ -103,6 +105,7 @@
   "imports": {
     "@utils/*": "./src/utils/*",
     "@fixtures/*": "./src/fixtures/*",
-    "@pages/*": "./src/pages/*"
+    "@pages/*": "./src/pages/*",
+    "data/*": "./src/data/*"
   }
 }
