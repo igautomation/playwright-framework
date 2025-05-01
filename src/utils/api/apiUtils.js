@@ -1,17 +1,25 @@
 // src/utils/api/apiUtils.js
+
 import Ajv from "ajv";
 import { faker } from "@faker-js/faker";
 import logger from "../common/logger.js";
 
+// Initialize AJV JSON Schema Validator
 const ajv = new Ajv({ allErrors: true, verbose: true });
 
 /**
- * Utility class for API testing, providing reusable methods for sending requests,
- * validating schemas, generating payloads, and handling responses.
+ * API utility class providing reusable request methods,
+ * schema validation, dynamic payload generation, and response checks.
  */
-export class ApiUtils {
+class ApiUtils {
   constructor(apiClient) {
+    if (!apiClient) {
+      throw new Error("apiClient must be provided to ApiUtils.");
+    }
+
     this.apiClient = apiClient;
+
+    // Default headers for API requests (can be overridden per call)
     this.defaultHeaders = {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -19,36 +27,35 @@ export class ApiUtils {
   }
 
   /**
-   * Sends an API request with the specified method, endpoint, and options.
-   * @param {string} method - HTTP method (GET, POST, PUT, DELETE).
-   * @param {string} endpoint - API endpoint (e.g., '/api/users').
-   * @param {object} [options] - Request options (payload, headers, queryParams, delay).
-   * @returns {Promise<{ status: number, body: object, headers: object }>} Response details.
+   * Sends an HTTP request using apiClient with provided options.
+   * Supports GET, POST, PUT, DELETE.
    */
   async sendRequest(method, endpoint, options = {}) {
     const { payload, headers = {}, queryParams = {}, delay } = options;
+
+    const finalUrl = delay ? `${endpoint}?delay=${delay}` : endpoint;
+    const body = payload ? JSON.stringify(payload) : null;
+    const allHeaders = { ...this.defaultHeaders, ...headers };
+
+    logger.info(
+      `Sending ${method} request to ${finalUrl} with payload: ${body || "none"}`
+    );
+    logger.debug(`Headers: ${JSON.stringify(allHeaders)}`);
+    logger.debug(`Query Params: ${JSON.stringify(queryParams)}`);
+
     try {
-      const requestUrl = delay ? `${endpoint}?delay=${delay}` : endpoint;
-      const requestPayload = payload ? JSON.stringify(payload) : null; // Serialize
-      const requestHeaders = { ...this.defaultHeaders, ...headers };
-
-      logger.info(
-        `Sending ${method} request to ${requestUrl} with payload: ${
-          requestPayload || "none"
-        }`
-      );
-      logger.debug(`Request headers: ${JSON.stringify(requestHeaders)}`);
-      logger.debug(`Query params: ${JSON.stringify(queryParams)}`);
-
-      const response = await this.apiClient[method.toLowerCase()](requestUrl, {
-        headers: requestHeaders,
+      const response = await this.apiClient[method.toLowerCase()](finalUrl, {
+        headers: allHeaders,
         params: queryParams,
-        data: requestPayload,
+        data: body,
       });
 
-      const responseBody = await response.json().catch(() => ({})); // Deserialize
+      const responseBody = await response.json().catch(() => ({}));
       const responseHeaders = response.headers();
-      logger.info(`Received response: ${JSON.stringify(responseBody)}`);
+
+      logger.info(
+        `Received response for ${finalUrl}: ${JSON.stringify(responseBody)}`
+      );
       logger.debug(`Response headers: ${JSON.stringify(responseHeaders)}`);
 
       return {
@@ -57,26 +64,24 @@ export class ApiUtils {
         headers: responseHeaders,
       };
     } catch (error) {
-      logger.error(`Request failed: ${method} ${endpoint} - ${error.message}`);
+      logger.error(`Request failed: ${method} ${finalUrl} - ${error.message}`);
       throw new Error(
-        `API request failed: ${method} ${endpoint} - ${error.message}`
+        `API request failed: ${method} ${finalUrl} - ${error.message}`
       );
     }
   }
 
   /**
-   * Validates a response body against a JSON schema.
-   * @param {object} data - Response body to validate.
-   * @param {object} schema - JSON schema.
-   * @param {string} endpoint - Endpoint for error context.
-   * @throws {Error} If validation fails.
+   * Validates a JSON response body against a schema.
    */
   validateSchema(data, schema, endpoint) {
     const validate = ajv.compile(schema);
+
     if (!validate(data)) {
       const errors = validate.errors.map(
         (err) => `${err.instancePath || "root"} ${err.message}`
       );
+
       logger.error(
         `Schema validation failed for ${endpoint}: ${errors.join(", ")}`
       );
@@ -84,34 +89,32 @@ export class ApiUtils {
         `Schema validation failed for ${endpoint}: ${errors.join(", ")}`
       );
     }
-    logger.info(`Schema validation passed for ${endpoint}`);
+
+    logger.info(`✅ Schema validation passed for ${endpoint}`);
   }
 
   /**
-   * Generates a dynamic user payload for testing.
-   * @param {object} [overrides] - Optional overrides for specific fields.
-   * @returns {object} User payload with name, job, email.
+   * Generates dynamic user payload using Faker.
+   * Used for POST/PUT testing.
    */
   generateDynamicUser(overrides = {}) {
-    const payload = {
+    const base = {
       name: faker.person.fullName(),
       job: faker.person.jobTitle(),
       email: faker.internet.email(),
     };
-    const dynamicPayload = { ...payload, ...overrides };
-    logger.info(`Generated dynamic payload: ${JSON.stringify(dynamicPayload)}`);
-    return dynamicPayload;
+
+    const merged = { ...base, ...overrides };
+    logger.info(`Generated dynamic payload: ${JSON.stringify(merged)}`);
+    return merged;
   }
 
   /**
-   * Validates response status and headers.
-   * @param {object} response - Response object from sendRequest.
-   * @param {number} expectedStatus - Expected HTTP status code.
-   * @param {object} [expectedHeaders] - Expected headers (key-value pairs).
-   * @param {string} endpoint - Endpoint for error context.
+   * Validates status code and headers in the response.
    */
   validateResponse(response, expectedStatus, expectedHeaders = {}, endpoint) {
     const { status, headers } = response;
+
     if (status !== expectedStatus) {
       logger.error(
         `Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`
@@ -120,47 +123,36 @@ export class ApiUtils {
         `Status validation failed for ${endpoint}: Expected ${expectedStatus}, got ${status}`
       );
     }
-    for (const [key, value] of Object.entries(expectedHeaders)) {
-      if (headers[key.toLowerCase()] !== value) {
+
+    for (const [key, expected] of Object.entries(expectedHeaders)) {
+      const actual = headers[key.toLowerCase()];
+      if (actual !== expected) {
         logger.error(
-          `Header validation failed for ${endpoint}: Expected ${key}=${value}, got ${
-            headers[key.toLowerCase()]
-          }`
+          `Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`
         );
         throw new Error(
-          `Header validation failed for ${endpoint}: Expected ${key}=${value}, got ${
-            headers[key.toLowerCase()]
-          }`
+          `Header mismatch for ${endpoint}: ${key} expected "${expected}" but got "${actual}"`
         );
       }
     }
-    logger.info(`Response validation passed for ${endpoint}: Status ${status}`);
+
+    logger.info(`✅ Response validation passed for ${endpoint}`);
   }
 
   /**
-   * Checks if an operation is idempotent (e.g., DELETE).
-   * @param {string} method - HTTP method.
-   * @param {string} endpoint - API endpoint.
-   * @param {number} expectedStatus - Expected status code for idempotent calls.
-   * @param {number} [attempts=2] - Number of attempts to verify idempotency.
-   * @returns {Promise<void>}
+   * Verifies API operation is idempotent by making multiple calls.
    */
   async verifyIdempotency(method, endpoint, expectedStatus, attempts = 2) {
-    try {
-      for (let i = 1; i <= attempts; i++) {
-        const { status } = await this.sendRequest(method, endpoint);
-        if (status !== expectedStatus) {
-          throw new Error(
-            `Idempotency check failed on attempt ${i} for ${method} ${endpoint}: Expected ${expectedStatus}, got ${status}`
-          );
-        }
-        logger.info(
-          `Idempotency check passed on attempt ${i} for ${method} ${endpoint}: Status ${status}`
-        );
+    for (let i = 1; i <= attempts; i++) {
+      const { status } = await this.sendRequest(method, endpoint);
+
+      if (status !== expectedStatus) {
+        const msg = `Idempotency failed on attempt ${i} for ${method} ${endpoint}: Expected ${expectedStatus}, got ${status}`;
+        logger.error(msg);
+        throw new Error(msg);
       }
-    } catch (error) {
-      logger.error(`Idempotency verification failed: ${error.message}`);
-      throw error;
+
+      logger.info(`Idempotency passed on attempt ${i}: ${status}`);
     }
   }
 }

@@ -1,14 +1,4 @@
 // src/config/playwright.config.js
-/**
- * Playwright Test Configuration (ESM Compliant)
- *
- * Responsibilities:
- * - Load environment variables dynamically
- * - Configure retries, reporters, timeouts
- * - Define multiple projects (Web, Mobile, API, Unit)
- * - Enable test artifacts (trace, video, screenshots)
- * - Integrate global setup and teardown
- */
 
 import { defineConfig, devices } from "@playwright/test";
 import { loadEnv } from "dotenv";
@@ -17,153 +7,140 @@ import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 import logger from "../utils/common/logger.js";
 
-// Environment and path setup
+// Setup file path context
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const env = process.env.NODE_ENV || "dev";
-const envFileName = env === "prod" ? "prod" : "dev";
-const envFilePath = join(
-  __dirname,
-  "..",
-  "config",
-  "env",
-  `${envFileName}.env`
-);
+// Determine environment
+const NODE_ENV = process.env.NODE_ENV || "dev";
+const envFile = join(__dirname, "env", `${NODE_ENV}.env`);
 
-// Optionally load .env file if it exists
-if (existsSync(envFilePath)) {
+// Load environment file
+if (existsSync(envFile)) {
   try {
-    loadEnv({ path: envFilePath, override: true });
-    logger.info(
-      `Successfully loaded environment variables from ${envFilePath}`
-    );
+    loadEnv({ path: envFile, override: true });
+    logger.info(`Loaded environment variables from ${envFile}`);
   } catch (error) {
-    logger.error(
-      `Failed to load environment file ${envFilePath}: ${error.message}`
-    );
-    throw new Error(`Failed to load environment file: ${error.message}`);
+    logger.error(`Failed to load environment file: ${error.message}`);
+    throw error;
   }
 } else {
-  logger.info(
-    `Environment file ${envFilePath} not found. Using existing environment variables.`
-  );
+  logger.warn(`Environment file not found: ${envFile}. Using process.env`);
 }
 
-// Log all environment variables for debugging (without assuming specific keys)
+// Sanitize sensitive output from logs
 const envVars = Object.fromEntries(
   Object.entries(process.env).filter(
-    ([key]) => !key.includes("PASSWORD") && !key.includes("SECRET")
-  ) // Exclude sensitive data
+    ([key]) =>
+      !key.toLowerCase().includes("password") &&
+      !key.toLowerCase().includes("secret")
+  )
 );
-logger.info("Available environment variables:", envVars);
+logger.info("Environment variables loaded:", envVars);
 
-// Use BASE_URL if provided, otherwise let fixtures/tests handle validation
+// Base URL
 const baseURL = process.env.BASE_URL;
 
-// Configure reporters (Local vs CI)
+// Reporters
 const reporters = process.env.CI
   ? [
       ["dot"],
       ["github"],
-      ["blob", { outputDir: "blob-report" }],
       ["json", { outputFile: "test-results/results.json" }],
-      [
-        "junit",
-        {
-          outputFile: "test-results/results.xml",
-          includeProjectInTestName: true,
-        },
-      ],
+      ["junit", { outputFile: "test-results/results.xml" }],
       [
         "allure-playwright",
-        { detail: true, outputFolder: "reports/allure", suiteTitle: false },
+        { outputFolder: "reports/allure", suiteTitle: false },
       ],
     ]
   : [
       ["list", { printSteps: true }],
-      [
-        "html",
-        {
-          outputFolder: "reports/html",
-          open: "on-failure",
-          host: "localhost",
-          port: 9323,
-        },
-      ],
-      ["blob", { outputDir: "blob-report" }],
-      ["json", { outputFile: "test-results/results.json" }],
-      [
-        "junit",
-        {
-          outputFile: "test-results/results.xml",
-          includeProjectInTestName: true,
-        },
-      ],
+      ["html", { outputFolder: "reports/html", open: "on-failure" }],
       [
         "allure-playwright",
-        { detail: true, outputFolder: "reports/allure", suiteTitle: false },
+        { outputFolder: "reports/allure", suiteTitle: false },
       ],
     ];
 
-// Final Playwright Configuration
 export default defineConfig({
-  globalSetup: "./src/config/globalSetup.js",
-  globalTeardown: "./src/config/globalTeardown.js",
-
   testDir: "./src/tests",
   testMatch: /.*\.spec\.js/,
   testIgnore: ["**/test-assets/**", "**/*.test.js"],
 
+  // Global hooks
+  globalSetup: "./src/config/globalSetup.js",
+  globalTeardown: "./src/config/globalTeardown.js",
+
+  // Execution policies
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? parseInt(process.env.WORKERS, 10) || 4 : undefined,
+  workers: process.env.CI
+    ? parseInt(process.env.WORKERS || "4", 10)
+    : undefined,
+  maxFailures: process.env.CI ? 10 : undefined,
 
+  // Sharding support
   shard: process.env.CI
     ? {
-        total: parseInt(process.env.CI_SHARD_TOTAL, 10) || 1,
-        current: parseInt(process.env.CI_SHARD_INDEX, 10) || 1,
+        total: parseInt(process.env.CI_SHARD_TOTAL || "1", 10),
+        current: parseInt(process.env.CI_SHARD_INDEX || "1", 10),
       }
     : undefined,
 
-  maxFailures: process.env.CI ? 10 : undefined,
+  // Timeouts
+  timeout: parseInt(process.env.TEST_TIMEOUT || "30000", 10),
+  expect: {
+    timeout: parseInt(process.env.EXPECT_TIMEOUT || "10000", 10),
+    toHaveScreenshot: {
+      maxDiffPixels: parseInt(
+        process.env.SCREENSHOT_MAX_DIFF_PIXELS || "50",
+        10
+      ),
+    },
+    toMatchSnapshot: {
+      maxDiffPixelRatio: parseFloat(
+        process.env.SNAPSHOT_MAX_DIFF_PIXEL_RATIO || "0.05"
+      ),
+    },
+  },
 
+  // Reporters and artifacts
   outputDir: "test-results",
   reporter: reporters,
 
   use: {
     baseURL,
-    storageState: process.env.STORAGE_STATE,
-    colorScheme: process.env.COLOR_SCHEME,
-    locale: process.env.LOCALE,
-    timezoneId: process.env.TIMEZONE,
+    storageState: process.env.STORAGE_STATE || "test-results/storageState.json",
+    colorScheme: process.env.COLOR_SCHEME || "light",
+    locale: process.env.LOCALE || "en-US",
+    timezoneId: process.env.TIMEZONE || "UTC",
     geolocation:
       process.env.GEOLOCATION_LATITUDE && process.env.GEOLOCATION_LONGITUDE
         ? {
             latitude: parseFloat(process.env.GEOLOCATION_LATITUDE),
             longitude: parseFloat(process.env.GEOLOCATION_LONGITUDE),
           }
-        : null,
+        : undefined,
     permissions: process.env.GEOLOCATION_LATITUDE ? ["geolocation"] : undefined,
     offline: process.env.OFFLINE === "true",
     javaScriptEnabled: process.env.JAVASCRIPT_ENABLED !== "false",
     acceptDownloads: true,
-    extraHTTPHeaders: process.env.API_KEY
-      ? { Authorization: `Bearer ${process.env.API_KEY}` }
-      : undefined,
-    ignoreHTTPSErrors: env !== "prod",
     screenshot: "only-on-failure",
     trace: "on-first-retry",
     video: "retain-on-failure",
-    actionTimeout: 10000,
-    headless: process.env.HEADLESS === "false" ? false : true,
     testIdAttribute: process.env.TEST_ID_ATTRIBUTE || "data-test-id",
+    headless: process.env.HEADLESS !== "false",
+    extraHTTPHeaders: process.env.API_KEY
+      ? { Authorization: `Bearer ${process.env.API_KEY}` }
+      : undefined,
     launchOptions: {
-      slowMo: process.env.HEADLESS === "false" ? 50 : 0,
+      slowMo: process.env.SLOWMO ? parseInt(process.env.SLOWMO, 10) : 0,
     },
+    actionTimeout: 10000,
   },
 
+  // Multiple execution projects
   projects: [
     {
       name: "setup",
@@ -224,24 +201,4 @@ export default defineConfig({
       testMatch: /.*\.unit\.spec\.js/,
     },
   ],
-
-  timeout: process.env.TEST_TIMEOUT
-    ? parseInt(process.env.TEST_TIMEOUT, 10)
-    : 30000,
-
-  expect: {
-    timeout: process.env.EXPECT_TIMEOUT
-      ? parseInt(process.env.EXPECT_TIMEOUT, 10)
-      : 10000,
-    toHaveScreenshot: {
-      maxDiffPixels: process.env.SCREENSHOT_MAX_DIFF_PIXELS
-        ? parseInt(process.env.SCREENSHOT_MAX_DIFF_PIXELS, 10)
-        : 50,
-    },
-    toMatchSnapshot: {
-      maxDiffPixelRatio: process.env.SNAPSHOT_MAX_DIFF_PIXEL_RATIO
-        ? parseFloat(process.env.SNAPSHOT_MAX_DIFF_PIXEL_RATIO)
-        : 0.05,
-    },
-  },
 });

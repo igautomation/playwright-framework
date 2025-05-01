@@ -1,66 +1,84 @@
 // src/utils/api/restUtils.js
+
 import logger from "../common/logger.js";
 
-/**
- * Utility class for REST API operations with retry logic.
- */
-export default class RestUtils {
-  constructor(request) {
+class RestUtils {
+  constructor(request, baseURL, defaultHeaders = {}) {
+    if (!request || !baseURL) {
+      throw new Error("Request object and baseURL are required for RestUtils");
+    }
+
     this.request = request;
+    this.baseURL = baseURL;
+    this.defaultHeaders = defaultHeaders;
   }
 
-  /**
-   * Sends an HTTP request with retry logic.
-   * @param {string} method - HTTP method (GET, POST, PUT, DELETE).
-   * @param {string} endpoint - API endpoint.
-   * @param {object} options - Request options (headers, params, data).
-   * @returns {Promise<object>} Response object.
-   */
-  async requestWithRetry(method, endpoint, options = {}) {
-    const maxRetries = 2;
-    let attempt = 0;
+  // Central method to send HTTP requests
+  async sendRequest(method, endpoint, options = {}) {
+    const url = this.baseURL + endpoint;
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    const payload = options.data || null;
 
-    while (attempt < maxRetries) {
+    try {
+      logger.info(`Sending ${method} to ${url}`);
+      logger.debug(`Headers: ${JSON.stringify(headers)}`);
+      if (payload) {
+        logger.debug(`Payload: ${JSON.stringify(payload)}`);
+      }
+
+      const context = await this.request.newContext({
+        baseURL: this.baseURL,
+        extraHTTPHeaders: headers,
+      });
+
+      let response;
+
+      switch (method.toUpperCase()) {
+        case "GET":
+          response = await context.get(endpoint);
+          break;
+        case "POST":
+          response = await context.post(endpoint, { data: payload });
+          break;
+        case "PUT":
+          response = await context.put(endpoint, { data: payload });
+          break;
+        case "DELETE":
+          response = await context.delete(endpoint);
+          break;
+        default:
+          throw new Error(`Unsupported method: ${method}`);
+      }
+
+      return response;
+    } catch (error) {
+      logger.error(
+        `REST call failed: ${method} ${endpoint} - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  // Retry wrapper for resilient requests (basic version)
+  async requestWithRetry(method, endpoint, options = {}, maxAttempts = 2) {
+    let attempt = 0;
+    let lastError;
+
+    while (attempt < maxAttempts) {
       try {
-        logger.debug(`Attempt ${attempt + 1} for ${method} ${endpoint}`);
-        const response = await this.request[method.toLowerCase()](
-          endpoint,
-          options
-        );
-        return response;
+        return await this.sendRequest(method, endpoint, options);
       } catch (error) {
+        lastError = error;
+        logger.warn(`Attempt ${attempt + 1} failed for ${method} ${endpoint}`);
         attempt++;
-        if (attempt >= maxRetries) {
-          logger.error(
-            `Failed after ${maxRetries} attempts for ${method} ${endpoint}: ${error.message}`
-          );
-          throw error;
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // basic backoff
         }
-        logger.warn(
-          `Retry ${attempt} for ${method} ${endpoint}: ${error.message}`
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
-  }
 
-  /**
-   * Sends batch HTTP requests.
-   * @param {Array<object>} requests - Array of request objects.
-   * @returns {Promise<Array<object>>} Array of responses.
-   */
-  async batchRequests(requests) {
-    try {
-      const responses = await Promise.all(
-        requests.map((req) =>
-          this.requestWithRetry(req.method, req.endpoint, req.options)
-        )
-      );
-      logger.info(`Batch request completed with ${responses.length} responses`);
-      return responses;
-    } catch (error) {
-      logger.error(`Batch request failed: ${error.message}`);
-      throw new Error(`Batch request failed: ${error.message}`);
-    }
+    throw new Error(`All ${maxAttempts} attempts failed: ${lastError.message}`);
   }
 }
+
+export default RestUtils;

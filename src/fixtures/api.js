@@ -1,37 +1,22 @@
 // src/fixtures/api.js
-/**
- * API utilities module for Playwright Framework (ESM Compliant).
- *
- * Responsibilities:
- * - Create isolated API request contexts
- * - Standardize helper methods for GET, POST, PUT, DELETE
- */
+
 import { request } from "@playwright/test";
 
-/**
- * Creates a new API request context with optional base URL and headers.
- *
- * @param {string} baseURL - The base URL for API requests.
- * @param {object} [extraHTTPHeaders={}] - Additional headers (e.g., auth).
- * @returns {Promise<import('@playwright/test').APIRequestContext>}
- */
+// Function to create an isolated API request context
+// Accepts a base URL and optional headers
 async function createRequestContext(baseURL, extraHTTPHeaders = {}) {
+  if (!baseURL) {
+    throw new Error("Base URL must be provided to createRequestContext()");
+  }
+
   return await request.newContext({
-    baseURL,
-    extraHTTPHeaders,
+    baseURL: baseURL,
+    extraHTTPHeaders: extraHTTPHeaders,
   });
 }
 
-/**
- * Generic function to make an API request.
- *
- * @param {import('@playwright/test').APIRequestContext} context - Request context.
- * @param {string} method - HTTP method.
- * @param {string} endpoint - API endpoint path.
- * @param {object} [payload={}] - Request body.
- * @param {object} [headers={}] - Additional headers.
- * @returns {Promise<import('@playwright/test').APIResponse>}
- */
+// Core function to issue HTTP requests using a method + endpoint
+// Accepts method, endpoint, payload (if applicable), and headers
 async function makeApiRequest(
   context,
   method,
@@ -39,10 +24,18 @@ async function makeApiRequest(
   payload = {},
   headers = {}
 ) {
+  if (!context || !method || !endpoint) {
+    throw new Error("API context, method, and endpoint are required.");
+  }
+
   const options = {
-    headers,
-    ...(method.toUpperCase() !== "GET" && { data: payload }),
+    headers: headers,
   };
+
+  // Only attach data for non-GET requests
+  if (method.toUpperCase() !== "GET") {
+    options.data = payload;
+  }
 
   switch (method.toUpperCase()) {
     case "GET":
@@ -58,32 +51,22 @@ async function makeApiRequest(
   }
 }
 
-/**
- * Performs a GET request.
- */
+// Export individual methods for convenience
 async function get(context, endpoint, headers = {}) {
   return await makeApiRequest(context, "GET", endpoint, {}, headers);
 }
 
-/**
- * Performs a POST request.
- */
 async function post(context, endpoint, payload = {}, headers = {}) {
   return await makeApiRequest(context, "POST", endpoint, payload, headers);
 }
 
-/**
- * Performs a PUT request.
- */
 async function put(context, endpoint, payload = {}, headers = {}) {
   return await makeApiRequest(context, "PUT", endpoint, payload, headers);
 }
 
-/**
- * Performs a DELETE request.
- */
 async function del(context, endpoint, headers = {}) {
   return await makeApiRequest(context, "DELETE", endpoint, {}, headers);
 }
 
+// Export all API helpers
 export { createRequestContext, get, post, put, del };

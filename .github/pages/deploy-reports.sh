@@ -17,4 +17,4 @@ jobs:
           chmod +x .github/pages/deploy-reports.sh
           .github/pages/deploy-reports.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

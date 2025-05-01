@@ -15,7 +15,7 @@ class ScreenshotUtils {
    */
   constructor(page) {
     if (!page) {
-      throw new Error('Page object is required');
+      throw new Error("Page object is required");
     }
     this.page = page;
   }
@@ -23,7 +23,7 @@ class ScreenshotUtils {
   /**
    * Captures a full-page screenshot.
    */
-  async captureFullPage(path, { fullPage = true, quality = 'png' } = {}) {
+  async captureFullPage(path, { fullPage = true, quality = "png" } = {}) {
     try {
       const screenshotOptions = { fullPage, type: quality };
 
@@ -34,16 +34,18 @@ class ScreenshotUtils {
 
       return await this.page.screenshot(screenshotOptions);
     } catch (error) {
-      throw new Error(`Failed to capture full-page screenshot: ${error.message}`);
+      throw new Error(
+        `Failed to capture full-page screenshot: ${error.message}`
+      );
     }
   }
 
   /**
    * Captures a screenshot of a specific element.
    */
-  async captureElement(selector, path, { clip = false, quality = 'png' } = {}) {
+  async captureElement(selector, path, { clip = false, quality = "png" } = {}) {
     if (!selector) {
-      throw new Error('Selector is required');
+      throw new Error("Selector is required");
     }
 
     try {
@@ -77,13 +79,13 @@ class ScreenshotUtils {
   /**
    * Captures a screenshot with custom viewport clipping.
    */
-  async captureCustom(path, { clip, quality = 'png' } = {}) {
+  async captureCustom(path, { clip, quality = "png" } = {}) {
     try {
       const screenshotOptions = { type: quality };
 
       if (clip) {
         if (!clip.x || !clip.y || !clip.width || !clip.height) {
-          throw new Error('Clip options must include x, y, width, and height');
+          throw new Error("Clip options must include x, y, width, and height");
         }
         screenshotOptions.clip = clip;
       }

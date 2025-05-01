@@ -1,7 +1,7 @@
 // src/pages/HomePage.js
 
-import BasePage from './BasePage.js';
-import WebInteractions from '../utils/web/webInteractions.js';
+import BasePage from "./BasePage.js";
+import WebInteractions from "../utils/web/webInteractions.js";
 
 class HomePage extends BasePage {
   constructor(page) {
@@ -9,8 +9,8 @@ class HomePage extends BasePage {
     this.web = new WebInteractions(page);
 
     // Locators directly used here or imported separately
-    this.welcomeMessage = 'h1';
-    this.navLinks = 'nav a';
+    this.welcomeMessage = "h1";
+    this.navLinks = "nav a";
   }
 
   async getNavLinks() {
@@ -19,7 +19,10 @@ class HomePage extends BasePage {
   }
 
   async navigateToSection(sectionName) {
-    await this.page.locator(this.navLinks).filter({ hasText: sectionName }).click();
+    await this.page
+      .locator(this.navLinks)
+      .filter({ hasText: sectionName })
+      .click();
     await this.waitForLoad();
   }
 

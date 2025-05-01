@@ -3,35 +3,35 @@
 /**
  * Global Teardown Script for Playwright Automation Framework.
  *
- * Purpose:
- * - This script runs once after all tests are completed.
- * - It ensures cleanup of temporary artifacts such as storage state files.
- * - Improves CI/CD hygiene by removing old session data.
+ * Runs once after all tests are finished.
+ * Cleans up storage state, cached tokens, or temp session data
+ * to ensure a clean CI/CD environment.
  */
 
 import fs from "fs-extra";
 import path from "path";
+import logger from "../utils/common/logger.js";
 
-/**
- * Global teardown function.
- * Deletes the storageState file if it exists to clean up the local environment.
- */
-module.exports = async () => {
+export default async function globalTeardown() {
   const storageStatePath =
     process.env.STORAGE_STATE || "test-results/storageState.json";
 
-  console.log("Starting global teardown: cleaning up storage state.");
+  logger.info("Global teardown started.");
 
   try {
-    // Check if storageState file exists and remove it
     if (await fs.pathExists(storageStatePath)) {
       await fs.remove(storageStatePath);
-      console.log(`Storage state file removed: ${storageStatePath}`);
+      logger.info(`Removed storage state file: ${storageStatePath}`);
     } else {
-      console.log("No storage state file found to remove.");
+      logger.info(`No storage state file found at: ${storageStatePath}`);
     }
+
+    // Optional: remove trace or session dumps if needed
+    // await fs.remove('test-results/setup-trace.zip');
+
+    logger.info("Global teardown completed.");
   } catch (error) {
-    console.error("Error during global teardown:", error);
-    process.exit(1); // Exit with failure code if teardown fails
+    logger.error(`Error during global teardown: ${error.message}`);
+    process.exit(1); // Fail the teardown process if cleanup fails
   }
-};
+}

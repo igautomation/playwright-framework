@@ -18,7 +18,7 @@ class NetworkUtils {
    */
   constructor(page) {
     if (!page) {
-      throw new Error('Page object is required');
+      throw new Error("Page object is required");
     }
     this.page = page;
   }
@@ -27,24 +27,29 @@ class NetworkUtils {
    * Intercepts a network request and applies a custom handler.
    */
   async interceptRequest(urlPattern, handler) {
-    if (!urlPattern || typeof handler !== 'function') {
-      throw new Error('Valid URL pattern and handler function are required');
+    if (!urlPattern || typeof handler !== "function") {
+      throw new Error("Valid URL pattern and handler function are required");
     }
-    await this.page.route(urlPattern, (route, request) => handler(route, request));
+    await this.page.route(urlPattern, (route, request) =>
+      handler(route, request)
+    );
   }
 
   /**
    * Mocks a network response for a given URL pattern.
    */
-  async mockResponse(urlPattern, { status = 200, body = {}, headers = {} } = {}) {
+  async mockResponse(
+    urlPattern,
+    { status = 200, body = {}, headers = {} } = {}
+  ) {
     if (!urlPattern) {
-      throw new Error('URL pattern is required');
+      throw new Error("URL pattern is required");
     }
     await this.page.route(urlPattern, (route) => {
       route.fulfill({
         status,
         body: JSON.stringify(body),
-        headers: { 'Content-Type': 'application/json', ...headers },
+        headers: { "Content-Type": "application/json", ...headers },
       });
     });
   }
@@ -53,8 +58,8 @@ class NetworkUtils {
    * Validates the payload of a network request.
    */
   async validateRequest(urlPattern, validator) {
-    if (!urlPattern || typeof validator !== 'function') {
-      throw new Error('Valid URL pattern and validator function are required');
+    if (!urlPattern || typeof validator !== "function") {
+      throw new Error("Valid URL pattern and validator function are required");
     }
 
     let isValid = false;
@@ -78,7 +83,7 @@ class NetworkUtils {
    */
   async captureResponse(urlPattern) {
     if (!urlPattern) {
-      throw new Error('URL pattern is required');
+      throw new Error("URL pattern is required");
     }
 
     let responseData;

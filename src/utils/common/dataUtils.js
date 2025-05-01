@@ -9,9 +9,9 @@
  * - Cache parsed data to improve performance
  */
 
-import { promises as fs } from 'fs';
-import yaml from 'js-yaml';
-import { parse as parseCsv } from 'csv-parse/sync';
+import { promises as fs } from "fs";
+import yaml from "js-yaml";
+import { parse as parseCsv } from "csv-parse/sync";
 
 // In-memory cache to avoid redundant file reads
 const cache = new Map();
@@ -30,19 +30,19 @@ const parsers = {
 
     const headers = Object.keys(parsed[0]);
     const requiredHeaders = {
-      'src/data/csv/users.csv': ['username', 'password'],
-      'src/data/csv/products.csv': ['id', 'name', 'price'],
+      "src/data/csv/users.csv": ["username", "password"],
+      "src/data/csv/products.csv": ["id", "name", "price"],
     };
     const required = requiredHeaders[path] || [];
-    const missing = required.filter(header => !headers.includes(header));
+    const missing = required.filter((header) => !headers.includes(header));
     if (missing.length > 0) {
       throw new Error(
-        `Missing required headers in ${path}: ${missing.join(', ')}`
+        `Missing required headers in ${path}: ${missing.join(", ")}`
       );
     }
 
     return parsed;
-  }
+  },
 };
 
 /**
@@ -58,13 +58,13 @@ async function readData(path) {
       return cache.get(path);
     }
 
-    const ext = path.split('.').pop().toLowerCase();
+    const ext = path.split(".").pop().toLowerCase();
     const parser = parsers[ext];
     if (!parser) {
       throw new Error(`Unsupported file format: ${ext}`);
     }
 
-    const data = await fs.readFile(path, 'utf8');
+    const data = await fs.readFile(path, "utf8");
     const result = parser(data, path);
 
     cache.set(path, result);

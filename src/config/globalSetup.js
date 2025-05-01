@@ -1,32 +1,28 @@
 // src/config/globalSetup.js
 
 /**
- * Global Setup Script for Playwright Automation Framework.
- *
- * Purpose:
- * - Authenticate a user and save the storage state before tests run.
- * - Extract authentication tokens dynamically.
- * - Support multi-user login scenarios.
- * - Use structured logging and tracing for debugging.
+ * Global Setup for Playwright Framework
+ * - Launches browser
+ * - Loads base URL
+ * - Injects or mocks login token
+ * - Saves storage state
+ * - Traces and logs outcome
  */
 
 import { chromium } from "@playwright/test";
-import { readData } from "../utils/common/dataUtils.js";
+import { readJson } from "../utils/common/dataOrchestrator.js";
 import BasePage from "../pages/BasePage.js";
-import logger from "../utils/logger.js";
+import logger from "../utils/common/logger.js";
+import path from "path";
 
 /**
- * Global setup function executed before the test suite.
- *
- * @param {Object} config - Playwright global config object.
+ * Playwright global setup hook
+ * Runs before any test executes (once per run)
  */
-async function globalSetup(config) {
+export default async function globalSetup(config) {
   const { baseURL, storageState } = config.projects[0].use;
 
-  logger.info("Starting global setup", {
-    baseURL,
-    storageStatePath: storageState,
-  });
+  logger.info("Global setup started", { baseURL });
 
   const browser = await chromium.launch();
   const context = await browser.newContext();
@@ -34,72 +30,48 @@ async function globalSetup(config) {
   const basePage = new BasePage(page);
 
   try {
-    // Start tracing to capture screenshots, DOM snapshots, network activity
-    const tracePath = `./test-results/setup-trace-${new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-")}.zip`;
+    // Start tracing
+    const traceFile = `./test-results/setup-trace-${Date.now()}.zip`;
     await context.tracing.start({ screenshots: true, snapshots: true });
-    logger.info("Tracing started", { tracePath });
 
-    // Dynamically load credentials (admin user preferred)
-    const credentials = await readData("src/data/json/credentials.json");
+    // Load admin credentials from JSON
+    const credentials = readJson("src/data/json/credentials.json");
     const user = credentials.users.find((u) => u.role === "admin");
-    if (!user) {
-      throw new Error("Admin user not found in credentials.json");
-    }
+    if (!user) throw new Error("No admin user found");
 
     const username = process.env.TEST_USERNAME || user.username;
     const password = process.env.TEST_PASSWORD || user.password;
-    logger.info("Loaded credentials", { username });
 
-    // Navigate to baseURL using BasePage utility
+    logger.info("Using credentials for global setup", { username });
+
+    // Navigate to the login page
     await basePage.navigateTo(baseURL);
 
-    // Mock authentication (e.g., example.com, agent portals)
-    logger.info("Setting mock authentication token in local storage...");
-    await page.evaluate(() => {
-      localStorage.setItem("authToken", "mock-auth-token");
-    });
-    logger.info("Mock authToken set successfully");
+    // Mock or inject auth token
+    const token = process.env.AUTH_TOKEN || "mock-auth-token";
+    await page.evaluate((t) => localStorage.setItem("authToken", t), token);
 
-    // Capture and export authentication token
-    const token =
-      (await page.evaluate(() => localStorage.getItem("authToken"))) ||
-      "mock-auth-token";
-    process.env.AUTH_TOKEN = token;
-    logger.info("Authentication token extracted", { token });
+    logger.info("Authentication token injected", { token });
 
-    // Save storage state for future sessions
+    // Save session state
     await context.storageState({ path: storageState });
-    logger.info("Storage state saved", { storageStatePath: storageState });
+    logger.info("Storage state saved", { path: storageState });
 
-    // Capture a screenshot for debugging
     await basePage.takeScreenshot("global-setup");
 
-    // Stop tracing on success
-    await context.tracing.stop({ path: tracePath });
-    logger.info("Tracing stopped successfully", { tracePath });
+    // Stop tracing
+    await context.tracing.stop({ path: traceFile });
+    logger.info("Tracing complete", { traceFile });
 
     await browser.close();
-    logger.info("Browser closed - Global setup completed successfully");
+    logger.info("Global setup completed");
   } catch (error) {
-    // On error, capture screenshot and trace
+    const failTrace = `./test-results/failed-setup-trace-${Date.now()}.zip`;
     await basePage.takeScreenshot("global-setup-failure");
-
-    const failedTracePath = `./test-results/failed-setup-trace-${new Date()
-      .toISOString()
-      .replace(/[:.]/g, "-")}.zip`;
-    await context.tracing.stop({ path: failedTracePath });
-    logger.error("Global setup failed", {
-      error: error.message,
-      failedTracePath,
-    });
+    await context.tracing.stop({ path: failTrace });
+    logger.error("Global setup failed", { error: error.message, failTrace });
 
     await browser.close();
-    logger.info("Browser closed after failure");
-
-    throw error; // Re-throw to stop the entire setup if failed
+    throw error;
   }
 }
-
-module.exports = globalSetup;

@@ -1,34 +1,45 @@
 // src/utils/api/models/User.js
 
 /**
- * User POJO for API payloads and responses (ESM Compliant).
+ * User model for use in API tests and data factories.
+ * Helps build, validate, and serialize user data with consistent schema.
  */
 
 class User {
   /**
+   * Create a user object.
+   *
    * @param {Object} params - User parameters
-   * @param {string} params.id - User ID
+   * @param {string} [params.id] - Optional user ID
    * @param {string} params.name - User name
    * @param {string} params.email - User email
-   * @param {string} [params.password] - User password
-   * @param {string} [params.role] - User role
+   * @param {string} [params.password] - User password (optional)
+   * @param {string} [params.role] - User role (optional)
    */
   constructor({ id, name, email, password, role }) {
-    if (!id) throw new Error('User ID is required');
-    if (!name) throw new Error('User name is required');
-    if (!email || !this.isValidEmail(email)) {
-      throw new Error('Valid email is required');
-    }
-
-    this._id = id;
+    this._id = id || null;
     this._name = name;
     this._email = email;
     this._password = password || null;
-    this._role = role || 'user';
+    this._role = role || "user";
   }
 
   /**
-   * Validates an email address
+   * Validates current user instance fields.
+   * Throws if required fields are missing or invalid.
+   */
+  validate() {
+    if (!this._name) {
+      throw new Error("User name is required");
+    }
+
+    if (!this._email || !this.isValidEmail(this._email)) {
+      throw new Error("Valid email is required");
+    }
+  }
+
+  /**
+   * Checks if an email address is valid.
    * @param {string} email
    * @returns {boolean}
    */
@@ -37,48 +48,55 @@ class User {
     return emailRegex.test(email);
   }
 
+  // --- Getters & Setters ---
+
   getId() {
     return this._id;
   }
 
-  setName(name) {
-    if (!name) throw new Error('User name cannot be empty');
-    this._name = name;
+  setId(id) {
+    this._id = id;
   }
 
   getName() {
     return this._name;
   }
 
-  setEmail(email) {
-    if (!email || !this.isValidEmail(email)) {
-      throw new Error('Valid email is required');
-    }
-    this._email = email;
+  setName(name) {
+    if (!name) throw new Error("Name cannot be empty");
+    this._name = name;
   }
 
   getEmail() {
     return this._email;
   }
 
-  setPassword(password) {
-    this._password = password || null;
+  setEmail(email) {
+    if (!this.isValidEmail(email)) {
+      throw new Error("Invalid email");
+    }
+    this._email = email;
   }
 
   getPassword() {
     return this._password;
   }
 
-  setRole(role) {
-    this._role = role || 'user';
+  setPassword(password) {
+    this._password = password || null;
   }
 
   getRole() {
     return this._role;
   }
 
+  setRole(role) {
+    this._role = role || "user";
+  }
+
   /**
-   * Serializes the user object to JSON
+   * Serializes the user object into a plain JSON structure.
+   * Used when sending payloads to API.
    * @returns {Object}
    */
   toJSON() {
