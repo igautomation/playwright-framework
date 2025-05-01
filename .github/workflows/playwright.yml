@@ -96,21 +96,21 @@ jobs:
 
       - name: Upload Allure Report
         if: always()
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: allure-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
           path: reports/allure-report/
 
       - name: Upload Playwright HTML Report
         if: always()
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-html-report-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
           path: playwright-report/
 
       - name: Upload Screenshots and Traces
         if: always()
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: traces-and-screenshots-${{ matrix.browser }}-${{ matrix.environment }}-${{ matrix.shard }}
           path: |
