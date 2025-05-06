@@ -1,256 +1,126 @@
-<<<<<<< HEAD
-// src/utils/reporting/reportUtils.js
-
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import logger from '../common/logger.js';
-
 /**
- * Path configurations (can be overridden using .env)
+ * Report utilities for test reporting
  */
-const ALLURE_RESULTS_DIR = process.env.ALLURE_RESULTS_DIR || 'reports/allure';
-const ALLURE_REPORT_DIR = process.env.ALLURE_REPORT_DIR || 'reports/allure-report';
-
-/**
- * Generates an Allure HTML report by reading raw results.
- * This is usually triggered after all test execution finishes.
- *
- * @throws {Error} if report generation fails
- */
-export function generateAllureReport() {
-  const resolvedResults = path.resolve(ALLURE_RESULTS_DIR);
-  const resolvedOutput = path.resolve(ALLURE_REPORT_DIR);
-
-  if (!fs.existsSync(resolvedResults)) {
-    logger.error(`Allure results directory not found: ${resolvedResults}`);
-    throw new Error(`Missing results: ${resolvedResults}`);
-  }
-
-  try {
-    execSync(`npx allure generate ${resolvedResults} -o ${resolvedOutput} --clean`, {
-      stdio: 'inherit'
-    });
-
-    logger.info(`Allure report generated at ${resolvedOutput}`);
-  } catch (error) {
-    logger.error(`Failed to generate Allure report: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Attaches a screenshot file to the test report.
- * Should be used inside a test or fixture (e.g., retryDiagnostics).
- *
- * @param {string} screenshotPath - Absolute or relative path to PNG file
- * @param {string} name - Display name for the screenshot in the report
- * @param {object} testInfo - Playwright testInfo object (injected automatically)
- */
-export function attachScreenshot(screenshotPath, name = 'Screenshot', testInfo) {
-  const resolved = path.resolve(screenshotPath);
-
-  if (!fs.existsSync(resolved)) {
-    logger.warn(`Screenshot not found: ${resolved}`);
-    return;
-  }
-
-  try {
-    const image = fs.readFileSync(resolved);
-    testInfo.attach(name, {
-      body: image,
-      contentType: 'image/png'
-    });
-
-    logger.info(`Attached screenshot to report: ${name}`);
-  } catch (error) {
-    logger.error(`Error attaching screenshot: ${error.message}`);
-  }
-}
-
-/**
- * Attaches a text log to the test report.
- * Can be raw text or a file path.
- *
- * @param {string} content - Raw string or file path
- * @param {string} name - Label in the report
- * @param {object} testInfo - Playwright testInfo object
- */
-export function attachLog(content, name = 'Log', testInfo) {
-  let body;
-
-  if (!content) {
-    logger.warn('No log content provided for attachment');
-    return;
-  }
-
-  try {
-    if (fs.existsSync(content)) {
-      body = fs.readFileSync(content);
-    } else {
-      body = Buffer.from(content, 'utf-8');
-    }
-
-    testInfo.attach(name, {
-      body,
-      contentType: 'text/plain'
-    });
-
-    logger.info(`Attached log: ${name}`);
-  } catch (error) {
-    logger.error(`Failed to attach log: ${error.message}`);
-  }
-}
-
-/**
- * Sends a webhook notification (Slack, Teams, etc.).
- * Typically used in CI to notify failures or test summaries.
- *
- * @param {Object} config - Notification config
- * @param {string} config.webhookUrl - Destination URL
- * @param {string} config.message - Main message
- * @param {string} [config.channel] - Optional: target channel
- */
-export async function sendNotification(config) {
-  if (!config || !config.webhookUrl || !config.message) {
-    logger.error('Missing webhookUrl or message in notification config');
-    return;
-  }
-
-  try {
-    const fetch = (await import('node-fetch')).default;
-    const payload = { text: config.message };
-
-    if (config.channel) {
-      payload.channel = config.channel;
-    }
-
-    const response = await fetch(config.webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Notification failed: ${response.status} ${response.statusText}`);
-    }
-
-    logger.info('Notification sent successfully');
-  } catch (error) {
-    logger.error(`Notification error: ${error.message}`);
-  }
-}
-
-/**
- * Optional utility: write JSON metadata to disk.
- * Can be used to export runtime stats or test info for other tools.
- *
- * @param {string} fileName - JSON file name
- * @param {object} data - Any data object to serialize
- */
-export async function writeMetadataFile(fileName, data) {
-  try {
-    const outputPath = path.resolve('reports', fileName);
-    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
-    logger.info(`Metadata file written: ${outputPath}`);
-  } catch (error) {
-    logger.error(`Failed to write metadata: ${error.message}`);
-  }
-}
-
-// Grouped export for convenience
-export default {
-  generateAllureReport,
-  attachScreenshot,
-  attachLog,
-  sendNotification,
-  writeMetadataFile
-};
-=======
-/**
- * Reporting utilities for test reporting
- */
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../common/logger');
 
 class ReportUtils {
   /**
-   * Constructor
+   * Generate Allure report
+   * @param {Object} options - Report options
+   * @returns {string} Report path
    */
-  constructor() {
-    this.reportsDir = path.resolve(process.cwd(), 'reports');
-
-    // Create reports directory if it doesn't exist
-    if (!fs.existsSync(this.reportsDir)) {
-      fs.mkdirSync(this.reportsDir, { recursive: true });
-    }
-  }
-
-  /**
-   * Save test result to JSON file
-   * @param {string} testName - Test name
-   * @param {Object} result - Test result
-   * @returns {string} Path to the report file
-   */
-  saveTestResult(testName, result) {
+  static generateAllureReport(options = {}) {
+    const resultsDir = options.resultsDir || path.join(process.cwd(), 'allure-results');
+    const reportDir = options.reportDir || path.join(process.cwd(), 'allure-report');
+    
+    logger.info(`Generating Allure report from ${resultsDir} to ${reportDir}`);
+    
     try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `${testName}-${timestamp}.json`;
-      const filePath = path.join(this.reportsDir, fileName);
-
-      fs.writeFileSync(filePath, JSON.stringify(result, null, 2));
-
-      logger.info(`Test result saved to: ${filePath}`);
-      return filePath;
-    } catch (error) {
-      logger.error('Failed to save test result', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Generate HTML report from test results
-   * @param {Array<Object>} results - Test results
-   * @returns {string} Path to the HTML report
-   */
-  generateHtmlReport(results) {
-    try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `report-${timestamp}.html`;
-      const filePath = path.join(this.reportsDir, 'html', fileName);
-
-      // Create HTML report directory if it doesn't exist
-      const htmlDir = path.join(this.reportsDir, 'html');
-      if (!fs.existsSync(htmlDir)) {
-        fs.mkdirSync(htmlDir, { recursive: true });
+      // Clean report directory
+      if (fs.existsSync(reportDir)) {
+        fs.rmSync(reportDir, { recursive: true });
       }
-
-      // Generate HTML content
-      const html = this.generateHtmlContent(results);
-
-      // Write HTML file
-      fs.writeFileSync(filePath, html);
-
-      logger.info(`HTML report generated at: ${filePath}`);
-      return filePath;
+      
+      // Generate report
+      execSync(`npx allure generate ${resultsDir} --clean -o ${reportDir}`);
+      
+      return reportDir;
     } catch (error) {
-      logger.error('Failed to generate HTML report', error);
+      logger.error('Failed to generate Allure report:', error);
       throw error;
     }
   }
 
   /**
-   * Generate HTML content for report
-   * @param {Array<Object>} results - Test results
-   * @returns {string} HTML content
+   * Open Allure report
+   * @param {string} reportDir - Report directory
    */
-  generateHtmlContent(results) {
-    const passed = results.filter((r) => r.status === 'passed').length;
-    const failed = results.filter((r) => r.status === 'failed').length;
-    const skipped = results.filter((r) => r.status === 'skipped').length;
-    const total = results.length;
+  static openAllureReport(reportDir = 'allure-report') {
+    logger.info(`Opening Allure report from ${reportDir}`);
+    
+    try {
+      execSync(`npx allure open ${reportDir}`);
+    } catch (error) {
+      logger.error('Failed to open Allure report:', error);
+      throw error;
+    }
+  }
 
+  /**
+   * Generate HTML report
+   * @param {Object} options - Report options
+   * @returns {string} Report path
+   */
+  static generateHtmlReport(options = {}) {
+    const resultsDir = options.resultsDir || path.join(process.cwd(), 'test-results');
+    const reportDir = options.reportDir || path.join(process.cwd(), 'html-report');
+    
+    logger.info(`Generating HTML report from ${resultsDir} to ${reportDir}`);
+    
+    try {
+      // Clean report directory
+      if (fs.existsSync(reportDir)) {
+        fs.rmSync(reportDir, { recursive: true });
+      }
+      
+      // Create report directory
+      fs.mkdirSync(reportDir, { recursive: true });
+      
+      // Generate report
+      const reportPath = path.join(reportDir, 'index.html');
+      
+      // Create simple HTML report
+      const html = this._generateHtml(resultsDir, options);
+      
+      fs.writeFileSync(reportPath, html);
+      
+      return reportPath;
+    } catch (error) {
+      logger.error('Failed to generate HTML report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate HTML content
+   * @param {string} resultsDir - Results directory
+   * @param {Object} options - Report options
+   * @returns {string} HTML content
+   * @private
+   */
+  static _generateHtml(resultsDir, options = {}) {
+    // Get test results
+    const results = this._getTestResults(resultsDir);
+    
+    // Calculate statistics
+    const stats = {
+      total: results.length,
+      passed: results.filter(r => r.status === 'passed').length,
+      failed: results.filter(r => r.status === 'failed').length,
+      skipped: results.filter(r => r.status === 'skipped').length,
+      duration: results.reduce((sum, r) => sum + r.duration, 0)
+    };
+    
+    // Format duration
+    const formatDuration = (ms) => {
+      if (ms < 1000) return `${ms}ms`;
+      const seconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      
+      if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+      } else {
+        return `${seconds}s`;
+      }
+    };
+    
+    // Generate HTML
     return `
       <!DOCTYPE html>
       <html lang="en">
@@ -261,131 +131,237 @@ class ReportUtils {
         <style>
           body {
             font-family: Arial, sans-serif;
+            line-height: 1.6;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
-          }
-          .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          }
-          h1, h2 {
             color: #333;
           }
+          h1, h2, h3 {
+            color: #2c3e50;
+          }
+          h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+          }
           .summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+          }
+          .stats {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-top: 15px;
           }
-          .card {
-            flex: 1;
-            min-width: 200px;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          }
-          .card h3 {
-            margin-top: 0;
-          }
-          .passed { background-color: #d4edda; color: #155724; }
-          .failed { background-color: #f8d7da; color: #721c24; }
-          .skipped { background-color: #e2e3e5; color: #383d41; }
-          .total { background-color: #cce5ff; color: #004085; }
-          .metric {
-            font-size: 36px;
-            font-weight: bold;
-            margin: 10px 0;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-          }
-          th {
+          .stat {
             background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
           }
-          tr.passed td:first-child {
-            border-left: 4px solid #28a745;
+          .stat h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
           }
-          tr.failed td:first-child {
-            border-left: 4px solid #dc3545;
+          .stat .value {
+            font-size: 24px;
+            font-weight: bold;
           }
-          tr.skipped td:first-child {
-            border-left: 4px solid #6c757d;
+          .stat.passed .value { color: #27ae60; }
+          .stat.failed .value { color: #e74c3c; }
+          .stat.skipped .value { color: #f39c12; }
+          .stat.duration .value { color: #3498db; }
+          
+          .test {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
           }
-          .timestamp {
-            color: #6c757d;
-            font-size: 14px;
-            margin-top: 20px;
+          .test.passed {
+            border-left: 5px solid #27ae60;
+          }
+          .test.failed {
+            border-left: 5px solid #e74c3c;
+          }
+          .test.skipped {
+            border-left: 5px solid #f39c12;
+          }
+          .test h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+          }
+          .test .duration {
+            color: #7f8c8d;
+            font-size: 0.9em;
+          }
+          .error {
+            background-color: #fadbd8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+          }
+          .media {
+            margin-top: 15px;
+          }
+          .media h4 {
+            margin-bottom: 5px;
+          }
+          .media img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
           }
         </style>
       </head>
       <body>
-        <div class="container">
-          <h1>Test Report</h1>
+        <h1>Test Report</h1>
+        
+        <div class="summary">
+          <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
           
-          <div class="summary">
-            <div class="card total">
-              <h3>Total Tests</h3>
-              <div class="metric">${total}</div>
-            </div>
-            <div class="card passed">
+          <div class="stats">
+            <div class="stat passed">
               <h3>Passed</h3>
-              <div class="metric">${passed}</div>
+              <div class="value">${stats.passed}</div>
             </div>
-            <div class="card failed">
+            <div class="stat failed">
               <h3>Failed</h3>
-              <div class="metric">${failed}</div>
+              <div class="value">${stats.failed}</div>
             </div>
-            <div class="card skipped">
+            <div class="stat skipped">
               <h3>Skipped</h3>
-              <div class="metric">${skipped}</div>
+              <div class="value">${stats.skipped}</div>
+            </div>
+            <div class="stat duration">
+              <h3>Duration</h3>
+              <div class="value">${formatDuration(stats.duration)}</div>
             </div>
           </div>
-          
-          <h2>Test Results</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Test</th>
-                <th>Status</th>
-                <th>Duration</th>
-                <th>Error</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${results
-                .map(
-                  (result) => `
-                <tr class="${result.status}">
-                  <td>${result.name}</td>
-                  <td>${result.status}</td>
-                  <td>${result.duration}ms</td>
-                  <td>${result.error || ''}</td>
-                </tr>
-              `
-                )
-                .join('')}
-            </tbody>
-          </table>
-          
-          <p class="timestamp">Generated on: ${new Date().toLocaleString()}</p>
         </div>
+        
+        <h2>Test Results</h2>
+        
+        ${results.map(test => `
+          <div class="test ${test.status}">
+            <h3>${test.name}</h3>
+            <div class="duration">Duration: ${formatDuration(test.duration)}</div>
+            
+            ${test.status === 'failed' && test.error ? `
+              <div class="error">
+                <strong>Error:</strong> ${test.error.message}
+                ${test.error.stack ? `\n\n${test.error.stack}` : ''}
+              </div>
+            ` : ''}
+            
+            ${test.screenshots && test.screenshots.length > 0 ? `
+              <div class="media">
+                <h4>Screenshots:</h4>
+                ${test.screenshots.map(screenshot => `
+                  <img src="file://${screenshot}" alt="Screenshot">
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
       </body>
       </html>
     `;
   }
+
+  /**
+   * Get test results
+   * @param {string} resultsDir - Results directory
+   * @returns {Array} Test results
+   * @private
+   */
+  static _getTestResults(resultsDir) {
+    // This is a simplified implementation
+    // In a real implementation, you would parse the test results files
+    
+    // Check if results directory exists
+    if (!fs.existsSync(resultsDir)) {
+      return [];
+    }
+    
+    // Get all JSON files in the results directory
+    const files = fs.readdirSync(resultsDir)
+      .filter(file => file.endsWith('.json'))
+      .map(file => path.join(resultsDir, file));
+    
+    // Parse each file
+    const results = [];
+    
+    for (const file of files) {
+      try {
+        const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        
+        // Extract test results
+        if (data.suites) {
+          for (const suite of data.suites) {
+            for (const spec of suite.specs) {
+              for (const test of spec.tests) {
+                results.push({
+                  name: `${suite.title} - ${spec.title} - ${test.title}`,
+                  status: test.status,
+                  duration: test.duration,
+                  error: test.error,
+                  screenshots: test.attachments
+                    .filter(a => a.contentType.startsWith('image/'))
+                    .map(a => a.path)
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Failed to parse test results file ${file}:`, error);
+      }
+    }
+    
+    return results;
+  }
+
+  /**
+   * Merge multiple reports
+   * @param {Array<string>} reportPaths - Report paths
+   * @param {string} outputPath - Output path
+   * @returns {string} Merged report path
+   */
+  static mergeReports(reportPaths, outputPath) {
+    logger.info(`Merging reports: ${reportPaths.join(', ')}`);
+    
+    try {
+      // For Allure reports, use allure-merge
+      if (reportPaths.every(p => p.includes('allure'))) {
+        const outputDir = path.dirname(outputPath);
+        
+        // Create output directory
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        // Merge reports
+        execSync(`npx allure-merge ${reportPaths.join(' ')} -o ${outputPath}`);
+        
+        return outputPath;
+      }
+      
+      // For other reports, implement custom merging logic
+      // ...
+      
+      return outputPath;
+    } catch (error) {
+      logger.error('Failed to merge reports:', error);
+      throw error;
+    }
+  }
 }
 
-module.exports = new ReportUtils();
->>>>>>> 51948a2 (Main v1.0)
+module.exports = ReportUtils;

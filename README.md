@@ -1,301 +1,173 @@
-<<<<<<< HEAD
-# Salesforce Playwright Test Automation Framework
-
-A comprehensive, production-grade test automation framework for Salesforce applications using Playwright.
-
-## 🔧 Features
-
-- **Page Object Model** for Salesforce UI components
-- **API Integration** with Salesforce REST API
-- **Multi-environment** configuration support
-- **Jira/Xray** integration for test case management
-- **Allure Reporting** with screenshots and videos
-- **CI/CD Integration** with GitHub Actions
-- **Advanced Testing** features like smart retries and flaky test handling
-
-## 📋 Prerequisites
-
-- Node.js 18+
-- Salesforce account with API access
-- Connected App in Salesforce (for API access)
-- Jira/Xray for test management (optional)
-
-## 🚀 Getting Started
-
-1. Clone the repository
-2. Install dependencies
-
-```bash
-npm install
-```
-
-3. Configure environment variables:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file with your Salesforce credentials.
-
-4. Run tests:
-=======
-# Playwright Framework
+# Playwright Testing Framework
 
 A comprehensive framework for web automation, testing, and reporting using Playwright.
 
-## Overview
-
-This framework integrates [Playwright](https://playwright.dev/) to provide powerful capabilities for:
-
-- Screenshot capture
-- PDF generation
-- Accessibility testing
-- Responsive design testing
-- Network mocking
-- Debugging with traces
-- Error handling
-
 ## Features
 
-### PlaywrightService
-
-A unified service for browser automation tasks:
-
-```javascript
-const { PlaywrightService } = require('./src/utils/common');
-
-const playwrightService = new PlaywrightService();
-
-// Capture screenshot
-await playwrightService.captureScreenshot('https://example.com', {
-  path: 'screenshot.png',
-  fullPage: true
-});
-
-// Generate PDF
-await playwrightService.generatePdf('https://example.com', {
-  path: 'document.pdf',
-  format: 'A4'
-});
-
-// Run accessibility audit
-const accessibilityResults = await playwrightService.runAccessibilityAudit('https://example.com');
-```
-
-### Enhanced Error Handling
-
-Robust error handling with retry mechanisms, timeouts, and graceful degradation:
-
-```javascript
-const { PlaywrightErrorHandler } = require('./src/utils/common');
-
-// Retry mechanism
-const retryableFunction = PlaywrightErrorHandler.withRetry(
-  async () => {
-    // Operation that might fail intermittently
-  },
-  { maxRetries: 3, retryDelay: 1000 }
-);
-
-// Timeout handling
-const timeoutFunction = PlaywrightErrorHandler.withTimeout(
-  async () => {
-    // Operation that might hang
-  },
-  5000, // 5 second timeout
-  { action: 'performing operation' }
-);
-
-// Graceful degradation
-const gracefulFunction = PlaywrightErrorHandler.withGracefulDegradation(
-  // Primary function
-  async () => {
-    // Operation that might fail
-  },
-  // Fallback function
-  async (args, error) => {
-    // Alternative implementation
-  }
-);
-```
-
-### Integration with Reporting System
-
-The framework integrates with a reporting system for generating charts, tables, and reports:
-
-- Enhanced screenshot capabilities for charts and tables
-- PDF generation for reports
-- Accessibility testing for reports
-- Responsive design testing for reports
+- **Cross-browser Testing**: Run tests on Chromium, Firefox, and WebKit
+- **API Testing**: Test REST and GraphQL APIs
+- **Visual Testing**: Compare screenshots for visual regression testing
+- **Performance Testing**: Measure page load times and resource usage
+- **Accessibility Testing**: Check WCAG compliance
+- **Localization Testing**: Test multilingual applications
+- **Reporting**: Generate HTML and Allure reports
+- **CI/CD Integration**: Ready for GitHub Actions and other CI systems
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/playwright-framework.git
+git clone https://github.com/your-username/playwright-framework.git
+cd playwright-framework
 
 # Install dependencies
-cd playwright-framework
 npm install
+
+# Install browsers
+npx playwright install
+```
+
+## Project Structure
+
+```
+playwright-framework/
+├── examples/                # Example tests and usage patterns
+├── locales/                 # Localization files
+├── reports/                 # Test reports
+│   ├── accessibility/       # Accessibility test reports
+│   ├── allure/              # Allure reports
+│   ├── html/                # HTML reports
+│   ├── performance/         # Performance test reports
+│   └── visual/              # Visual test reports
+├── src/
+│   ├── cli/                 # Command-line interface tools
+│   ├── config/              # Configuration files
+│   ├── dashboard/           # Test dashboard
+│   ├── pages/               # Page objects
+│   ├── tests/               # Test files
+│   │   ├── accessibility/   # Accessibility tests
+│   │   ├── api/             # API tests
+│   │   ├── localization/    # Localization tests
+│   │   ├── performance/     # Performance tests
+│   │   ├── ui/              # UI tests
+│   │   └── visual/          # Visual tests
+│   └── utils/               # Utility functions
+│       ├── accessibility/   # Accessibility testing utilities
+│       ├── api/             # API testing utilities
+│       ├── common/          # Common utilities
+│       ├── localization/    # Localization utilities
+│       ├── performance/     # Performance testing utilities
+│       ├── reporting/       # Reporting utilities
+│       ├── visual/          # Visual testing utilities
+│       └── web/             # Web testing utilities
+├── traces/                  # Playwright traces
+├── visual-baselines/        # Visual test baselines
+└── visual-diffs/            # Visual test differences
 ```
 
 ## Usage
 
-### Running Examples
-
-```bash
-# Run all examples
-npm run examples:playwright
-
-# Run specific examples
-npm run examples:screenshot
-npm run examples:pdf
-npm run examples:accessibility
-npm run examples:responsive
-npm run examples:trace
-npm run examples:network
-npm run examples:error
-```
-
 ### Running Tests
->>>>>>> 51948a2 (Main v1.0)
 
 ```bash
 # Run all tests
-npm test
+npm run test:playwright
 
-<<<<<<< HEAD
-# Run UI tests only
-npm run test:ui
-
-# Run API tests only
+# Run specific test types
 npm run test:api
-
-# Run smoke tests
-npm run test:smoke
-```
-
-## 📁 Project Structure
-
-```
-├── tests/               # Test files
-│   ├── ui/              # UI tests
-│   ├── api/             # API tests
-│   └── hybrid/          # Hybrid tests using both UI and API
-├── pages/               # Page Objects for Salesforce UI
-├── data/                # Test data
-├── utils/               # Utilities and helpers
-├── config/              # Environment configuration
-├── reports/             # Test reports
-├── .github/workflows/   # CI/CD configurations
-├── playwright.config.js # Playwright configuration
-└── cli.js               # CLI utility
-```
-
-## 🔄 Test Execution
-
-The framework supports various test execution modes:
-
-```bash
-# Run specific test file
-npx playwright test tests/ui/login.spec.js
-
-# Run tests with specific tag
-npx playwright test --grep @smoke
-
-# Run tests in specific browser
-npx playwright test --project=chromium
-
-# Run tests with UI mode
 npm run test:ui
+npm run test:visual
+npm run test:accessibility
+npm run test:performance
+npm run test:localization
 
-# Run tests with debug mode
-npm run test:debug
+# Run tests with specific tags
+npx playwright test --grep @smoke
+npx playwright test --grep @regression
 ```
 
-## 📊 Reporting
-
-Generate and view Allure reports:
-
-```bash
-npm run test:report
-```
-
-## 💻 CLI Utility
-
-The framework includes a CLI utility for common tasks:
-
-```bash
-# Show help
-node cli.js --help
-
-# Run smoke tests
-node cli.js run:smoke
-
-# Run tests with specific browser
-node cli.js run --browser=firefox
-
-# Fetch test cases from Xray
-node cli.js xray:fetch
-
-# Clean reports and artifacts
-node cli.js clean
-```
-
-## 🔗 Jira/Xray Integration
-
-Connect tests to Jira test cases using tags:
+### Visual Testing
 
 ```javascript
-test('should create contact via API and verify via UI @ui @api @SFPROJ-123', async ({ page }) => {
-  // Test implementation
+const { test, expect } = require('@playwright/test');
+const VisualComparisonUtils = require('../../utils/visual/visualComparisonUtils');
+
+test('Homepage visual comparison', async ({ page }) => {
+  const visualUtils = new VisualComparisonUtils(page);
+  await page.goto('https://example.com');
+  const result = await visualUtils.compareScreenshot('homepage');
+  expect(result.match).toBe(true);
 });
 ```
 
-## 🌐 Environment Configuration
+### Performance Testing
 
-The framework supports multiple environments:
+```javascript
+const { test, expect } = require('@playwright/test');
+const PerformanceUtils = require('../../utils/performance/performanceUtils');
 
-- Create environment-specific `.env` files: `.env.development`, `.env.qa`, etc.
-- Run tests with specific environment:
-
-```bash
-NODE_ENV=qa npm test
+test('Page load performance', async ({ page }) => {
+  const perfUtils = new PerformanceUtils(page);
+  const result = await perfUtils.measurePageLoad('https://example.com');
+  expect(result.loadTime).toBeLessThan(5000);
+});
 ```
 
-## 🤝 Contributing
+### Accessibility Testing
 
-1. Create feature branches from `main`
-2. Follow the coding standards
-3. Run linting and tests before pushing
-4. Create Pull Requests for review
+```javascript
+const { test, expect } = require('@playwright/test');
+const AccessibilityUtils = require('../../utils/accessibility/accessibilityUtils');
 
-## 📄 License
-
-MIT
-=======
-# Run tests in watch mode
-npm run test:watch
+test('Homepage accessibility audit', async ({ page }) => {
+  const accessibilityUtils = new AccessibilityUtils(page);
+  await page.goto('https://example.com');
+  const result = await accessibilityUtils.audit();
+  expect(result.issues.length).toBe(0);
+});
 ```
 
-### Starting the Dashboard
+### Localization Testing
+
+```javascript
+const { test, expect } = require('@playwright/test');
+const LocalizationUtils = require('../../utils/localization/localizationUtils');
+
+test('Compare locales', async ({ browser }) => {
+  const localizationUtils = new LocalizationUtils(page);
+  const result = await localizationUtils.compareLocales(
+    'https://example.com', 
+    ['en', 'fr', 'es']
+  );
+  expect(result.comparisonResults.fr.missingTranslations.length).toBe(0);
+});
+```
+
+## Generating Reports
 
 ```bash
+# Generate HTML report
+npm run report
+
+# Open Allure report
+npx allure open reports/allure
+```
+
+## Dashboard
+
+```bash
+# Start the dashboard
 npm run dashboard
 ```
 
-## Documentation
+## Contributing
 
-- [Playwright Integration Guide](docs/playwright-integration-guide.md)
-- [Error Handling Guide](docs/error-handling-guide.md)
-- [Report Templates Guide](docs/report-templates-guide.md)
-- [Report History Guide](docs/report-history-guide.md)
-
-## Examples
-
-Check out the [examples](examples/playwright) directory for practical examples of using the framework.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT
->>>>>>> 51948a2 (Main v1.0)
+This project is licensed under the MIT License - see the LICENSE file for details.

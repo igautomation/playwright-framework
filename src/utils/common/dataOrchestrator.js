@@ -6,12 +6,11 @@
  * Used by test cases to load consistent, parameterized test data.
  */
 
-import fs from 'fs-extra';
-import path from 'path';
-import yaml from 'js-yaml';
-import { XMLParser } from 'fast-xml-parser';
-import ExcelJS from 'exceljs';
-import DBUtils from '../database/dbUtils.js';
+const fs = require('fs-extra');
+const path = require('path');
+const yaml = require('js-yaml');
+const { XMLParser } = require('fast-xml-parser');
+const ExcelJS = require('exceljs');
 
 // Default file paths are configurable via .env or hardcoded fallback
 const YAML_PATH = process.env.YAML_TEST_DATA || 'src/data/testData.yaml';
@@ -96,7 +95,6 @@ async function readExcel(filePath = EXCEL_PATH, requiredHeaders = ['name', 'job'
  * - .env values (like LOGIN_USERNAME)
  * - YAML (e.g., name, job)
  * - Excel (e.g., test matrix)
- * - Database (e.g., user lookup)
  */
 async function getHybridTestData() {
   const envData = {
@@ -105,19 +103,24 @@ async function getHybridTestData() {
   };
 
   const yamlData = readYaml();
-  const excelData = (await readExcel())[0]; // only take first row for test
-
-  const db = new DBUtils();
-  await db.connect();
-  const dbUser = await db.getUserByEmail(excelData.email);
-  await db.disconnect();
+  
+  let excelData = {};
+  try {
+    excelData = (await readExcel())[0]; // only take first row for test
+  } catch (error) {
+    console.warn('Excel data could not be loaded:', error.message);
+  }
 
   return {
     ...envData,
     ...yamlData.user,
-    ...excelData,
-    dbUser
+    ...excelData
   };
 }
 
-export { readYaml, readXml, readExcel, getHybridTestData };
+module.exports = {
+  readYaml,
+  readXml,
+  readExcel,
+  getHybridTestData
+};

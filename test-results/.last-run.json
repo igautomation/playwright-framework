@@ -1,24 +1,6 @@
 {
-<<<<<<< HEAD
   "status": "failed",
   "failedTests": [
-    "e907b7a545abc30c8323-6a3250fff2a9a043ef13",
-    "e907b7a545abc30c8323-9574d5d7da248d6e3e72",
-    "e907b7a545abc30c8323-6bf504280d742e5f0f5a",
-    "e907b7a545abc30c8323-747166888a586ca603aa",
-    "18fd9be6d75c9d79a36d-16cf6c86a52b4b2e0d3e",
-    "18fd9be6d75c9d79a36d-3f9a5f87975cd88378f0",
-    "18fd9be6d75c9d79a36d-b8c0269477bd8240f152",
-    "18fd9be6d75c9d79a36d-48a768029f0568def0ef",
-    "615d1c5db31f9826dbc0-67778bf0b5ad9c8e0144",
-    "89cebebd1c15cc61d4d6-927abd2cf400269f5eb0",
-    "89cebebd1c15cc61d4d6-1deef6462f00149c4ab9",
-    "4c3a774d296c770a43cb-c8aaccd430b619d8931a",
-    "4c3a774d296c770a43cb-f6f80ae9600c8291505c",
-    "fae837f865b8886eaed8-dba1c7949460eb6e32a8"
+    "2e8466450f6d9faf857d-5f69ef67e3e6103f340d"
   ]
-=======
-  "status": "passed",
-  "failedTests": []
->>>>>>> 51948a2 (Main v1.0)
 }

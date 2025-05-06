@@ -1,41 +1,32 @@
 module.exports = {
-<<<<<<< HEAD
-  rules: {
-    quotes: ['error', 'single'],
-    semi: ['error', 'always']
-  },
-  settings: {
-    'import/resolver': {
-      node: {
-        paths: ['src']
-      },
-      alias: {
-        map: [
-          ['@fixtures', './src/fixtures'],
-          ['@utils', './src/utils']
-        ],
-        extensions: ['.js', '.jsx']
-      }
-    }
-  }
-=======
   env: {
     node: true,
     es2021: true,
-    browser: true, // Add browser environment for document/window globals
+    jest: true,
   },
   extends: [
     'eslint:recommended',
-    'plugin:playwright/recommended', // Add Playwright plugin
+    'plugin:playwright/recommended',
+    'prettier',
   ],
   parserOptions: {
-    ecmaVersion: 2022, // Support modern JS features
-    sourceType: 'module', // Support import/export
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
   rules: {
-    'no-console': 'warn',
-    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // Ignore variables starting with underscore
-    'no-undef': 'error',
+    'no-console': 'off',
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'playwright/no-conditional-in-test': 'off',
+    'playwright/expect-expect': 'off',
+    'playwright/no-force-option': 'warn',
+    'playwright/no-wait-for-timeout': 'warn',
   },
->>>>>>> 51948a2 (Main v1.0)
+  overrides: [
+    {
+      files: ['**/*.test.js', '**/*.spec.js'],
+      rules: {
+        'no-undef': 'off',
+      },
+    },
+  ],
 };

@@ -1,79 +1,129 @@
-<<<<<<< HEAD
-// src/pages/XPathPracticePage.js
-import BasePage from './BasePage.js';
-import WebInteractions from '../utils/web/webInteractions.js';
-=======
+/**
+ * XPath practice page object
+ */
 const BasePage = require('./BasePage');
-const { expect } = require('@playwright/test');
->>>>>>> 51948a2 (Main v1.0)
+const logger = require('../utils/common/logger');
 
 class XPathPracticePage extends BasePage {
+  /**
+   * Constructor
+   * @param {Object} page - Playwright page object
+   */
   constructor(page) {
     super(page);
-<<<<<<< HEAD
-    this.web = new WebInteractions(page);
-    this.usernameSelector = '#userId';
-    this.passwordSelector = '#pass';
-    this.loginButton = 'button[type="submit"]';
+    this.url = 'https://selectorshub.com/xpath-practice-page/';
+    
+    // Locators
+    this.userTable = '//table[@id="resultTable"]';
+    this.userTableRows = '//table[@id="resultTable"]//tbody/tr';
+    this.downloadLink = '//a[contains(text(), "Download")]';
+    this.checkboxes = '//input[@type="checkbox"]';
+    this.inputFields = '//input[@type="text"]';
+    this.dropdowns = '//select';
   }
 
-  async goto() {
-    await this.page.goto(`${process.env.BASE_URL}`);
+  /**
+   * Navigate to XPath practice page
+   * @param {string} url - URL to navigate to (optional)
+   * @returns {Promise<void>}
+   */
+  async navigate(url = '') {
+    await super.navigate(url || this.url);
+    logger.info('Navigated to XPath practice page');
   }
 
-  async login(username, password) {
-    await this.web.clearAndType(this.usernameSelector, username);
-    await this.web.clearAndType(this.passwordSelector, password);
-    await this.web.safeClick(this.loginButton);
+  /**
+   * Verify user in table
+   * @param {string} username - Username to verify
+   * @param {string} userRole - User role to verify
+   * @param {string} name - Name to verify
+   * @param {string} status - Status to verify
+   * @returns {Promise<boolean>} True if user found
+   */
+  async verifyUserInTable(username, userRole, name, status) {
+    logger.info(`Verifying user in table: ${username}`);
+    
+    // Wait for table to be visible
+    await this.page.waitForSelector(this.userTable);
+    
+    // Get all rows
+    const rows = await this.page.$$(this.userTableRows);
+    
+    // Check each row for the user
+    for (const row of rows) {
+      const rowText = await row.textContent();
+      
+      if (rowText.includes(username) && 
+          rowText.includes(userRole) && 
+          rowText.includes(name) && 
+          rowText.includes(status)) {
+        logger.info(`User found: ${username}`);
+        return true;
+      }
+    }
+    
+    logger.info(`User not found: ${username}`);
+    return false;
   }
 
-  async logout() {
-    await this.web.safeClick('button[type="logout"]');
-  }
-}
-
-export default XPathPracticePage;
-=======
-    this.locators = {
-      userTable: '#resultTable',
-      userRow: (username) => `#resultTable tr:has(td:text-is("${username}"))`,
-      downloadLink: 'a[href$=".png"]',
-      shadowDomIframe: '#pact',
-    };
-  }
-
-  async verifyUserInTable(
-    username,
-    expectedRole,
-    expectedName,
-    expectedStatus
-  ) {
-    // Wait for the table to be visible
-    await this.page.waitForSelector(this.locators.userTable, {
-      timeout: 10000,
-    });
-
-    // Find the row containing the username
-    const row = this.page.locator(this.locators.userRow(username));
-
-    // Wait for the row to be visible
-    await expect(row).toBeVisible({ timeout: 10000 });
-
-    // Verify the expected data in each column
-    await expect(row.locator('td:nth-child(2)')).toHaveText(expectedRole);
-    await expect(row.locator('td:nth-child(3)')).toHaveText(expectedName);
-    await expect(row.locator('td:nth-child(4)')).toHaveText(expectedStatus);
-  }
-
+  /**
+   * Click download link
+   * @returns {Promise<void>}
+   */
   async clickDownloadLink() {
-    await this.page.locator(this.locators.downloadLink).click();
+    logger.info('Clicking download link');
+    await this.page.click(this.downloadLink);
   }
 
-  async interactWithShadowDomIframe() {
-    const iframe = this.page.frameLocator(this.locators.shadowDomIframe);
-    const shadowElement = iframe.locator('#snacktime');
-    await expect(shadowElement).toBeVisible();
+  /**
+   * Check all checkboxes
+   * @returns {Promise<number>} Number of checkboxes checked
+   */
+  async checkAllCheckboxes() {
+    logger.info('Checking all checkboxes');
+    
+    const checkboxes = await this.page.$$(this.checkboxes);
+    
+    for (const checkbox of checkboxes) {
+      await checkbox.check();
+    }
+    
+    return checkboxes.length;
+  }
+
+  /**
+   * Fill all input fields
+   * @param {string} value - Value to fill
+   * @returns {Promise<number>} Number of fields filled
+   */
+  async fillAllInputFields(value) {
+    logger.info(`Filling all input fields with: ${value}`);
+    
+    const inputFields = await this.page.$$(this.inputFields);
+    
+    for (const field of inputFields) {
+      await field.fill(value);
+    }
+    
+    return inputFields.length;
+  }
+
+  /**
+   * Select option in all dropdowns
+   * @param {string} value - Value to select
+   * @returns {Promise<number>} Number of dropdowns changed
+   */
+  async selectInAllDropdowns(value) {
+    logger.info(`Selecting in all dropdowns: ${value}`);
+    
+    const dropdowns = await this.page.$$(this.dropdowns);
+    
+    for (const dropdown of dropdowns) {
+      await dropdown.selectOption(value);
+    }
+    
+    return dropdowns.length;
   }
 }
+
 module.exports = XPathPracticePage;
->>>>>>> 51948a2 (Main v1.0)

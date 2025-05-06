@@ -1,297 +1,217 @@
-<<<<<<< HEAD
-// src/utils/web/screenshotUtils.js
-
 /**
- * Screenshot Utilities for Playwright Automation Framework (ESM Compliant).
- *
- * Responsibilities:
- * - Capture full-page screenshots
- * - Capture element-specific screenshots
- * - Capture custom area screenshots using clipping
+ * Screenshot utilities for Playwright
  */
-
-class ScreenshotUtils {
-  /**
-   * @param {import('@playwright/test').Page} page - Playwright Page object.
-   */
-  constructor(page) {
-    if (!page) {
-      throw new Error('Page object is required');
-    }
-    this.page = page;
-  }
-
-  /**
-   * Captures a full-page screenshot.
-   */
-  async captureFullPage(path, { fullPage = true, quality = 'png' } = {}) {
-    try {
-      const screenshotOptions = { fullPage, type: quality };
-
-      if (path) {
-        await this.page.screenshot({ ...screenshotOptions, path });
-        return null;
-      }
-
-      return await this.page.screenshot(screenshotOptions);
-    } catch (error) {
-      throw new Error(`Failed to capture full-page screenshot: ${error.message}`);
-=======
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const logger = require('../common/logger');
 
-/**
- * Screenshot Utilities class for taking screenshots and videos
- */
 class ScreenshotUtils {
   /**
    * Constructor
-   * @param {import('@playwright/test').Page} page - Playwright page object
+   * @param {Object} page - Playwright page object
+   * @param {Object} options - Configuration options
    */
-  constructor(page) {
+  constructor(page, options = {}) {
     this.page = page;
-    this.screenshotDir = path.resolve(process.cwd(), 'reports/screenshots');
-    this.videoDir = path.resolve(process.cwd(), 'reports/videos');
-    this.traceDir = path.resolve(process.cwd(), 'reports/traces');
-
-    // Create directories if they don't exist
-    [this.screenshotDir, this.videoDir, this.traceDir].forEach((dir) => {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-    });
+    this.screenshotDir = options.screenshotDir || path.join(process.cwd(), 'screenshots');
+    
+    // Create screenshot directory if it doesn't exist
+    if (!fs.existsSync(this.screenshotDir)) {
+      fs.mkdirSync(this.screenshotDir, { recursive: true });
+    }
   }
 
   /**
    * Take a screenshot
    * @param {string} name - Screenshot name
    * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Path to the screenshot
+   * @returns {Promise<string>} Screenshot path
    */
   async takeScreenshot(name, options = {}) {
-    try {
-      logger.debug(`Taking screenshot: ${name}`);
-
-      // Generate a unique filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${name}_${timestamp}.png`;
-      const filepath = path.join(this.screenshotDir, filename);
-
-      // Take the screenshot
-      await this.page.screenshot({
-        path: filepath,
-        fullPage: options.fullPage || false,
-        ...options,
-      });
-
-      logger.info(`Screenshot saved to: ${filepath}`);
-      return filepath;
-    } catch (error) {
-      logger.error(`Failed to take screenshot: ${name}`, error);
-      throw error;
->>>>>>> 51948a2 (Main v1.0)
-    }
+    const screenshotPath = options.path || path.join(
+      this.screenshotDir,
+      `${name}-${Date.now()}.png`
+    );
+    
+    logger.info(`Taking screenshot: ${screenshotPath}`);
+    
+    await this.page.screenshot({
+      path: screenshotPath,
+      fullPage: options.fullPage !== false,
+      ...options
+    });
+    
+    return screenshotPath;
   }
 
   /**
-<<<<<<< HEAD
-   * Captures a screenshot of a specific element.
-   */
-  async captureElement(selector, path, { clip = false, quality = 'png' } = {}) {
-    if (!selector) {
-      throw new Error('Selector is required');
-    }
-
-    try {
-      const element = await this.page.locator(selector);
-
-      if (!(await element.isVisible())) {
-        throw new Error(`Element not visible: ${selector}`);
-      }
-
-      const screenshotOptions = { type: quality };
-
-      if (clip) {
-        const boundingBox = await element.boundingBox();
-        if (!boundingBox) {
-          throw new Error(`No bounding box for element: ${selector}`);
-        }
-        screenshotOptions.clip = boundingBox;
-      }
-
-      if (path) {
-        await element.screenshot({ ...screenshotOptions, path });
-        return null;
-      }
-
-      return await element.screenshot(screenshotOptions);
-    } catch (error) {
-      throw new Error(`Failed to capture element screenshot: ${error.message}`);
-=======
    * Take a screenshot of an element
    * @param {string} selector - Element selector
    * @param {string} name - Screenshot name
    * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Path to the screenshot
+   * @returns {Promise<string>} Screenshot path
    */
   async takeElementScreenshot(selector, name, options = {}) {
-    try {
-      logger.debug(`Taking screenshot of element: ${selector}, name: ${name}`);
+    // Wait for element to be visible
+    await this.page.waitForSelector(selector, { 
+      state: 'visible',
+      timeout: options.timeout || 10000
+    });
+    
+    const element = await this.page.$(selector);
+    
+    if (!element) {
+      throw new Error(`Element not found: ${selector}`);
+    }
+    
+    const screenshotPath = options.path || path.join(
+      this.screenshotDir,
+      `${name}-${Date.now()}.png`
+    );
+    
+    logger.info(`Taking element screenshot: ${screenshotPath}`);
+    
+    await element.screenshot({
+      path: screenshotPath,
+      ...options
+    });
+    
+    return screenshotPath;
+  }
 
-      // Generate a unique filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${name}_${timestamp}.png`;
-      const filepath = path.join(this.screenshotDir, filename);
+  /**
+   * Take screenshots of multiple elements
+   * @param {Array<string>} selectors - Element selectors
+   * @param {string} namePrefix - Screenshot name prefix
+   * @param {Object} options - Screenshot options
+   * @returns {Promise<Array<string>>} Screenshot paths
+   */
+  async takeMultipleElementScreenshots(selectors, namePrefix, options = {}) {
+    const screenshotPaths = [];
+    
+    for (let i = 0; i < selectors.length; i++) {
+      const selector = selectors[i];
+      const name = `${namePrefix}-${i + 1}`;
+      
+      try {
+        const screenshotPath = await this.takeElementScreenshot(selector, name, options);
+        screenshotPaths.push(screenshotPath);
+      } catch (error) {
+        logger.error(`Failed to take screenshot of element ${selector}:`, error);
+      }
+    }
+    
+    return screenshotPaths;
+  }
 
-      // Take the screenshot of the element
-      const element = this.page.locator(selector);
-      await element.screenshot({
-        path: filepath,
-        ...options,
+  /**
+   * Take a screenshot on failure
+   * @param {string} testName - Test name
+   * @param {Error} error - Error object
+   * @param {Object} options - Screenshot options
+   * @returns {Promise<string>} Screenshot path
+   */
+  async takeScreenshotOnFailure(testName, error, options = {}) {
+    const screenshotPath = options.path || path.join(
+      this.screenshotDir,
+      'failures',
+      `${testName}-failure-${Date.now()}.png`
+    );
+    
+    // Create directory if it doesn't exist
+    const screenshotDir = path.dirname(screenshotPath);
+    if (!fs.existsSync(screenshotDir)) {
+      fs.mkdirSync(screenshotDir, { recursive: true });
+    }
+    
+    logger.error(`Test failed: ${testName}`, error);
+    logger.info(`Taking failure screenshot: ${screenshotPath}`);
+    
+    await this.page.screenshot({
+      path: screenshotPath,
+      fullPage: options.fullPage !== false,
+      ...options
+    });
+    
+    return screenshotPath;
+  }
+
+  /**
+   * Take a screenshot of the viewport
+   * @param {string} name - Screenshot name
+   * @param {Object} options - Screenshot options
+   * @returns {Promise<string>} Screenshot path
+   */
+  async takeViewportScreenshot(name, options = {}) {
+    const screenshotPath = options.path || path.join(
+      this.screenshotDir,
+      `${name}-viewport-${Date.now()}.png`
+    );
+    
+    logger.info(`Taking viewport screenshot: ${screenshotPath}`);
+    
+    await this.page.screenshot({
+      path: screenshotPath,
+      fullPage: false,
+      ...options
+    });
+    
+    return screenshotPath;
+  }
+
+  /**
+   * Take screenshots at different viewport sizes
+   * @param {string} name - Screenshot name
+   * @param {Array<Object>} viewports - Viewport sizes
+   * @param {Object} options - Screenshot options
+   * @returns {Promise<Array<Object>>} Screenshot results
+   */
+  async takeResponsiveScreenshots(name, viewports, options = {}) {
+    const results = [];
+    const originalViewport = await this.page.viewportSize();
+    
+    for (const viewport of viewports) {
+      // Set viewport size
+      await this.page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height
       });
-
-      logger.info(`Element screenshot saved to: ${filepath}`);
-      return filepath;
-    } catch (error) {
-      logger.error(
-        `Failed to take screenshot of element: ${selector}, name: ${name}`,
-        error
+      
+      // Wait for layout to stabilize
+      await this.page.waitForTimeout(500);
+      
+      // Take screenshot
+      const screenshotPath = options.path || path.join(
+        this.screenshotDir,
+        'responsive',
+        `${name}-${viewport.width}x${viewport.height}-${Date.now()}.png`
       );
-      throw error;
->>>>>>> 51948a2 (Main v1.0)
-    }
-  }
-
-  /**
-<<<<<<< HEAD
-   * Captures a screenshot with custom viewport clipping.
-   */
-  async captureCustom(path, { clip, quality = 'png' } = {}) {
-    try {
-      const screenshotOptions = { type: quality };
-
-      if (clip) {
-        if (!clip.x || !clip.y || !clip.width || !clip.height) {
-          throw new Error('Clip options must include x, y, width, and height');
-        }
-        screenshotOptions.clip = clip;
+      
+      // Create directory if it doesn't exist
+      const screenshotDir = path.dirname(screenshotPath);
+      if (!fs.existsSync(screenshotDir)) {
+        fs.mkdirSync(screenshotDir, { recursive: true });
       }
-
-      if (path) {
-        await this.page.screenshot({ ...screenshotOptions, path });
-        return null;
-      }
-
-      return await this.page.screenshot(screenshotOptions);
-    } catch (error) {
-      throw new Error(`Failed to capture custom screenshot: ${error.message}`);
-=======
-   * Start video recording
-   * @returns {Promise<void>}
-   */
-  async startVideoRecording() {
-    try {
-      logger.debug('Starting video recording');
-
-      // Video recording is handled by Playwright context
-      // This is just a placeholder for additional setup if needed
-      logger.info('Video recording will be saved after the test');
-    } catch (error) {
-      logger.error('Failed to start video recording', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Save trace
-   * @param {string} name - Trace name
-   * @returns {Promise<string>} Path to the trace
-   */
-  async saveTrace(name) {
-    try {
-      logger.debug(`Saving trace: ${name}`);
-
-      // Generate a unique filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${name}_${timestamp}.zip`;
-      const filepath = path.join(this.traceDir, filename);
-
-      // Save the trace
-      await this.page.context().tracing.stop({ path: filepath });
-
-      logger.info(`Trace saved to: ${filepath}`);
-      return filepath;
-    } catch (error) {
-      logger.error(`Failed to save trace: ${name}`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Start tracing
-   * @param {Object} options - Tracing options
-   * @returns {Promise<void>}
-   */
-  async startTracing(options = {}) {
-    try {
-      logger.debug('Starting tracing');
-
-      // Start tracing
-      await this.page.context().tracing.start({
-        screenshots: true,
-        snapshots: true,
-        ...options,
+      
+      logger.info(`Taking responsive screenshot at ${viewport.width}x${viewport.height}: ${screenshotPath}`);
+      
+      await this.page.screenshot({
+        path: screenshotPath,
+        fullPage: options.fullPage !== false,
+        ...options
       });
-
-      logger.info('Tracing started');
-    } catch (error) {
-      logger.error('Failed to start tracing', error);
-      throw error;
+      
+      results.push({
+        viewport,
+        screenshotPath
+      });
     }
-  }
-
-  /**
-   * Compare screenshots
-   * @param {string} baselinePath - Path to the baseline screenshot
-   * @param {string} actualPath - Path to the actual screenshot
-   * @param {Object} options - Comparison options
-   * @returns {Promise<boolean>} Whether the screenshots match
-   */
-  async compareScreenshots(baselinePath, actualPath, options = {}) {
-    try {
-      logger.debug(`Comparing screenshots: ${baselinePath} and ${actualPath}`);
-
-      // Check if the baseline screenshot exists
-      if (!fs.existsSync(baselinePath)) {
-        logger.warn(`Baseline screenshot does not exist: ${baselinePath}`);
-        return false;
-      }
-
-      // Check if the actual screenshot exists
-      if (!fs.existsSync(actualPath)) {
-        logger.warn(`Actual screenshot does not exist: ${actualPath}`);
-        return false;
-      }
-
-      // In a real implementation, you would use a library like pixelmatch
-      // to compare the screenshots pixel by pixel
-      // This is just a placeholder
-      logger.info('Screenshot comparison is not implemented yet');
-      return true;
-    } catch (error) {
-      logger.error(
-        `Failed to compare screenshots: ${baselinePath} and ${actualPath}`,
-        error
-      );
-      throw error;
->>>>>>> 51948a2 (Main v1.0)
-    }
+    
+    // Restore original viewport
+    await this.page.setViewportSize(originalViewport);
+    
+    return results;
   }
 }
 
-<<<<<<< HEAD
-export default ScreenshotUtils;
-=======
 module.exports = ScreenshotUtils;
->>>>>>> 51948a2 (Main v1.0)

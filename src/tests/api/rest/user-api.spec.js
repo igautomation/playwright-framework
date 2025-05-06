@@ -2,7 +2,7 @@
  * User API tests
  */
 const { test, expect } = require('../../fixtures/baseFixtures');
-const User = require('../../../utils/api/models/User');
+const User = require('../../../utils/api/models/User').default;
 const TestDataFactory = require('../../../utils/common/testDataFactory');
 const schemaValidator = require('../../../utils/api/schemaValidator');
 const fs = require('fs');

@@ -2,7 +2,7 @@
  * Hybrid flow tests combining API and UI testing
  */
 const { test, expect } = require('../fixtures/baseFixtures');
-const User = require('../../utils/api/models/User');
+const User = require('../../utils/api/models/User').default;
 const TestDataFactory = require('../../utils/common/testDataFactory');
 
 test.describe('Hybrid Flow Tests @e2e', () => {

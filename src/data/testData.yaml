@@ -1,4 +1,26 @@
 user:
-  name: Jane YAML
-  job: Tester
-  email: jane.yaml@test.com
+  name: Test User
+  job: QA Engineer
+  email: test.user@example.com
+  
+api:
+  baseUrl: https://reqres.in/api
+  endpoints:
+    users: /users
+    login: /login
+    register: /register
+    
+test:
+  timeout: 30000
+  retries: 2
+  
+environments:
+  dev:
+    url: https://dev.example.com
+    api: https://dev-api.example.com
+  staging:
+    url: https://staging.example.com
+    api: https://staging-api.example.com
+  prod:
+    url: https://example.com
+    api: https://api.example.com
