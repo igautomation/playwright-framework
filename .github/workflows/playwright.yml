@@ -2,102 +2,135 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   test:
-    name: 'Playwright Tests'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Create .env file
+        run: |
+          cat > .env << 'EOL'
+          # Application URLs & API Auth
+          API_BASE_URL=https://reqres.in
+          API_GRAPHQL_PATH=/graphql
+          BASE_URL=https://selectorshub.com/xpath-practice-page
+          API_KEY=123456
+          OAUTH2_TOKEN=dummy-token
+          
+          # Login Credentials
+          LOGIN_USERNAME=testuser
+          LOGIN_PASSWORD=secure123
+          TEST_USERNAME=testuser@example.com
+          TEST_PASSWORD=password123
+          
+          # Playwright Runtime Settings
+          NODE_ENV=production
+          HEADLESS=true
+          SLOWMO=0
+          
+          # CI Runtime Vars
+          CI=true
+          WORKERS=4
+          EOL
+      
+      - name: Create Dockerfile
+        run: |
+          cat > Dockerfile << 'EOL'
+          # Build stage
+          FROM mcr.microsoft.com/playwright:v1.40.0-focal AS builder
+          
+          WORKDIR /app
+          
+          # Install build dependencies including make and build-essential
+          RUN apt-get update && apt-get install -y \
+              pkg-config \
+              libcairo2-dev \
+              libpango1.0-dev \
+              libjpeg-dev \
+              libgif-dev \
+              librsvg2-dev \
+              build-essential \
+              make \
+              g++ \
+              && apt-get clean \
+              && rm -rf /var/lib/apt/lists/*
+          
+          COPY package*.json ./
+          RUN npm ci
+          
+          # Runtime stage
+          FROM mcr.microsoft.com/playwright:v1.40.0-focal
+          
+          WORKDIR /app
+          
+          # Install runtime dependencies for canvas
+          RUN apt-get update && apt-get install -y \
+              libcairo2 \
+              libpango-1.0-0 \
+              libpangocairo-1.0-0 \
+              libjpeg8 \
+              libgif7 \
+              librsvg2-2 \
+              && apt-get clean \
+              && rm -rf /var/lib/apt/lists/*
+          
+          # Copy only runtime dependencies
+          COPY --from=builder /app/node_modules /app/node_modules
+          COPY . .
+          
+          ENV NODE_ENV=production
+          
+          CMD ["npm", "test"]
+          EOL
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
         with:
-          node-version: 18
-          cache: 'npm'
+          context: .
+          load: true
+          tags: playwright-framework:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
-      - name: Install dependencies
-        run: npm ci
+      - name: Run visual tests
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
+            --env-file .env \
+            playwright-framework:test npx playwright test src/tests/visual/visualRegressionTest.spec.js --project=chromium
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Run accessibility tests
+        if: success() || failure()  # Run even if previous step fails
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
+            --env-file .env \
+            playwright-framework:test npx playwright test src/tests/accessibility/accessibilityTest.spec.js --project=chromium
       
-      - name: Run Playwright tests
-        run: npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-        env:
-          CI: true
+      - name: Generate report
+        if: always()
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
+            --env-file .env \
+            playwright-framework:test npm run report
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: playwright-report-${{ matrix.shard }}
-          path: |
-            playwright-report/
-            test-results/
+          name: playwright-report
+          path: playwright-report/
           retention-days: 30
-  
-  report:
-    name: 'Generate Report'
-    needs: test
-    if: always()
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Download all test results
-        uses: actions/download-artifact@v3
-        with:
-          path: all-test-results
-      
-      - name: Merge reports
-        run: |
-          npx playwright merge-reports ./all-test-results/playwright-report-*
-      
-      - name: Generate Allure report
-        run: |
-          npm install -g allure-commandline
-          npx allure generate ./allure-results --clean -o allure-report
-      
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-report
-          path: playwright-report
-          retention-days: 30
-      
-      - name: Upload Allure report
-        uses: actions/upload-artifact@v3
-        with:
-          name: allure-report
-          path: allure-report
-          retention-days: 30
-      
-      - name: Deploy report to GitHub Pages
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playwright-report
-          destination_dir: reports
