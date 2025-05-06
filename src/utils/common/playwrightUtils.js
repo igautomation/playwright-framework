@@ -3,11 +3,13 @@
  * See: https://playwright.dev/docs/intro
  * See: https://playwright.dev/docs/api/class-playwright
  */
-const { chromium, firefox, webkit } = require('playwright');
+const { chromium, firefox, webkit, devices } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
 const PlaywrightErrorHandler = require('./errorHandler');
+const pixelmatch = require('pixelmatch');
+const { PNG } = require('pngjs');
 
 /**
  * Playwright utilities for advanced browser automation
@@ -143,7 +145,7 @@ class PlaywrightUtils {
       });
       
       // Get device descriptor
-      const device = require('playwright').devices[deviceName];
+      const device = devices[deviceName];
       
       if (!device) {
         throw new Error(`Device not found: ${deviceName}`);
@@ -221,180 +223,48 @@ class PlaywrightUtils {
         throw new Error(`Screenshot not found: ${screenshotPath2}`);
       }
       
-      // Use Playwright's page.screenshot to compare images
-      const browser = await chromium.launch({ headless: true });
-      const page = await browser.newPage();
+      // Read images
+      const img1 = PNG.sync.read(fs.readFileSync(screenshotPath1));
+      const img2 = PNG.sync.read(fs.readFileSync(screenshotPath2));
       
-      // Load comparison script
-      await page.setContent(`
-        <html>
-          <body>
-            <h1>Visual Comparison</h1>
-            <div style="display: flex;">
-              <div>
-                <h2>Image 1</h2>
-                <img id="img1" src="" alt="Image 1">
-              </div>
-              <div>
-                <h2>Image 2</h2>
-                <img id="img2" src="" alt="Image 2">
-              </div>
-            </div>
-            <div>
-              <h2>Difference</h2>
-              <canvas id="diffCanvas"></canvas>
-            </div>
-            <script>
-              // Function to compare images
-              async function compareImages() {
-                const img1 = document.getElementById('img1');
-                const img2 = document.getElementById('img2');
-                const canvas = document.getElementById('diffCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Wait for images to load
-                await new Promise(resolve => {
-                  let loaded = 0;
-                  img1.onload = img2.onload = () => {
-                    loaded++;
-                    if (loaded === 2) resolve();
-                  };
-                });
-                
-                // Set canvas dimensions
-                canvas.width = Math.max(img1.width, img2.width);
-                canvas.height = Math.max(img1.height, img2.height);
-                
-                // Draw first image
-                ctx.drawImage(img1, 0, 0);
-                
-                // Get image data
-                const img1Data = ctx.getImageData(0, 0, img1.width, img1.height);
-                
-                // Draw second image
-                ctx.drawImage(img2, 0, 0);
-                
-                // Get image data
-                const img2Data = ctx.getImageData(0, 0, img2.width, img2.height);
-                
-                // Compare pixels
-                const diff = {
-                  width: Math.max(img1.width, img2.width),
-                  height: Math.max(img1.height, img2.height),
-                  diffPixels: 0,
-                  diffPercentage: 0,
-                  diffImage: null
-                };
-                
-                // Create diff image data
-                const diffImageData = ctx.createImageData(diff.width, diff.height);
-                
-                // Compare pixels
-                for (let y = 0; y < diff.height; y++) {
-                  for (let x = 0; x < diff.width; x++) {
-                    const i = (y * diff.width + x) * 4;
-                    
-                    // Check if pixel is within both images
-                    const inImg1 = x < img1.width && y < img1.height;
-                    const inImg2 = x < img2.width && y < img2.height;
-                    
-                    if (inImg1 && inImg2) {
-                      // Compare pixels
-                      const r1 = img1Data.data[i];
-                      const g1 = img1Data.data[i + 1];
-                      const b1 = img1Data.data[i + 2];
-                      const a1 = img1Data.data[i + 3];
-                      
-                      const r2 = img2Data.data[i];
-                      const g2 = img2Data.data[i + 1];
-                      const b2 = img2Data.data[i + 2];
-                      const a2 = img2Data.data[i + 3];
-                      
-                      // Calculate difference
-                      const rDiff = Math.abs(r1 - r2);
-                      const gDiff = Math.abs(g1 - g2);
-                      const bDiff = Math.abs(b1 - b2);
-                      const aDiff = Math.abs(a1 - a2);
-                      
-                      // Check if different
-                      const threshold = ${options.threshold || 0};
-                      if (rDiff > threshold || gDiff > threshold || bDiff > threshold || aDiff > threshold) {
-                        diff.diffPixels++;
-                        
-                        // Highlight difference in red
-                        diffImageData.data[i] = 255;
-                        diffImageData.data[i + 1] = 0;
-                        diffImageData.data[i + 2] = 0;
-                        diffImageData.data[i + 3] = 255;
-                      } else {
-                        // Copy original pixel
-                        diffImageData.data[i] = r1;
-                        diffImageData.data[i + 1] = g1;
-                        diffImageData.data[i + 2] = b1;
-                        diffImageData.data[i + 3] = a1;
-                      }
-                    } else if (inImg1) {
-                      // Pixel only in image 1 (highlight in blue)
-                      diff.diffPixels++;
-                      diffImageData.data[i] = 0;
-                      diffImageData.data[i + 1] = 0;
-                      diffImageData.data[i + 2] = 255;
-                      diffImageData.data[i + 3] = 255;
-                    } else if (inImg2) {
-                      // Pixel only in image 2 (highlight in green)
-                      diff.diffPixels++;
-                      diffImageData.data[i] = 0;
-                      diffImageData.data[i + 1] = 255;
-                      diffImageData.data[i + 2] = 0;
-                      diffImageData.data[i + 3] = 255;
-                    }
-                  }
-                }
-                
-                // Calculate percentage
-                diff.diffPercentage = (diff.diffPixels / (diff.width * diff.height)) * 100;
-                
-                // Draw diff image
-                ctx.putImageData(diffImageData, 0, 0);
-                
-                // Return results
-                return diff;
-              }
-              
-              // Export function for Playwright to call
-              window.compareImages = compareImages;
-            </script>
-          </body>
-        </html>
-      `);
+      // Create output image
+      const { width, height } = img1;
+      const diffImage = new PNG({ width, height });
       
-      // Read images as base64
-      const img1Base64 = fs.readFileSync(screenshotPath1).toString('base64');
-      const img2Base64 = fs.readFileSync(screenshotPath2).toString('base64');
+      // Compare images
+      const threshold = options.threshold || 0.1;
+      const diffPixels = pixelmatch(
+        img1.data, 
+        img2.data, 
+        diffImage.data, 
+        width, 
+        height, 
+        { threshold }
+      );
       
-      // Set image sources
-      await page.evaluate((img1, img2) => {
-        document.getElementById('img1').src = `data:image/png;base64,${img1}`;
-        document.getElementById('img2').src = `data:image/png;base64,${img2}`;
-      }, img1Base64, img2Base64);
-      
-      // Run comparison
-      const result = await page.evaluate(() => window.compareImages());
+      // Calculate diff percentage
+      const diffPercentage = (diffPixels / (width * height)) * 100;
       
       // Save diff image if path provided
       if (options.diffPath) {
+        // Ensure directory exists
         const diffDir = path.dirname(options.diffPath);
         if (!fs.existsSync(diffDir)) {
           fs.mkdirSync(diffDir, { recursive: true });
         }
         
-        await page.screenshot({ path: options.diffPath });
-        result.diffImagePath = options.diffPath;
+        // Write diff image
+        fs.writeFileSync(options.diffPath, PNG.sync.write(diffImage));
       }
       
-      await browser.close();
-      
-      return result;
+      return {
+        diffPixels,
+        diffPercentage,
+        width,
+        height,
+        match: diffPercentage <= (options.matchThreshold || 0.1),
+        diffImage
+      };
     } catch (error) {
       throw PlaywrightErrorHandler.handleError(error, {
         action: 'comparing screenshots',
@@ -406,13 +276,12 @@ class PlaywrightUtils {
   }
   
   /**
-   * Extract data from a page using Playwright
+   * Measure page performance metrics
    * @param {string} url - URL to navigate to
-   * @param {Object} selectors - Selectors to extract data from
    * @param {Object} options - Options
-   * @returns {Promise<Object>} Extracted data
+   * @returns {Promise<Object>} Performance metrics
    */
-  static async extractData(url, selectors, options = {}) {
+  static async measurePerformance(url, options = {}) {
     let browser = null;
     
     try {
@@ -420,17 +289,168 @@ class PlaywrightUtils {
         headless: options.headless !== false
       });
       
-      const context = await browser.newContext({
-        userAgent: options.userAgent,
-        viewport: options.viewport
-      });
-      
+      const context = await browser.newContext();
       const page = await context.newPage();
       
-      // Set request interception if needed
-      if (options.headers) {
-        await page.setExtraHTTPHeaders(options.headers);
+      // Start tracing if enabled
+      if (options.trace) {
+        await context.tracing.start({ 
+          screenshots: true, 
+          snapshots: true 
+        });
       }
+      
+      // Navigate to URL and measure performance
+      const startTime = Date.now();
+      
+      // Enable JS coverage if requested
+      if (options.coverage) {
+        await page.coverage.startJSCoverage();
+        await page.coverage.startCSSCoverage();
+      }
+      
+      // Navigate to the page
+      const response = await page.goto(url, { 
+        timeout: options.timeout || 30000,
+        waitUntil: options.waitUntil || 'networkidle'
+      });
+      
+      const loadTime = Date.now() - startTime;
+      
+      // Wait for network to be idle
+      await page.waitForLoadState('networkidle');
+      
+      // Get performance metrics
+      const metrics = await page.evaluate(() => JSON.stringify(window.performance));
+      const performanceMetrics = JSON.parse(metrics);
+      
+      // Get resource timing entries
+      const resourceTimings = await page.evaluate(() => {
+        return JSON.stringify(
+          Array.from(window.performance.getEntriesByType('resource'))
+        );
+      });
+      
+      // Get JS coverage if enabled
+      let jsCoverage = null;
+      let cssCoverage = null;
+      
+      if (options.coverage) {
+        jsCoverage = await page.coverage.stopJSCoverage();
+        cssCoverage = await page.coverage.stopCSSCoverage();
+      }
+      
+      // Stop tracing if enabled
+      let tracePath = null;
+      if (options.trace) {
+        tracePath = options.tracePath || path.join(process.cwd(), 'traces', `trace-${Date.now()}.zip`);
+        
+        // Ensure directory exists
+        const traceDir = path.dirname(tracePath);
+        if (!fs.existsSync(traceDir)) {
+          fs.mkdirSync(traceDir, { recursive: true });
+        }
+        
+        await context.tracing.stop({ path: tracePath });
+      }
+      
+      // Take a screenshot if enabled
+      let screenshotPath = null;
+      if (options.screenshot) {
+        screenshotPath = options.screenshotPath || path.join(
+          process.cwd(),
+          'screenshots',
+          `performance-${Date.now()}.png`
+        );
+        
+        // Ensure directory exists
+        const screenshotDir = path.dirname(screenshotPath);
+        if (!fs.existsSync(screenshotDir)) {
+          fs.mkdirSync(screenshotDir, { recursive: true });
+        }
+        
+        await page.screenshot({ path: screenshotPath });
+      }
+      
+      // Calculate total resource size
+      const resources = JSON.parse(resourceTimings);
+      const totalResourceSize = resources.reduce((total, resource) => {
+        return total + (resource.transferSize || 0);
+      }, 0);
+      
+      // Calculate JS and CSS coverage
+      let jsUsage = null;
+      let cssUsage = null;
+      
+      if (options.coverage) {
+        const calculateUsage = (coverage) => {
+          let totalBytes = 0;
+          let usedBytes = 0;
+          
+          for (const entry of coverage) {
+            totalBytes += entry.text.length;
+            
+            for (const range of entry.ranges) {
+              usedBytes += range.end - range.start;
+            }
+          }
+          
+          return {
+            totalBytes,
+            usedBytes,
+            usagePercentage: totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0
+          };
+        };
+        
+        jsUsage = calculateUsage(jsCoverage);
+        cssUsage = calculateUsage(cssCoverage);
+      }
+      
+      return {
+        url,
+        loadTime,
+        statusCode: response.status(),
+        performanceMetrics,
+        resources: {
+          count: resources.length,
+          totalSize: totalResourceSize
+        },
+        coverage: options.coverage ? {
+          js: jsUsage,
+          css: cssUsage
+        } : null,
+        tracePath,
+        screenshotPath
+      };
+    } catch (error) {
+      throw PlaywrightErrorHandler.handleError(error, {
+        action: 'measuring performance',
+        url,
+        options
+      });
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
+    }
+  }
+  
+  /**
+   * Test accessibility of a page
+   * @param {string} url - URL to navigate to
+   * @param {Object} options - Options
+   * @returns {Promise<Object>} Accessibility audit results
+   */
+  static async testAccessibility(url, options = {}) {
+    let browser = null;
+    
+    try {
+      browser = await chromium.launch({
+        headless: options.headless !== false
+      });
+      
+      const context = await browser.newContext();
+      const page = await context.newPage();
       
       // Navigate to URL
       await page.goto(url, { 
@@ -446,77 +466,88 @@ class PlaywrightUtils {
         });
       }
       
-      // Extract data
-      const data = {};
+      // Get accessibility snapshot
+      const snapshot = await page.accessibility.snapshot({
+        interestingOnly: options.interestingOnly !== false
+      });
       
-      for (const [key, selector] of Object.entries(selectors)) {
-        try {
-          if (typeof selector === 'string') {
-            // Simple selector
-            const element = await page.$(selector);
-            if (element) {
-              data[key] = await element.textContent();
-            } else {
-              data[key] = null;
-            }
-          } else if (typeof selector === 'object') {
-            // Complex selector with options
-            const { selector: sel, attribute, multiple, transform } = selector;
-            
-            if (multiple) {
-              // Extract multiple elements
-              const elements = await page.$$(sel);
-              data[key] = await Promise.all(elements.map(async (element) => {
-                let value;
-                
-                if (attribute) {
-                  value = await element.getAttribute(attribute);
-                } else {
-                  value = await element.textContent();
-                }
-                
-                // Apply transform if provided
-                if (transform && typeof transform === 'function') {
-                  value = transform(value);
-                }
-                
-                return value;
-              }));
-            } else {
-              // Extract single element
-              const element = await page.$(sel);
-              if (element) {
-                let value;
-                
-                if (attribute) {
-                  value = await element.getAttribute(attribute);
-                } else {
-                  value = await element.textContent();
-                }
-                
-                // Apply transform if provided
-                if (transform && typeof transform === 'function') {
-                  value = transform(value);
-                }
-                
-                data[key] = value;
-              } else {
-                data[key] = null;
+      // Analyze accessibility issues
+      const issues = await page.evaluate(() => {
+        // Simple accessibility checks
+        const issues = [];
+        
+        // Check for images without alt text
+        document.querySelectorAll('img').forEach(img => {
+          if (!img.alt) {
+            issues.push({
+              type: 'image-alt',
+              message: 'Image missing alt text',
+              element: {
+                tagName: 'img',
+                src: img.src
               }
-            }
+            });
           }
-        } catch (selectorError) {
-          logger.warn(`Failed to extract data for selector "${key}": ${selectorError.message}`);
-          data[key] = null;
+        });
+        
+        // Check for form inputs without labels
+        document.querySelectorAll('input, select, textarea').forEach(input => {
+          const id = input.id;
+          if (id && !document.querySelector(`label[for="${id}"]`)) {
+            issues.push({
+              type: 'input-label',
+              message: 'Form control missing associated label',
+              element: {
+                tagName: input.tagName,
+                type: input.type,
+                id: input.id
+              }
+            });
+          }
+        });
+        
+        // Check for low contrast (simplified)
+        // A proper implementation would use color contrast algorithms
+        
+        // Check for missing document language
+        if (!document.documentElement.lang) {
+          issues.push({
+            type: 'language',
+            message: 'Document language not specified'
+          });
         }
+        
+        return issues;
+      });
+      
+      // Save report if path provided
+      if (options.reportPath) {
+        // Ensure directory exists
+        const reportDir = path.dirname(options.reportPath);
+        if (!fs.existsSync(reportDir)) {
+          fs.mkdirSync(reportDir, { recursive: true });
+        }
+        
+        fs.writeFileSync(options.reportPath, JSON.stringify({
+          url,
+          timestamp: new Date().toISOString(),
+          snapshot,
+          issues
+        }, null, 2));
       }
       
-      return data;
+      return {
+        url,
+        timestamp: new Date().toISOString(),
+        snapshot,
+        issues,
+        passed: issues.length === 0
+      };
     } catch (error) {
       throw PlaywrightErrorHandler.handleError(error, {
-        action: 'extracting data',
+        action: 'testing accessibility',
         url,
-        selectors
+        options
       });
     } finally {
       if (browser) {
@@ -526,16 +557,335 @@ class PlaywrightUtils {
   }
   
   /**
-   * Get list of available devices for emulation
-   * @returns {Array<string>} List of device names
+   * Generate PDF from HTML content
+   * @param {string} htmlContent - HTML content
+   * @param {Object} options - PDF options
+   * @returns {Promise<Buffer>} PDF buffer
    */
-  static getAvailableDevices() {
+  static async generatePdfFromHtml(htmlContent, options = {}) {
+    let browser = null;
+    
     try {
-      const devices = require('playwright').devices;
-      return Object.keys(devices);
+      browser = await chromium.launch({
+        headless: true // PDF generation requires headless mode
+      });
+      
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      
+      // Set content
+      await page.setContent(htmlContent, {
+        waitUntil: options.waitUntil || 'networkidle'
+      });
+      
+      // Generate PDF path if not provided
+      const pdfPath = options.path || path.join(
+        process.cwd(),
+        'pdfs',
+        `document-${Date.now()}.pdf`
+      );
+      
+      // Ensure directory exists
+      const pdfDir = path.dirname(pdfPath);
+      if (!fs.existsSync(pdfDir)) {
+        fs.mkdirSync(pdfDir, { recursive: true });
+      }
+      
+      // Generate PDF
+      const pdf = await page.pdf({
+        path: pdfPath,
+        format: options.format || 'A4',
+        margin: options.margin || { top: '1cm', bottom: '1cm', left: '1cm', right: '1cm' },
+        printBackground: options.printBackground !== false,
+        displayHeaderFooter: options.displayHeaderFooter || false,
+        headerTemplate: options.headerTemplate || '',
+        footerTemplate: options.footerTemplate || '',
+        scale: options.scale || 1,
+        landscape: options.landscape || false,
+        pageRanges: options.pageRanges || ''
+      });
+      
+      return pdf;
     } catch (error) {
-      logger.error('Failed to get available devices', error);
-      return [];
+      throw PlaywrightErrorHandler.handleError(error, {
+        action: 'generating PDF from HTML',
+        options
+      });
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
+    }
+  }
+  
+  /**
+   * Extract data from a table on a webpage
+   * @param {string} url - URL to navigate to
+   * @param {string} tableSelector - CSS selector for the table
+   * @param {Object} options - Options
+   * @returns {Promise<Array>} Extracted table data
+   */
+  static async extractTableData(url, tableSelector, options = {}) {
+    let browser = null;
+    
+    try {
+      browser = await chromium.launch({
+        headless: options.headless !== false
+      });
+      
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      
+      // Navigate to URL
+      await page.goto(url, { 
+        timeout: options.timeout || 30000,
+        waitUntil: options.waitUntil || 'networkidle'
+      });
+      
+      // Wait for table to be visible
+      await page.waitForSelector(tableSelector, { 
+        state: 'visible',
+        timeout: options.selectorTimeout || 10000
+      });
+      
+      // Extract table data
+      const tableData = await page.evaluate((selector) => {
+        const table = document.querySelector(selector);
+        if (!table) return null;
+        
+        const headers = Array.from(table.querySelectorAll('thead th, tbody tr:first-child th'))
+          .map(th => th.textContent.trim());
+        
+        const rows = Array.from(table.querySelectorAll('tbody tr'))
+          .map(row => {
+            const cells = Array.from(row.querySelectorAll('td, th'))
+              .map(cell => cell.textContent.trim());
+            
+            // If headers exist, create object with header keys
+            if (headers.length > 0) {
+              return headers.reduce((obj, header, index) => {
+                obj[header] = cells[index] || '';
+                return obj;
+              }, {});
+            }
+            
+            return cells;
+          });
+        
+        return {
+          headers,
+          rows
+        };
+      }, tableSelector);
+      
+      // Save data if path provided
+      if (options.outputPath) {
+        // Ensure directory exists
+        const outputDir = path.dirname(options.outputPath);
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        fs.writeFileSync(options.outputPath, JSON.stringify(tableData, null, 2));
+      }
+      
+      return tableData;
+    } catch (error) {
+      throw PlaywrightErrorHandler.handleError(error, {
+        action: 'extracting table data',
+        url,
+        tableSelector,
+        options
+      });
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
+    }
+  }
+  
+  /**
+   * Test a form by filling and submitting it
+   * @param {string} url - URL to navigate to
+   * @param {Object} formData - Form field data
+   * @param {Object} options - Options
+   * @returns {Promise<Object>} Form submission results
+   */
+  static async testForm(url, formData, options = {}) {
+    let browser = null;
+    
+    try {
+      browser = await chromium.launch({
+        headless: options.headless !== false
+      });
+      
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      
+      // Start tracing if enabled
+      if (options.trace) {
+        await context.tracing.start({ 
+          screenshots: true, 
+          snapshots: true 
+        });
+      }
+      
+      // Navigate to URL
+      await page.goto(url, { 
+        timeout: options.timeout || 30000,
+        waitUntil: options.waitUntil || 'networkidle'
+      });
+      
+      // Wait for form to be visible
+      const formSelector = options.formSelector || 'form';
+      await page.waitForSelector(formSelector, { 
+        state: 'visible',
+        timeout: options.selectorTimeout || 10000
+      });
+      
+      // Fill form fields
+      for (const [field, value] of Object.entries(formData)) {
+        // Handle different field types
+        const fieldSelector = `${formSelector} [name="${field}"]`;
+        const fieldType = await page.$eval(fieldSelector, el => el.type || el.tagName.toLowerCase());
+        
+        switch (fieldType) {
+          case 'checkbox':
+            if (value) {
+              await page.check(fieldSelector);
+            } else {
+              await page.uncheck(fieldSelector);
+            }
+            break;
+          case 'radio':
+            await page.check(`${formSelector} [name="${field}"][value="${value}"]`);
+            break;
+          case 'select':
+          case 'select-one':
+          case 'select-multiple':
+            await page.selectOption(fieldSelector, value);
+            break;
+          case 'file':
+            await page.setInputFiles(fieldSelector, value);
+            break;
+          default:
+            await page.fill(fieldSelector, String(value));
+        }
+        
+        // Wait a bit between field fills if specified
+        if (options.delayBetweenFields) {
+          await page.waitForTimeout(options.delayBetweenFields);
+        }
+      }
+      
+      // Take screenshot before submission if enabled
+      let beforeScreenshotPath = null;
+      if (options.screenshotBefore) {
+        beforeScreenshotPath = options.beforeScreenshotPath || path.join(
+          process.cwd(),
+          'screenshots',
+          `form-before-${Date.now()}.png`
+        );
+        
+        // Ensure directory exists
+        const screenshotDir = path.dirname(beforeScreenshotPath);
+        if (!fs.existsSync(screenshotDir)) {
+          fs.mkdirSync(screenshotDir, { recursive: true });
+        }
+        
+        await page.screenshot({ path: beforeScreenshotPath });
+      }
+      
+      // Set up navigation promise
+      const navigationPromise = page.waitForNavigation({
+        timeout: options.navigationTimeout || 30000,
+        waitUntil: options.waitUntil || 'networkidle'
+      }).catch(() => null); // Catch in case there's no navigation
+      
+      // Submit form
+      if (options.submitButtonSelector) {
+        await page.click(options.submitButtonSelector);
+      } else {
+        await page.evaluate((selector) => {
+          const form = document.querySelector(selector);
+          if (form) form.submit();
+        }, formSelector);
+      }
+      
+      // Wait for navigation or timeout
+      const navigationResult = await navigationPromise;
+      
+      // Take screenshot after submission if enabled
+      let afterScreenshotPath = null;
+      if (options.screenshotAfter) {
+        afterScreenshotPath = options.afterScreenshotPath || path.join(
+          process.cwd(),
+          'screenshots',
+          `form-after-${Date.now()}.png`
+        );
+        
+        // Ensure directory exists
+        const screenshotDir = path.dirname(afterScreenshotPath);
+        if (!fs.existsSync(screenshotDir)) {
+          fs.mkdirSync(screenshotDir, { recursive: true });
+        }
+        
+        await page.screenshot({ path: afterScreenshotPath });
+      }
+      
+      // Stop tracing if enabled
+      let tracePath = null;
+      if (options.trace) {
+        tracePath = options.tracePath || path.join(process.cwd(), 'traces', `form-trace-${Date.now()}.zip`);
+        
+        // Ensure directory exists
+        const traceDir = path.dirname(tracePath);
+        if (!fs.existsSync(traceDir)) {
+          fs.mkdirSync(traceDir, { recursive: true });
+        }
+        
+        await context.tracing.stop({ path: tracePath });
+      }
+      
+      // Check for success indicators
+      let success = false;
+      let errorMessage = null;
+      
+      if (options.successSelector) {
+        success = await page.$(options.successSelector).then(Boolean);
+      }
+      
+      if (options.errorSelector) {
+        const errorElement = await page.$(options.errorSelector);
+        if (errorElement) {
+          errorMessage = await errorElement.textContent();
+          success = false;
+        }
+      }
+      
+      // Get current URL
+      const currentUrl = page.url();
+      
+      return {
+        success: success || (options.successUrl && currentUrl.includes(options.successUrl)),
+        currentUrl,
+        errorMessage,
+        navigationOccurred: !!navigationResult,
+        beforeScreenshotPath,
+        afterScreenshotPath,
+        tracePath
+      };
+    } catch (error) {
+      throw PlaywrightErrorHandler.handleError(error, {
+        action: 'testing form',
+        url,
+        formData,
+        options
+      });
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
     }
   }
 }
