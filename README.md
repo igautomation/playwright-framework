@@ -12,11 +12,13 @@ A comprehensive, modular test automation framework built with Playwright. This f
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
+- [Environment Configuration](#environment-configuration)
 - [Framework Architecture](#framework-architecture)
 - [Test Types](#test-types)
 - [Key Components](#key-components)
 - [Writing Tests](#writing-tests)
 - [Running Tests](#running-tests)
+- [Docker Support](#docker-support)
 - [Reporting](#reporting)
 - [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
@@ -36,6 +38,7 @@ A comprehensive, modular test automation framework built with Playwright. This f
 - **Self-Healing Locators**: Automatically recover from broken selectors
 - **Reporting**: Detailed HTML and Allure reports with screenshots and videos
 - **CI/CD Integration**: GitHub Actions workflows for continuous testing
+- **Docker Support**: Run tests in containerized environments for consistency
 
 ## Prerequisites
 
@@ -43,6 +46,7 @@ A comprehensive, modular test automation framework built with Playwright. This f
 - npm 7 or higher
 - Git
 - Basic knowledge of JavaScript and testing concepts
+- Docker (optional, for containerized execution)
 
 ## Getting Started
 
@@ -59,15 +63,61 @@ A comprehensive, modular test automation framework built with Playwright. This f
    npm install
    ```
 
-3. Install Playwright browsers:
+3. Set up environment configuration:
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your configuration
+   ```
+
+4. Install Playwright browsers:
    ```bash
    npx playwright install
    ```
 
-4. Run a sample test to verify your setup:
+5. Run a sample test to verify your setup:
    ```bash
    npx playwright test src/tests/visual/visualRegressionTest.spec.js --project=chromium
    ```
+
+## Environment Configuration
+
+The framework uses environment variables for configuration. You can set these variables in a `.env` file or directly in your environment.
+
+### Configuration Files
+
+- `.env`: Environment-specific variables (not committed to version control)
+- `src/config/environment.js`: Central configuration module that loads variables
+- `src/config/environments/[environment].js`: Environment-specific defaults
+
+### Key Configuration Parameters
+
+```javascript
+// Example of accessing configuration in tests
+const config = require('../../config/environment');
+
+// URLs
+const baseUrl = config.baseUrl;           // e.g., 'https://example.com'
+const apiUrl = config.apiUrl;             // e.g., 'https://api.example.com'
+
+// Authentication
+const username = config.credentials.username;  // e.g., 'testuser'
+const password = config.credentials.password;  // e.g., 'password123'
+
+// Timeouts
+const timeout = config.timeouts.default;  // e.g., 30000 (ms)
+```
+
+### Environment-Specific Configuration
+
+You can set the `NODE_ENV` environment variable to load different configurations:
+
+```bash
+# Development environment
+NODE_ENV=development npm test
+
+# Production environment
+NODE_ENV=production npm test
+```
 
 ## Framework Architecture
 
@@ -80,6 +130,8 @@ playwright-framework/
 ├── playwright-report/        # HTML report
 ├── src/
 │   ├── config/               # Configuration files
+│   │   ├── environment.js    # Central configuration module
+│   │   └── environments/     # Environment-specific configs
 │   ├── data/                 # Test data files (YAML, JSON, etc.)
 │   ├── fixtures/             # Test fixtures and contexts
 │   ├── pages/                # Page Object Models
@@ -103,8 +155,12 @@ playwright-framework/
 ├── test-results/             # Test results and artifacts
 ├── visual-baselines/         # Visual baseline images
 ├── visual-diffs/             # Visual difference images
+├── .env                      # Environment variables (not in version control)
+├── .env.example              # Example environment variables
 ├── .eslintrc.js              # ESLint configuration
 ├── .prettierrc               # Prettier configuration
+├── Dockerfile                # Docker configuration
+├── docker-compose.yml        # Docker Compose configuration
 ├── package.json              # Project dependencies and scripts
 └── playwright.config.js      # Playwright configuration
 ```
@@ -127,10 +183,15 @@ Tests that interact with the application through the browser interface.
 
 ```javascript
 // Example UI test
+const config = require('../../config/environment');
+
 test('should login successfully', async ({ page }) => {
   const loginPage = new LoginPage(page);
   await loginPage.navigate();
-  await loginPage.login('testuser', 'password123');
+  await loginPage.login(
+    config.credentials.username,
+    config.credentials.password
+  );
   await expect(page).toHaveURL(/dashboard/);
 });
 ```
@@ -141,8 +202,10 @@ Tests that interact with the application's API endpoints.
 
 ```javascript
 // Example API test
+const config = require('../../config/environment');
+
 test('should create a new user', async () => {
-  const api = new ApiUtils('https://api.example.com');
+  const api = new ApiUtils(config.apiUrl);
   const user = User.createRandom();
   const response = await api.post('/users', user.toJSON());
   expect(response.status).toBe(201);
@@ -155,10 +218,14 @@ Tests that compare screenshots to detect visual regressions.
 
 ```javascript
 // Example visual test
+const config = require('../../config/environment');
+
 test('homepage should match baseline', async ({ page }) => {
   const visualUtils = new VisualComparisonUtils(page);
-  await page.goto('https://example.com');
-  await visualUtils.compareScreenshot('homepage');
+  await page.goto(config.baseUrl);
+  await visualUtils.compareScreenshot('homepage', {
+    threshold: config.visual.threshold
+  });
 });
 ```
 
@@ -168,9 +235,11 @@ Tests that check for accessibility issues.
 
 ```javascript
 // Example accessibility test
+const config = require('../../config/environment');
+
 test('homepage should be accessible', async ({ page }) => {
   const a11y = new AccessibilityUtils(page);
-  await page.goto('https://example.com');
+  await page.goto(config.baseUrl);
   const violations = await a11y.audit();
   expect(violations.length).toBe(0);
 });
@@ -182,10 +251,12 @@ Tests that measure and analyze performance metrics.
 
 ```javascript
 // Example performance test
+const config = require('../../config/environment');
+
 test('page should load within threshold', async ({ page }) => {
   const perfUtils = new PerformanceUtils(page);
-  const metrics = await perfUtils.measurePageLoad('https://example.com');
-  expect(metrics.loadTime).toBeLessThan(3000);
+  const metrics = await perfUtils.measurePageLoad(config.baseUrl);
+  expect(metrics.loadTime).toBeLessThan(config.timeouts.pageLoad);
 });
 ```
 
@@ -195,10 +266,12 @@ Tests that verify application behavior across different languages and locales.
 
 ```javascript
 // Example localization test
+const config = require('../../config/environment');
+
 test('should display content in Spanish', async ({ page }) => {
   const l10n = new LocalizationUtils(page);
   await l10n.setLocale('es-ES');
-  await page.goto('https://example.com');
+  await page.goto(config.baseUrl);
   const content = await l10n.extractTextContent();
   expect(content).toContain('Bienvenido');
 });
@@ -212,10 +285,12 @@ Page objects encapsulate UI interactions and provide a higher-level API for test
 
 ```javascript
 // Example page object
+const config = require('../../config/environment');
+
 class LoginPage extends BasePage {
   constructor(page) {
     super(page);
-    this.url = 'https://example.com/login';
+    this.url = `${config.baseUrl}/login`;
     this.usernameInput = '#username';
     this.passwordInput = '#password';
     this.loginButton = 'button[type="submit"]';
@@ -235,7 +310,11 @@ Data models represent entities in the application and provide methods for valida
 
 ```javascript
 // Example usage of User model
-const user = new User('johndoe', 'password123');
+const User = require('../../utils/api/models/User');
+const config = require('../../config/environment');
+
+// Create a user with credentials from config
+const user = new User(config.credentials.username, config.credentials.password);
 user.firstName = 'John';
 user.lastName = 'Doe';
 user.email = 'john.doe@example.com';
@@ -256,16 +335,25 @@ Utility classes provide reusable functionality for tests.
 
 ```javascript
 // Example API utility usage
-const api = new ApiUtils('https://api.example.com');
+const ApiUtils = require('../../utils/api/apiUtils');
+const config = require('../../config/environment');
+
+const api = new ApiUtils(config.apiUrl);
 const response = await api.get('/users/1');
 
 // Example visual comparison utility usage
+const VisualComparisonUtils = require('../../utils/visual/visualComparisonUtils');
 const visualUtils = new VisualComparisonUtils(page);
-await visualUtils.compareScreenshot('homepage');
+await visualUtils.compareScreenshot('homepage', {
+  threshold: config.visual.threshold,
+  baselineDir: config.visual.baselineDir,
+  diffDir: config.visual.diffDir
+});
 
 // Example web interactions utility usage
+const WebInteractions = require('../../utils/web/webInteractions');
 const web = new WebInteractions(page);
-await web.navigate('https://example.com');
+await web.navigate(config.baseUrl);
 await web.click('#login-button');
 ```
 
@@ -275,12 +363,19 @@ Fixtures provide setup and teardown functionality for tests.
 
 ```javascript
 // Example fixture usage
+const base = require('@playwright/test');
+const LoginPage = require('../../pages/LoginPage');
+const config = require('../../config/environment');
+
 const test = base.extend({
   loggedInPage: async ({ page }, use) => {
     // Setup: Log in
     const loginPage = new LoginPage(page);
     await loginPage.navigate();
-    await loginPage.login('testuser', 'password123');
+    await loginPage.login(
+      config.credentials.username,
+      config.credentials.password
+    );
     
     // Use the fixture
     await use(page);
@@ -332,6 +427,7 @@ const { test, expect } = require('@playwright/test');
 const LoginPage = require('../../pages/LoginPage');
 const DashboardPage = require('../../pages/DashboardPage');
 const User = require('../../utils/api/models/User');
+const config = require('../../config/environment');
 
 // Test suite
 test.describe('User Authentication', () => {
@@ -350,7 +446,10 @@ test.describe('User Authentication', () => {
     await loginPage.navigate();
     
     // Act
-    await loginPage.login(user.username, user.password);
+    await loginPage.login(
+      config.credentials.username,
+      config.credentials.password
+    );
     
     // Assert
     const dashboardPage = new DashboardPage(page);
@@ -424,6 +523,81 @@ npx playwright test --headed
 npx playwright test --grep @smoke
 ```
 
+## Docker Support
+
+This framework can be run in Docker containers, which ensures consistent test execution across different environments.
+
+### Using Docker
+
+1. Build the Docker image:
+   ```bash
+   docker build -t playwright-framework .
+   ```
+
+2. Run tests using Docker:
+   ```bash
+   docker run -it --rm \
+     -v $(pwd)/test-results:/app/test-results \
+     -v $(pwd)/playwright-report:/app/playwright-report \
+     -e BASE_URL=https://your-app.com \
+     -e API_URL=https://api.your-app.com \
+     -e TEST_USERNAME=your_username \
+     -e TEST_PASSWORD=your_password \
+     playwright-framework
+   ```
+
+### Using Docker Compose
+
+1. Run tests using Docker Compose:
+   ```bash
+   # Set environment variables in .env file or export them
+   export BASE_URL=https://your-app.com
+   export API_URL=https://api.your-app.com
+   export TEST_USERNAME=your_username
+   export TEST_PASSWORD=your_password
+
+   # Run the tests
+   docker-compose up
+   ```
+
+2. Run specific tests:
+   ```bash
+   docker-compose run --rm playwright npm run test:visual
+   ```
+
+### Running Tests in Different Environments
+
+You can easily switch between environments by setting the `NODE_ENV` variable:
+
+```bash
+# Run tests in development environment
+docker-compose run --rm -e NODE_ENV=development playwright npm test
+
+# Run tests in production environment
+docker-compose run --rm -e NODE_ENV=production playwright npm test
+```
+
+### Debugging in Docker
+
+To debug tests running in Docker:
+
+```bash
+# Run with headed browser for debugging
+docker run -it --rm \
+  -v $(pwd)/test-results:/app/test-results \
+  -v $(pwd)/playwright-report:/app/playwright-report \
+  -e HEADLESS=false \
+  -e PWDEBUG=1 \
+  playwright-framework
+```
+
+### Benefits of Docker
+
+- **Consistency**: Tests run in the same environment regardless of where they're executed
+- **Isolation**: Tests don't interfere with the host system
+- **Portability**: Easy to run tests on any system with Docker installed
+- **CI/CD Integration**: Seamless integration with CI/CD pipelines
+
 ## Reporting
 
 ### HTML Report
@@ -448,7 +622,12 @@ You can generate custom reports using the reporting utilities:
 
 ```javascript
 const ReportUtils = require('../../utils/reporting/reportUtils');
-ReportUtils.generateHtmlReport();
+const config = require('../../config/environment');
+
+ReportUtils.generateHtmlReport({
+  resultsDir: 'test-results',
+  reportDir: 'playwright-report'
+});
 ```
 
 ## Best Practices
@@ -496,6 +675,12 @@ ReportUtils.generateHtmlReport();
 - Extract common functionality into helper methods
 - Keep page objects and utilities up-to-date
 
+### 8. Configuration Management
+
+- Never hardcode environment-specific values in tests
+- Use the configuration module for all environment-specific values
+- Provide sensible defaults for all configuration parameters
+
 ## Troubleshooting
 
 ### Common Issues and Solutions
@@ -525,7 +710,7 @@ ReportUtils.generateHtmlReport();
 **Symptoms**: Tests fail due to authentication problems
 
 **Solutions**:
-- Check if credentials are correct
+- Check if credentials are correct in your environment configuration
 - Verify authentication flow
 - Use API authentication when possible
 - Store and reuse authentication tokens
@@ -535,10 +720,20 @@ ReportUtils.generateHtmlReport();
 **Symptoms**: Visual tests fail due to minor differences
 
 **Solutions**:
-- Adjust comparison threshold
+- Adjust comparison threshold in configuration
 - Update baseline images
 - Use masking for dynamic content
 - Check for environment-specific differences
+
+#### 5. Docker-Specific Issues
+
+**Symptoms**: Tests work locally but fail in Docker
+
+**Solutions**:
+- Check if browsers are installed correctly in the Docker image
+- Verify environment variables are passed correctly
+- Ensure volumes are mounted properly
+- Check for permission issues with mounted volumes
 
 ### Debugging Techniques
 
@@ -575,12 +770,16 @@ Create custom fixtures for complex setup and teardown:
 // src/fixtures/authFixtures.js
 const base = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
+const config = require('../config/environment');
 
 exports.test = base.test.extend({
   authenticatedPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
     await loginPage.navigate();
-    await loginPage.login('testuser', 'password123');
+    await loginPage.login(
+      config.credentials.username,
+      config.credentials.password
+    );
     await use(page);
     // Logout or cleanup after test
   }
@@ -592,9 +791,11 @@ exports.test = base.test.extend({
 Combine API and UI testing for efficient test scenarios:
 
 ```javascript
+const config = require('../../config/environment');
+
 test('should create user via API and verify in UI', async ({ page }) => {
   // Create user via API
-  const api = new ApiUtils('https://api.example.com');
+  const api = new ApiUtils(config.apiUrl);
   const user = User.createRandom();
   await api.post('/users', user.toJSON());
   
@@ -614,9 +815,11 @@ test('should create user via API and verify in UI', async ({ page }) => {
 Configure parallel execution in `playwright.config.js`:
 
 ```javascript
+const config = require('./src/config/environment');
+
 module.exports = {
-  workers: process.env.CI ? 4 : undefined,
-  fullyParallel: true,
+  workers: config.features.parallelExecution ? 4 : 1,
+  fullyParallel: config.features.parallelExecution,
   // other config...
 };
 ```
@@ -659,21 +862,30 @@ module.exports = CustomReporter;
 Implement different visual comparison strategies:
 
 ```javascript
+const config = require('../../config/environment');
+
 // Full page comparison
-await visualUtils.compareScreenshot('homepage');
+await visualUtils.compareScreenshot('homepage', {
+  threshold: config.visual.threshold
+});
 
 // Element comparison
-await visualUtils.compareElementScreenshot('#header', 'header');
+await visualUtils.compareElementScreenshot('#header', 'header', {
+  threshold: config.visual.threshold
+});
 
 // Responsive comparison
 await visualUtils.compareResponsiveScreenshots('homepage', [
   { width: 1920, height: 1080 },
   { width: 768, height: 1024 },
   { width: 375, height: 667 }
-]);
+], {
+  threshold: config.visual.threshold
+});
 
 // Comparison with masking
 await visualUtils.compareScreenshot('homepage', {
+  threshold: config.visual.threshold,
   mask: ['.dynamic-content', '.ads']
 });
 ```
@@ -684,7 +896,9 @@ Implement data-driven tests using external data sources:
 
 ```javascript
 const { readYaml } = require('../../utils/common/dataOrchestrator');
-const testData = readYaml('src/data/users.yaml');
+const config = require('../../config/environment');
+
+const testData = readYaml(`${config.testData.dataPath}/users.yaml`);
 
 for (const user of testData.users) {
   test(`should login with user ${user.username}`, async ({ page }) => {
@@ -717,15 +931,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: Install dependencies
-        run: npm ci
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Build Docker image
+        run: docker build -t playwright-framework .
       - name: Run tests
-        run: npm test
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
+            -e BASE_URL=${{ secrets.BASE_URL }} \
+            -e API_URL=${{ secrets.API_URL }} \
+            -e TEST_USERNAME=${{ secrets.TEST_USERNAME }} \
+            -e TEST_PASSWORD=${{ secrets.TEST_PASSWORD }} \
+            -e NODE_ENV=production \
+            playwright-framework
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
@@ -742,8 +960,15 @@ Example Jenkins pipeline:
 pipeline {
   agent {
     docker {
-      image 'mcr.microsoft.com/playwright:v1.32.0-focal'
+      image 'mcr.microsoft.com/playwright:v1.40.0-focal'
     }
+  }
+  environment {
+    NODE_ENV = 'production'
+    BASE_URL = credentials('base-url')
+    API_URL = credentials('api-url')
+    TEST_USERNAME = credentials('test-username')
+    TEST_PASSWORD = credentials('test-password')
   }
   stages {
     stage('Install dependencies') {
@@ -783,36 +1008,26 @@ pipeline {
 Our framework includes a sophisticated User model for API testing:
 
 ```javascript
-const User = require('../utils/api/models/User');
+const User = require('../../utils/api/models/User');
+const config = require('../../config/environment');
 
-// Create a user with individual properties
-const user1 = new User('johndoe', 'password123');
-user1.firstName = 'John';
-user1.lastName = 'Doe';
-user1.email = 'john.doe@example.com';
-
-// Create a user from an object
-const user2 = new User({
-  username: 'janedoe',
-  firstName: 'Jane',
-  lastName: 'Doe',
-  email: 'jane.doe@example.com'
-});
-
-// Create a random user
-const randomUser = User.createRandom();
+// Create a user with credentials from config
+const user = new User(config.credentials.username, config.credentials.password);
+user.firstName = 'John';
+user.lastName = 'Doe';
+user.email = 'john.doe@example.com';
 
 // Validate user data
-const validationResult = user1.validate(true);
+const validationResult = user.validate(true);
 if (!validationResult.valid) {
   console.error(validationResult.errors);
 }
 
 // Serialize to JSON (excluding password)
-const userData = user1.toJSON(false);
+const userData = user.toJSON(false);
 
 // Clone a user
-const clonedUser = user1.clone();
+const clonedUser = user.clone();
 
 // Compare users
 const areEqual = user1.equals(clonedUser);
@@ -833,6 +1048,7 @@ The User model provides:
 - [Playwright API Reference](https://playwright.dev/docs/api/class-playwright)
 - [Allure Report Documentation](https://docs.qameta.io/allure/)
 - [JavaScript MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [Docker Documentation](https://docs.docker.com/)
 
 ## Contributing
 

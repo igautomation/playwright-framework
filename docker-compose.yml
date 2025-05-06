@@ -1,33 +1,55 @@
-<<<<<<< HEAD
-version: '3.8'
-
-services:
-  playwright-framework:
-    build: .
-    container_name: playwright-framework
-    environment:
-      - NODE_ENV=qa
-    volumes:
-      - .:/usr/src/app
-    command: ['npx', 'playwright', 'test']
-=======
-version: '3'
-
 services:
   playwright:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
     volumes:
-      - ./reports:/app/reports
       - ./test-results:/app/test-results
+      - ./playwright-report:/app/playwright-report
       - ./allure-results:/app/allure-results
+      - ./reports:/app/reports
+      - ./visual-diffs:/app/visual-diffs
     environment:
-      - BASE_URL=${BASE_URL:-https://opensource-demo.orangehrmlive.com/web/index.php}
-      - API_URL=${API_URL:-https://opensource-demo.orangehrmlive.com/web/index.php}
-      - USERNAME=${USERNAME:-Admin}
-      - PASSWORD=${PASSWORD:-admin123}
-      - HEADLESS=true
-      - NODE_ENV=${NODE_ENV:-dev}
-    command: npm test
->>>>>>> 51948a2 (Main v1.0)
+      # Application URLs & API Auth
+      - API_BASE_URL=${API_BASE_URL:-https://reqres.in}
+      - API_GRAPHQL_PATH=${API_GRAPHQL_PATH:-/graphql}
+      - BASE_URL=${BASE_URL:-https://selectorshub.com/xpath-practice-page}
+      - API_KEY=${API_KEY}
+      - API_URL=${API_URL:-https://reqres.in}
+      - OAUTH2_TOKEN=${OAUTH2_TOKEN}
+      
+      # Login Credentials
+      - LOGIN_USERNAME=${LOGIN_USERNAME:-testuser}
+      - LOGIN_PASSWORD=${LOGIN_PASSWORD:-secure123}
+      - TEST_USERNAME=${TEST_USERNAME:-testuser@example.com}
+      - TEST_PASSWORD=${TEST_PASSWORD:-password123}
+      
+      # Localization
+      - LOCALE=${LOCALE:-en-US}
+      - TIMEZONE=${TIMEZONE:-UTC}
+      - COLOR_SCHEME=${COLOR_SCHEME:-light}
+      
+      # Playwright Runtime Settings
+      - NODE_ENV=${NODE_ENV:-production}
+      - HEADLESS=${HEADLESS:-true}
+      - SLOWMO=${SLOWMO:-0}
+      - JAVASCRIPT_ENABLED=${JAVASCRIPT_ENABLED:-true}
+      - TEST_ID_ATTRIBUTE=${TEST_ID_ATTRIBUTE:-data-test-id}
+      
+      # Expect & Test Timeouts
+      - DEFAULT_TIMEOUT=${DEFAULT_TIMEOUT:-30000}
+      - ACTION_TIMEOUT=${ACTION_TIMEOUT:-30000}
+      - EXPECT_TIMEOUT=${EXPECT_TIMEOUT:-10000}
+      - SCREENSHOT_MAX_DIFF_PIXELS=${SCREENSHOT_MAX_DIFF_PIXELS:-100}
+      - SNAPSHOT_MAX_DIFF_PIXEL_RATIO=${SNAPSHOT_MAX_DIFF_PIXEL_RATIO:-0.05}
+      
+      # CI Runtime Vars
+      - CI=${CI:-true}
+      - WORKERS=${WORKERS:-4}
+      
+      # Visual Testing
+      - VISUAL_BASELINE_DIR=${VISUAL_BASELINE_DIR:-visual-baselines}
+      - VISUAL_DIFF_DIR=${VISUAL_DIFF_DIR:-visual-diffs}
+      - VISUAL_THRESHOLD=${VISUAL_THRESHOLD:-0.1}
