@@ -1,0 +1,53 @@
+{
+  "name": "Sales Report Template",
+  "description": "A template for generating sales reports with multiple visualizations",
+  "tags": ["sales", "monthly", "finance"],
+  "dataSource": {
+    "type": "file",
+    "fileType": "json",
+    "fileName": ""
+  },
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Sales by Product Category",
+      "xAxis": "category",
+      "yAxis": ["sales"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "line",
+      "title": "Sales Trend Over Time",
+      "xAxis": "date",
+      "yAxis": ["sales", "target"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "pie",
+      "title": "Sales Distribution by Region",
+      "labels": "region",
+      "values": "sales",
+      "dimensions": {
+        "width": 600,
+        "height": 600
+      }
+    },
+    {
+      "type": "table",
+      "title": "Top Performing Products",
+      "columns": ["product", "category", "sales", "growth"],
+      "filter": "item.sales > 1000",
+      "limit": 10,
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    }
+  ]
+}

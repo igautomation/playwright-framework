@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # IDE/Editor
 .vscode/
 .idea/
@@ -38,3 +39,6 @@ docs-site/build/
 # Others
 coverage/
 .DS_Store
+=======
+node_modules
+>>>>>>> 51948a2 (Main v1.0)

@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
 echo "🔍 Running pre-commit linting..."
 npx lint-staged
+=======
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx lint-staged
+npx lint-staged
+>>>>>>> 51948a2 (Main v1.0)

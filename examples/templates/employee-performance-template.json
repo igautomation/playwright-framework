@@ -1,0 +1,53 @@
+{
+  "name": "Employee Performance Template",
+  "description": "A template for analyzing employee performance metrics",
+  "tags": ["hr", "quarterly", "performance"],
+  "dataSource": {
+    "type": "file",
+    "fileType": "json",
+    "fileName": ""
+  },
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Performance Scores by Department",
+      "xAxis": "department",
+      "yAxis": ["performanceScore", "targetScore"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "line",
+      "title": "Performance Trend Over Time",
+      "xAxis": "quarter",
+      "yAxis": ["performanceScore", "companyAverage"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "pie",
+      "title": "Performance Rating Distribution",
+      "labels": "rating",
+      "values": "count",
+      "dimensions": {
+        "width": 600,
+        "height": 600
+      }
+    },
+    {
+      "type": "table",
+      "title": "Top Performers",
+      "columns": ["employeeId", "firstName", "lastName", "department", "performanceScore", "rating"],
+      "filter": "item.performanceScore > 85",
+      "limit": 10,
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    }
+  ]
+}

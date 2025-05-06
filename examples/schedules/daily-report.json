@@ -1,0 +1,48 @@
+{
+  "name": "Daily Sales Report",
+  "description": "Daily report of sales data",
+  "cronExpression": "0 6 * * *",
+  "timezone": "UTC",
+  "active": true,
+  "recipients": ["sales@example.com", "manager@example.com"],
+  "reportConfig": {
+    "title": "Daily Sales Report",
+    "dataSource": {
+      "type": "file",
+      "fileType": "json",
+      "fileName": "time-series-data.json"
+    },
+    "charts": [
+      {
+        "type": "line",
+        "title": "Sales Trend",
+        "xAxis": "Date",
+        "yAxis": ["Sales", "Stock"],
+        "dimensions": {
+          "width": 800,
+          "height": 400
+        }
+      },
+      {
+        "type": "bar",
+        "title": "Daily Sales",
+        "xAxis": "Date",
+        "yAxis": ["Sales"],
+        "dimensions": {
+          "width": 800,
+          "height": 400
+        }
+      },
+      {
+        "type": "table",
+        "title": "Sales Data",
+        "columns": ["Date", "Stock", "Sales"],
+        "limit": 15,
+        "dimensions": {
+          "width": 800,
+          "height": 400
+        }
+      }
+    ]
+  }
+}

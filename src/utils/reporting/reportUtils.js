@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/utils/reporting/reportUtils.js
 
 import { execSync } from 'child_process';
@@ -165,3 +166,226 @@ export default {
   sendNotification,
   writeMetadataFile
 };
+=======
+/**
+ * Reporting utilities for test reporting
+ */
+const fs = require('fs');
+const path = require('path');
+const logger = require('../common/logger');
+
+class ReportUtils {
+  /**
+   * Constructor
+   */
+  constructor() {
+    this.reportsDir = path.resolve(process.cwd(), 'reports');
+
+    // Create reports directory if it doesn't exist
+    if (!fs.existsSync(this.reportsDir)) {
+      fs.mkdirSync(this.reportsDir, { recursive: true });
+    }
+  }
+
+  /**
+   * Save test result to JSON file
+   * @param {string} testName - Test name
+   * @param {Object} result - Test result
+   * @returns {string} Path to the report file
+   */
+  saveTestResult(testName, result) {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `${testName}-${timestamp}.json`;
+      const filePath = path.join(this.reportsDir, fileName);
+
+      fs.writeFileSync(filePath, JSON.stringify(result, null, 2));
+
+      logger.info(`Test result saved to: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      logger.error('Failed to save test result', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate HTML report from test results
+   * @param {Array<Object>} results - Test results
+   * @returns {string} Path to the HTML report
+   */
+  generateHtmlReport(results) {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `report-${timestamp}.html`;
+      const filePath = path.join(this.reportsDir, 'html', fileName);
+
+      // Create HTML report directory if it doesn't exist
+      const htmlDir = path.join(this.reportsDir, 'html');
+      if (!fs.existsSync(htmlDir)) {
+        fs.mkdirSync(htmlDir, { recursive: true });
+      }
+
+      // Generate HTML content
+      const html = this.generateHtmlContent(results);
+
+      // Write HTML file
+      fs.writeFileSync(filePath, html);
+
+      logger.info(`HTML report generated at: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      logger.error('Failed to generate HTML report', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate HTML content for report
+   * @param {Array<Object>} results - Test results
+   * @returns {string} HTML content
+   */
+  generateHtmlContent(results) {
+    const passed = results.filter((r) => r.status === 'passed').length;
+    const failed = results.filter((r) => r.status === 'failed').length;
+    const skipped = results.filter((r) => r.status === 'skipped').length;
+    const total = results.length;
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Test Report</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+          }
+          .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          }
+          h1, h2 {
+            color: #333;
+          }
+          .summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          .card {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          }
+          .card h3 {
+            margin-top: 0;
+          }
+          .passed { background-color: #d4edda; color: #155724; }
+          .failed { background-color: #f8d7da; color: #721c24; }
+          .skipped { background-color: #e2e3e5; color: #383d41; }
+          .total { background-color: #cce5ff; color: #004085; }
+          .metric {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+          }
+          th {
+            background-color: #f8f9fa;
+          }
+          tr.passed td:first-child {
+            border-left: 4px solid #28a745;
+          }
+          tr.failed td:first-child {
+            border-left: 4px solid #dc3545;
+          }
+          tr.skipped td:first-child {
+            border-left: 4px solid #6c757d;
+          }
+          .timestamp {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Test Report</h1>
+          
+          <div class="summary">
+            <div class="card total">
+              <h3>Total Tests</h3>
+              <div class="metric">${total}</div>
+            </div>
+            <div class="card passed">
+              <h3>Passed</h3>
+              <div class="metric">${passed}</div>
+            </div>
+            <div class="card failed">
+              <h3>Failed</h3>
+              <div class="metric">${failed}</div>
+            </div>
+            <div class="card skipped">
+              <h3>Skipped</h3>
+              <div class="metric">${skipped}</div>
+            </div>
+          </div>
+          
+          <h2>Test Results</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${results
+                .map(
+                  (result) => `
+                <tr class="${result.status}">
+                  <td>${result.name}</td>
+                  <td>${result.status}</td>
+                  <td>${result.duration}ms</td>
+                  <td>${result.error || ''}</td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+          
+          <p class="timestamp">Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+}
+
+module.exports = new ReportUtils();
+>>>>>>> 51948a2 (Main v1.0)

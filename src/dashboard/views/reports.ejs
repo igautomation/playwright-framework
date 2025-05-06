@@ -1,0 +1,466 @@
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Available Reports</h5>
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createReportModal">
+          <i class="bi bi-plus-circle me-1"></i> Create Report
+        </button>
+      </div>
+      <div class="card-body">
+        <% if (reports && reports.length > 0) { %>
+          <div class="row">
+            <% reports.forEach(report => { %>
+              <div class="col-md-4 mb-4">
+                <div class="card report-card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title"><%= report %></h5>
+                    <p class="card-text text-muted small">
+                      <i class="bi bi-calendar me-1"></i> Generated on: <%= new Date().toLocaleDateString() %>
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent">
+                    <a href="/charts/<%= report %>" class="btn btn-sm btn-primary" target="_blank">
+                      <i class="bi bi-eye me-1"></i> View
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger ms-2 delete-report-btn" data-report="<%= report %>">
+                      <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i> No reports found. Create a new report to get started.
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Report Modal -->
+<div class="modal fade" id="createReportModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="reportTitle" class="form-label">Report Title</label>
+          <input type="text" class="form-control" id="reportTitle" placeholder="Enter report title">
+        </div>
+        
+        <div class="mb-3">
+          <label for="dataSource" class="form-label">Data Source</label>
+          <select class="form-select" id="dataSource">
+            <option value="">Select a data source...</option>
+            <option value="json">JSON Files</option>
+            <option value="csv">CSV Files</option>
+            <option value="upload">Uploaded Files</option>
+          </select>
+        </div>
+        
+        <div class="mb-3" id="fileSelectContainer" style="display: none;">
+          <label for="fileName" class="form-label">File</label>
+          <select class="form-select" id="fileName">
+            <option value="">Select a file...</option>
+          </select>
+        </div>
+        
+        <div id="reportConfig" style="display: none;">
+          <h6>Report Configuration</h6>
+          <div class="mb-3">
+            <label for="chartTypes" class="form-label">Charts to Include</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="bar" id="barChartCheck" checked>
+              <label class="form-check-label" for="barChartCheck">
+                Bar Chart
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="pie" id="pieChartCheck" checked>
+              <label class="form-check-label" for="pieChartCheck">
+                Pie Chart
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="line" id="lineChartCheck">
+              <label class="form-check-label" for="lineChartCheck">
+                Line Chart
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="table" id="tableCheck" checked>
+              <label class="form-check-label" for="tableCheck">
+                Data Table
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="columnsSelect" class="form-label">Columns to Analyze</label>
+            <select class="form-select" id="columnsSelect" multiple>
+              <!-- Columns will be populated dynamically -->
+            </select>
+            <div class="form-text">Hold Ctrl/Cmd to select multiple columns</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="generateReportBtn" disabled>Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Handle delete report button
+    document.querySelectorAll('.delete-report-btn').forEach(btn => {
+      btn.addEventListener('click', async (event) => {
+        const report = event.currentTarget.getAttribute('data-report');
+        
+        if (confirm(`Are you sure you want to delete the report "${report}"?`)) {
+          try {
+            const response = await fetch(`/api/reports/${report}`, {
+              method: 'DELETE'
+            });
+            
+            if (response.ok) {
+              // Remove report card from UI
+              event.currentTarget.closest('.col-md-4').remove();
+              showToast('Report deleted successfully', 'success');
+              
+              // Reload page if no reports left
+              const reportCards = document.querySelectorAll('.report-card');
+              if (reportCards.length === 0) {
+                window.location.reload();
+              }
+            } else {
+              const data = await response.json();
+              alert(`Error: ${data.error || 'Failed to delete report'}`);
+            }
+          } catch (error) {
+            console.error('Error deleting report:', error);
+            alert(`Error: ${error.message}`);
+          }
+        }
+      });
+    });
+    
+    // Handle data source selection
+    const dataSourceSelect = document.getElementById('dataSource');
+    const fileSelectContainer = document.getElementById('fileSelectContainer');
+    const fileNameSelect = document.getElementById('fileName');
+    const reportConfig = document.getElementById('reportConfig');
+    const generateReportBtn = document.getElementById('generateReportBtn');
+    
+    dataSourceSelect.addEventListener('change', () => {
+      const source = dataSourceSelect.value;
+      
+      if (source) {
+        fileSelectContainer.style.display = 'block';
+        loadFileList(source);
+      } else {
+        fileSelectContainer.style.display = 'none';
+        reportConfig.style.display = 'none';
+        generateReportBtn.disabled = true;
+      }
+    });
+    
+    // Handle file selection
+    fileNameSelect.addEventListener('change', async () => {
+      const fileName = fileNameSelect.value;
+      
+      if (fileName) {
+        try {
+          // Load file data to get columns
+          const response = await fetch(`/api/data/${dataSourceSelect.value}/${fileName}`);
+          const result = await response.json();
+          
+          if (result.error) {
+            alert(`Error: ${result.error}`);
+            return;
+          }
+          
+          // Populate columns select
+          const columnsSelect = document.getElementById('columnsSelect');
+          columnsSelect.innerHTML = '';
+          
+          const columns = Object.keys(result.data[0]);
+          columns.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col;
+            columnsSelect.appendChild(option);
+          });
+          
+          // Show report config
+          reportConfig.style.display = 'block';
+          generateReportBtn.disabled = false;
+        } catch (error) {
+          console.error('Error loading file data:', error);
+          alert(`Error: ${error.message}`);
+        }
+      } else {
+        reportConfig.style.display = 'none';
+        generateReportBtn.disabled = true;
+      }
+    });
+    
+    // Load file list
+    async function loadFileList(fileType) {
+      try {
+        fileNameSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        const response = await fetch(`/api/files/${fileType}`);
+        const data = await response.json();
+        
+        fileNameSelect.innerHTML = '<option value="">Select a file...</option>';
+        
+        if (data.files && data.files.length > 0) {
+          data.files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            fileNameSelect.appendChild(option);
+          });
+        } else {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'No files available';
+          option.disabled = true;
+          fileNameSelect.appendChild(option);
+        }
+      } catch (error) {
+        console.error('Error loading file list:', error);
+        fileNameSelect.innerHTML = '<option value="">Error loading files</option>';
+      }
+    }
+    
+    // Handle generate report button
+    generateReportBtn.addEventListener('click', async () => {
+      const reportTitle = document.getElementById('reportTitle').value || `Report-${Date.now()}`;
+      const fileName = fileNameSelect.value;
+      const selectedColumns = Array.from(document.getElementById('columnsSelect').selectedOptions).map(opt => opt.value);
+      
+      if (!fileName) {
+        alert('Please select a file');
+        return;
+      }
+      
+      if (selectedColumns.length === 0) {
+        alert('Please select at least one column to analyze');
+        return;
+      }
+      
+      // Get selected chart types
+      const chartTypes = [];
+      if (document.getElementById('barChartCheck').checked) chartTypes.push('bar');
+      if (document.getElementById('pieChartCheck').checked) chartTypes.push('pie');
+      if (document.getElementById('lineChartCheck').checked) chartTypes.push('line');
+      if (document.getElementById('tableCheck').checked) chartTypes.push('table');
+      
+      if (chartTypes.length === 0) {
+        alert('Please select at least one chart type');
+        return;
+      }
+      
+      try {
+        // Show loading
+        generateReportBtn.disabled = true;
+        generateReportBtn.innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Generating...
+        `;
+        
+        // Load file data
+        const dataResponse = await fetch(`/api/data/${dataSourceSelect.value}/${fileName}`);
+        const dataResult = await dataResponse.json();
+        
+        if (dataResult.error) {
+          alert(`Error: ${dataResult.error}`);
+          return;
+        }
+        
+        const data = dataResult.data;
+        
+        // Generate report configuration
+        const reportCharts = [];
+        
+        // Add charts based on selected types
+        if (chartTypes.includes('bar')) {
+          // Add bar chart for each numeric column
+          selectedColumns.forEach(column => {
+            if (typeof data[0][column] === 'number' || !isNaN(parseFloat(data[0][column]))) {
+              reportCharts.push({
+                type: 'bar',
+                title: `${column} by Category`,
+                config: {
+                  labels: data.map(item => item[selectedColumns[0]]),
+                  datasets: [{
+                    label: column,
+                    data: data.map(item => item[column]),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  title: `${column} by Category`
+                }
+              });
+            }
+          });
+        }
+        
+        if (chartTypes.includes('pie')) {
+          // Add pie chart for categorical columns
+          selectedColumns.forEach(column => {
+            // Count occurrences of each value
+            const counts = {};
+            data.forEach(item => {
+              const value = item[column];
+              counts[value] = (counts[value] || 0) + 1;
+            });
+            
+            reportCharts.push({
+              type: 'pie',
+              title: `Distribution of ${column}`,
+              config: {
+                labels: Object.keys(counts),
+                data: Object.values(counts),
+                backgroundColor: [
+                  'rgba(255, 99, 132, 0.5)',
+                  'rgba(54, 162, 235, 0.5)',
+                  'rgba(255, 206, 86, 0.5)',
+                  'rgba(75, 192, 192, 0.5)',
+                  'rgba(153, 102, 255, 0.5)',
+                  'rgba(255, 159, 64, 0.5)'
+                ]
+              },
+              options: {
+                title: `Distribution of ${column}`
+              }
+            });
+          });
+        }
+        
+        if (chartTypes.includes('line')) {
+          // Add line chart for time series data
+          const timeColumns = selectedColumns.filter(col => 
+            data[0][col] && (
+              data[0][col].toString().includes('-') || 
+              data[0][col].toString().includes('/') ||
+              data[0][col].toString().match(/^\d{4}/)
+            )
+          );
+          
+          if (timeColumns.length > 0) {
+            const timeColumn = timeColumns[0];
+            const numericColumns = selectedColumns.filter(col => 
+              typeof data[0][col] === 'number' || !isNaN(parseFloat(data[0][col]))
+            );
+            
+            if (numericColumns.length > 0) {
+              reportCharts.push({
+                type: 'line',
+                title: `Trends Over Time`,
+                config: {
+                  labels: data.map(item => item[timeColumn]),
+                  datasets: numericColumns.map((col, index) => {
+                    const colors = [
+                      'rgba(255, 99, 132, 0.5)',
+                      'rgba(54, 162, 235, 0.5)',
+                      'rgba(255, 206, 86, 0.5)',
+                      'rgba(75, 192, 192, 0.5)',
+                      'rgba(153, 102, 255, 0.5)',
+                      'rgba(255, 159, 64, 0.5)'
+                    ];
+                    
+                    return {
+                      label: col,
+                      data: data.map(item => item[col]),
+                      backgroundColor: colors[index % colors.length],
+                      borderColor: colors[index % colors.length].replace('0.5', '1'),
+                      borderWidth: 1,
+                      fill: false
+                    };
+                  })
+                },
+                options: {
+                  title: `Trends Over Time`
+                }
+              });
+            }
+          }
+        }
+        
+        if (chartTypes.includes('table')) {
+          // Add data table
+          reportCharts.push({
+            type: 'table',
+            title: 'Data Table',
+            data: data.slice(0, 50).map(item => {
+              const newItem = {};
+              selectedColumns.forEach(col => {
+                newItem[col] = item[col];
+              });
+              return newItem;
+            }),
+            options: {
+              title: 'Data Table',
+              columns: selectedColumns
+            }
+          });
+        }
+        
+        // Generate report
+        const reportResponse = await fetch('/api/generate-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            charts: reportCharts,
+            title: reportTitle
+          })
+        });
+        
+        const reportResult = await reportResponse.json();
+        
+        if (reportResult.error) {
+          alert(`Error: ${reportResult.error}`);
+          return;
+        }
+        
+        // Open report in new window
+        window.open(reportResult.report.path, '_blank');
+        
+        // Reset button
+        generateReportBtn.disabled = false;
+        generateReportBtn.innerHTML = 'Generate Report';
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createReportModal'));
+        modal.hide();
+        
+        // Reload page to show new report
+        window.location.reload();
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert(`Error: ${error.message}`);
+        
+        // Reset button
+        generateReportBtn.disabled = false;
+        generateReportBtn.innerHTML = 'Generate Report';
+      }
+    });
+  });
+</script>

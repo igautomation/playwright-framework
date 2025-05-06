@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.8'
 
 services:
@@ -9,3 +10,24 @@ services:
     volumes:
       - .:/usr/src/app
     command: ['npx', 'playwright', 'test']
+=======
+version: '3'
+
+services:
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./reports:/app/reports
+      - ./test-results:/app/test-results
+      - ./allure-results:/app/allure-results
+    environment:
+      - BASE_URL=${BASE_URL:-https://opensource-demo.orangehrmlive.com/web/index.php}
+      - API_URL=${API_URL:-https://opensource-demo.orangehrmlive.com/web/index.php}
+      - USERNAME=${USERNAME:-Admin}
+      - PASSWORD=${PASSWORD:-admin123}
+      - HEADLESS=true
+      - NODE_ENV=${NODE_ENV:-dev}
+    command: npm test
+>>>>>>> 51948a2 (Main v1.0)

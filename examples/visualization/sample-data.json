@@ -1,0 +1,82 @@
+[
+  {
+    "Name": "Product A",
+    "Price": 99.99,
+    "Category": "Electronics",
+    "Rating": 4.7,
+    "Stock": 120,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product B",
+    "Price": 149.99,
+    "Category": "Electronics",
+    "Rating": 4.8,
+    "Stock": 85,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product C",
+    "Price": 29.99,
+    "Category": "Books",
+    "Rating": 4.5,
+    "Stock": 200,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product D",
+    "Price": 39.99,
+    "Category": "Books",
+    "Rating": 4.2,
+    "Stock": 150,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product E",
+    "Price": 199.99,
+    "Category": "Electronics",
+    "Rating": 4.9,
+    "Stock": 50,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product F",
+    "Price": 59.99,
+    "Category": "Clothing",
+    "Rating": 4.3,
+    "Stock": 300,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product G",
+    "Price": 79.99,
+    "Category": "Clothing",
+    "Rating": 4.6,
+    "Stock": 180,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product H",
+    "Price": 249.99,
+    "Category": "Electronics",
+    "Rating": 4.8,
+    "Stock": 40,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product I",
+    "Price": 19.99,
+    "Category": "Books",
+    "Rating": 4.4,
+    "Stock": 250,
+    "Date": "2025-01-15"
+  },
+  {
+    "Name": "Product J",
+    "Price": 129.99,
+    "Category": "Home",
+    "Rating": 4.7,
+    "Stock": 75,
+    "Date": "2025-01-15"
+  }
+]

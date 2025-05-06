@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/utils/api/apiUtils.js
 
 import Ajv from 'ajv';
@@ -141,8 +142,264 @@ class ApiUtils {
       }
 
       logger.info(`Idempotency passed on attempt ${i}: ${status}`);
+=======
+const axios = require('axios');
+const logger = require('../common/logger');
+
+/**
+ * API Utilities class for making API requests
+ */
+class ApiUtils {
+  /**
+   * Constructor
+   * @param {string} baseUrl - Base URL for API requests
+   * @param {Object} defaultHeaders - Default headers for API requests
+   */
+  constructor(baseUrl, defaultHeaders = {}) {
+    this.baseUrl = baseUrl || process.env.API_URL;
+    this.defaultHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...defaultHeaders,
+    };
+
+    // Create axios instance
+    this.client = axios.create({
+      baseURL: this.baseUrl,
+      headers: this.defaultHeaders,
+      timeout: 30000,
+    });
+
+    // Add request interceptor for logging
+    this.client.interceptors.request.use(
+      (config) => {
+        logger.debug(
+          `API Request: ${config.method.toUpperCase()} ${config.url}`,
+          {
+            headers: config.headers,
+            data: config.data,
+          }
+        );
+        return config;
+      },
+      (error) => {
+        logger.error('API Request Error:', error);
+        return Promise.reject(error);
+      }
+    );
+
+    // Add response interceptor for logging
+    this.client.interceptors.response.use(
+      (response) => {
+        logger.debug(
+          `API Response: ${response.status} ${response.statusText}`,
+          {
+            data: response.data,
+          }
+        );
+        return response;
+      },
+      (error) => {
+        if (error.response) {
+          logger.error(
+            `API Response Error: ${error.response.status} ${error.response.statusText}`,
+            {
+              data: error.response.data,
+            }
+          );
+        } else {
+          logger.error('API Response Error:', error.message);
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  /**
+   * Set authorization header
+   * @param {string} token - Authorization token
+   * @param {string} type - Token type (e.g., Bearer)
+   * @returns {ApiUtils} This instance for chaining
+   */
+  setAuthToken(token, type = 'Bearer') {
+    this.defaultHeaders['Authorization'] = `${type} ${token}`;
+    this.client.defaults.headers.common['Authorization'] = `${type} ${token}`;
+    return this;
+  }
+
+  /**
+   * Set API key
+   * @param {string} apiKey - API key
+   * @param {string} headerName - Header name for the API key
+   * @returns {ApiUtils} This instance for chaining
+   */
+  setApiKey(apiKey, headerName = 'X-API-Key') {
+    this.defaultHeaders[headerName] = apiKey;
+    this.client.defaults.headers.common[headerName] = apiKey;
+    return this;
+  }
+
+  /**
+   * Make a GET request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} params - Query parameters
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async get(endpoint, params = {}, headers = {}) {
+    try {
+      const response = await this.client.get(endpoint, {
+        params,
+        headers: { ...this.defaultHeaders, ...headers },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`GET request failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a POST request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} data - Request data
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async post(endpoint, data = {}, headers = {}) {
+    try {
+      const response = await this.client.post(endpoint, data, {
+        headers: { ...this.defaultHeaders, ...headers },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`POST request failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a PUT request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} data - Request data
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async put(endpoint, data = {}, headers = {}) {
+    try {
+      const response = await this.client.put(endpoint, data, {
+        headers: { ...this.defaultHeaders, ...headers },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`PUT request failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a DELETE request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} params - Query parameters
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async delete(endpoint, params = {}, headers = {}) {
+    try {
+      const response = await this.client.delete(endpoint, {
+        params,
+        headers: { ...this.defaultHeaders, ...headers },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`DELETE request failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a PATCH request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} data - Request data
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async patch(endpoint, data = {}, headers = {}) {
+    try {
+      const response = await this.client.patch(endpoint, data, {
+        headers: { ...this.defaultHeaders, ...headers },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`PATCH request failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a request with multipart/form-data
+   * @param {string} method - HTTP method
+   * @param {string} endpoint - API endpoint
+   * @param {Object} formData - Form data
+   * @param {Object} headers - Request headers
+   * @returns {Promise<Object>} Response data
+   */
+  async uploadFile(method, endpoint, formData, headers = {}) {
+    try {
+      const response = await this.client({
+        method,
+        url: endpoint,
+        data: formData,
+        headers: {
+          ...this.defaultHeaders,
+          ...headers,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      logger.error(`File upload failed for endpoint: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a batch request
+   * @param {Array<Object>} requests - Array of request objects
+   * @returns {Promise<Array<Object>>} Array of response data
+   */
+  async batch(requests) {
+    try {
+      const promises = requests.map((request) => {
+        const { method, endpoint, data, params, headers } = request;
+
+        switch (method.toLowerCase()) {
+          case 'get':
+            return this.get(endpoint, params, headers);
+          case 'post':
+            return this.post(endpoint, data, headers);
+          case 'put':
+            return this.put(endpoint, data, headers);
+          case 'delete':
+            return this.delete(endpoint, params, headers);
+          case 'patch':
+            return this.patch(endpoint, data, headers);
+          default:
+            throw new Error(`Unsupported method: ${method}`);
+        }
+      });
+
+      return await Promise.all(promises);
+    } catch (error) {
+      logger.error('Batch request failed', error);
+      throw error;
+>>>>>>> 51948a2 (Main v1.0)
     }
   }
 }
 
+<<<<<<< HEAD
 export default ApiUtils;
+=======
+module.exports = ApiUtils;
+>>>>>>> 51948a2 (Main v1.0)

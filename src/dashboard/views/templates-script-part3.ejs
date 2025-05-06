@@ -1,0 +1,394 @@
+<script>
+    // Generate sample data
+    async function generateSampleData() {
+      try {
+        if (!currentTemplate) return;
+        
+        const sampleDataContainer = document.getElementById('sampleData');
+        sampleDataContainer.innerHTML = `
+          <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Generating sample data...</p>
+          </div>
+        `;
+        
+        const response = await fetch(`/api/templates/${currentTemplate.id}/sample-data`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ count: 5 })
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          sampleDataContainer.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i> ${result.error}
+            </div>
+          `;
+          return;
+        }
+        
+        // Render sample data
+        const data = result.data;
+        
+        if (!data || data.length === 0) {
+          sampleDataContainer.innerHTML = `
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i> No sample data generated
+            </div>
+          `;
+          return;
+        }
+        
+        let tableHtml = `
+          <div class="table-responsive">
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr>
+                  ${Object.keys(data[0]).map(key => `<th>${key}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        data.forEach(item => {
+          tableHtml += '<tr>';
+          Object.values(item).forEach(value => {
+            if (typeof value === 'object') {
+              tableHtml += `<td>${JSON.stringify(value)}</td>`;
+            } else {
+              tableHtml += `<td>${value}</td>`;
+            }
+          });
+          tableHtml += '</tr>';
+        });
+        
+        tableHtml += `
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        sampleDataContainer.innerHTML = tableHtml;
+      } catch (error) {
+        console.error('Error generating sample data:', error);
+        document.getElementById('sampleData').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i> Error generating sample data: ${error.message}
+          </div>
+        `;
+      }
+    }
+    
+    // Clone template
+    async function cloneTemplate() {
+      try {
+        if (!currentTemplate) return;
+        
+        const newName = prompt('Enter name for the cloned template:', `${currentTemplate.name} (Copy)`);
+        
+        if (!newName) return;
+        
+        const response = await fetch(`/api/templates/${currentTemplate.id}/clone`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: newName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          alert(`Error: ${result.error}`);
+          return;
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('templateDetailsModal'));
+        modal.hide();
+        
+        // Show success message
+        showToast('Template cloned successfully', 'success');
+        
+        // Reload templates
+        loadTemplates();
+      } catch (error) {
+        console.error('Error cloning template:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Open edit template modal
+    async function openEditTemplateModal(templateId) {
+      try {
+        const response = await fetch(`/api/templates/${templateId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+          alert(`Error: ${data.error}`);
+          return;
+        }
+        
+        const template = data.template;
+        
+        // Populate form fields
+        document.getElementById('editTemplateId').value = template.id;
+        document.getElementById('editTemplateName').value = template.name;
+        document.getElementById('editTemplateDescription').value = template.description || '';
+        document.getElementById('editTemplateTags').value = template.tags ? template.tags.join(', ') : '';
+        
+        // Set data source
+        document.getElementById('editDataSourceType').value = template.dataSource.type;
+        
+        if (template.dataSource.type === 'file') {
+          document.getElementById('editFileType').value = template.dataSource.fileType || 'json';
+          document.getElementById('editFileName').value = template.dataSource.fileName || '';
+        }
+        
+        // Populate charts
+        const chartsContainer = document.getElementById('editChartsContainer');
+        chartsContainer.innerHTML = '';
+        
+        template.charts.forEach((chart, index) => {
+          const chartDiv = document.createElement('div');
+          chartDiv.className = 'chart-config mb-3 border rounded p-3';
+          
+          let chartConfigHtml = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6>Chart ${index + 1}</h6>
+              <button type="button" class="btn btn-sm btn-outline-danger remove-chart-btn">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+            
+            <div class="mb-3">
+              <label for="editChartType${index}" class="form-label">Chart Type</label>
+              <select class="form-select chart-type" id="editChartType${index}">
+                <option value="bar" ${chart.type === 'bar' ? 'selected' : ''}>Bar Chart</option>
+                <option value="line" ${chart.type === 'line' ? 'selected' : ''}>Line Chart</option>
+                <option value="pie" ${chart.type === 'pie' ? 'selected' : ''}>Pie Chart</option>
+                <option value="table" ${chart.type === 'table' ? 'selected' : ''}>Table</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="editChartTitle${index}" class="form-label">Chart Title</label>
+              <input type="text" class="form-control chart-title" id="editChartTitle${index}" value="${chart.title || ''}">
+            </div>
+            
+            <div class="chart-specific-config" id="editChartConfig${index}">
+          `;
+          
+          if (chart.type === 'bar' || chart.type === 'line') {
+            chartConfigHtml += `
+              <div class="mb-3">
+                <label for="editXAxis${index}" class="form-label">X-Axis Column</label>
+                <input type="text" class="form-control x-axis" id="editXAxis${index}" value="${chart.xAxis || ''}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="editYAxis${index}" class="form-label">Y-Axis Column(s)</label>
+                <input type="text" class="form-control y-axis" id="editYAxis${index}" placeholder="Comma-separated column names" value="${Array.isArray(chart.yAxis) ? chart.yAxis.join(', ') : chart.yAxis || ''}">
+              </div>
+            `;
+          } else if (chart.type === 'pie') {
+            chartConfigHtml += `
+              <div class="mb-3">
+                <label for="editLabels${index}" class="form-label">Labels Column</label>
+                <input type="text" class="form-control labels" id="editLabels${index}" value="${chart.labels || ''}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="editValues${index}" class="form-label">Values Column</label>
+                <input type="text" class="form-control values" id="editValues${index}" value="${chart.values || ''}">
+              </div>
+            `;
+          } else if (chart.type === 'table') {
+            chartConfigHtml += `
+              <div class="mb-3">
+                <label for="editColumns${index}" class="form-label">Columns</label>
+                <input type="text" class="form-control columns" id="editColumns${index}" placeholder="Comma-separated column names" value="${Array.isArray(chart.columns) ? chart.columns.join(', ') : chart.columns || ''}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="editFilter${index}" class="form-label">Filter (optional)</label>
+                <input type="text" class="form-control filter" id="editFilter${index}" placeholder="e.g. item.price > 100" value="${chart.filter || ''}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="editLimit${index}" class="form-label">Row Limit</label>
+                <input type="number" class="form-control limit" id="editLimit${index}" value="${chart.limit || 50}" min="1">
+              </div>
+            `;
+          }
+          
+          chartConfigHtml += '</div>';
+          chartDiv.innerHTML = chartConfigHtml;
+          chartsContainer.appendChild(chartDiv);
+          
+          // Add event listener to remove button
+          const removeBtn = chartDiv.querySelector('.remove-chart-btn');
+          removeBtn.addEventListener('click', () => {
+            chartDiv.remove();
+            updateEditChartNumbers();
+          });
+          
+          // Add event listener to chart type select
+          const chartTypeSelect = chartDiv.querySelector('.chart-type');
+          chartTypeSelect.addEventListener('change', () => {
+            updateEditChartConfig(index, chartTypeSelect.value);
+          });
+        });
+        
+        // Disable remove button if only one chart
+        if (template.charts.length === 1) {
+          const removeBtn = chartsContainer.querySelector('.remove-chart-btn');
+          if (removeBtn) {
+            removeBtn.disabled = true;
+          }
+        }
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editTemplateModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error loading template for editing:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Add chart configuration to edit form
+    function addEditChartConfig() {
+      const chartsContainer = document.getElementById('editChartsContainer');
+      const chartCount = chartsContainer.querySelectorAll('.chart-config').length;
+      
+      const chartDiv = document.createElement('div');
+      chartDiv.className = 'chart-config mb-3 border rounded p-3';
+      chartDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6>Chart ${chartCount + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger remove-chart-btn">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        
+        <div class="mb-3">
+          <label for="editChartType${chartCount}" class="form-label">Chart Type</label>
+          <select class="form-select chart-type" id="editChartType${chartCount}">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="table">Table</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="editChartTitle${chartCount}" class="form-label">Chart Title</label>
+          <input type="text" class="form-control chart-title" id="editChartTitle${chartCount}">
+        </div>
+        
+        <div class="chart-specific-config" id="editChartConfig${chartCount}">
+          <div class="mb-3">
+            <label for="editXAxis${chartCount}" class="form-label">X-Axis Column</label>
+            <input type="text" class="form-control x-axis" id="editXAxis${chartCount}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="editYAxis${chartCount}" class="form-label">Y-Axis Column(s)</label>
+            <input type="text" class="form-control y-axis" id="editYAxis${chartCount}" placeholder="Comma-separated column names">
+          </div>
+        </div>
+      `;
+      
+      chartsContainer.appendChild(chartDiv);
+      
+      // Add event listener to remove button
+      const removeBtn = chartDiv.querySelector('.remove-chart-btn');
+      removeBtn.addEventListener('click', () => {
+        chartDiv.remove();
+        updateEditChartNumbers();
+      });
+      
+      // Add event listener to chart type select
+      const chartTypeSelect = chartDiv.querySelector('.chart-type');
+      chartTypeSelect.addEventListener('change', () => {
+        updateEditChartConfig(chartCount, chartTypeSelect.value);
+      });
+      
+      // Enable first remove button if we now have more than one chart
+      if (chartCount === 0) {
+        const firstRemoveBtn = chartsContainer.querySelector('.remove-chart-btn');
+        if (firstRemoveBtn) {
+          firstRemoveBtn.disabled = false;
+        }
+      }
+    }
+    
+    // Update chart numbers in edit form
+    function updateEditChartNumbers() {
+      const chartConfigs = document.querySelectorAll('#editChartsContainer .chart-config');
+      chartConfigs.forEach((chartDiv, index) => {
+        const heading = chartDiv.querySelector('h6');
+        heading.textContent = `Chart ${index + 1}`;
+      });
+      
+      // Disable remove button if only one chart left
+      if (chartConfigs.length === 1) {
+        const removeBtn = chartConfigs[0].querySelector('.remove-chart-btn');
+        removeBtn.disabled = true;
+      }
+    }
+    
+    // Update chart configuration in edit form
+    function updateEditChartConfig(index, chartType) {
+      const chartConfigDiv = document.getElementById(`editChartConfig${index}`);
+      
+      if (chartType === 'bar' || chartType === 'line') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="editXAxis${index}" class="form-label">X-Axis Column</label>
+            <input type="text" class="form-control x-axis" id="editXAxis${index}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="editYAxis${index}" class="form-label">Y-Axis Column(s)</label>
+            <input type="text" class="form-control y-axis" id="editYAxis${index}" placeholder="Comma-separated column names">
+          </div>
+        `;
+      } else if (chartType === 'pie') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="editLabels${index}" class="form-label">Labels Column</label>
+            <input type="text" class="form-control labels" id="editLabels${index}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="editValues${index}" class="form-label">Values Column</label>
+            <input type="text" class="form-control values" id="editValues${index}">
+          </div>
+        `;
+      } else if (chartType === 'table') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="editColumns${index}" class="form-label">Columns</label>
+            <input type="text" class="form-control columns" id="editColumns${index}" placeholder="Comma-separated column names">
+          </div>
+          
+          <div class="mb-3">
+            <label for="editFilter${index}" class="form-label">Filter (optional)</label>
+            <input type="text" class="form-control filter" id="editFilter${index}" placeholder="e.g. item.price > 100">
+          </div>
+          
+          <div class="mb-3">
+            <label for="editLimit${index}" class="form-label">Row Limit</label>
+            <input type="number" class="form-control limit" id="editLimit${index}" value="50" min="1">
+          </div>
+        `;
+      }
+    }</script>

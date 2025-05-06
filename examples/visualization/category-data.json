@@ -1,0 +1,22 @@
+[
+  {
+    "Category": "Electronics",
+    "Count": 4,
+    "Revenue": 699.96
+  },
+  {
+    "Category": "Books",
+    "Count": 3,
+    "Revenue": 89.97
+  },
+  {
+    "Category": "Clothing",
+    "Count": 2,
+    "Revenue": 139.98
+  },
+  {
+    "Category": "Home",
+    "Count": 1,
+    "Revenue": 129.99
+  }
+]

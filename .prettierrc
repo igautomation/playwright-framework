@@ -1,7 +1,13 @@
 {
   "semi": true,
+<<<<<<< HEAD
   "singleQuote": true,
   "useTabs": false,
   "printWidth": 100,
   "trailingComma": "none"
+=======
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "tabWidth": 2
+>>>>>>> 51948a2 (Main v1.0)
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/utils/xray/xrayUtils.js
 
 /**
@@ -167,3 +168,331 @@ class XrayUtils {
 }
 
 export default XrayUtils;
+=======
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const logger = require('../common/logger');
+
+/**
+ * Xray Utilities class for integrating with Jira/Xray
+ */
+class XrayUtils {
+  /**
+   * Constructor
+   * @param {Object} config - Xray configuration
+   */
+  constructor(config = {}) {
+    this.config = {
+      jiraBaseUrl: process.env.JIRA_BASE_URL || config.jiraBaseUrl,
+      jiraUsername: process.env.JIRA_USERNAME || config.jiraUsername,
+      jiraApiToken: process.env.JIRA_API_TOKEN || config.jiraApiToken,
+      jiraProjectKey: process.env.JIRA_PROJECT_KEY || config.jiraProjectKey,
+      xrayCloudBaseUrl: 'https://xray.cloud.getxray.app/api/v2',
+      ...config,
+    };
+
+    // Validate required configuration
+    if (!this.config.jiraBaseUrl) {
+      throw new Error('Jira base URL is required');
+    }
+
+    // Create axios instance for Jira API
+    this.jiraClient = axios.create({
+      baseURL: this.config.jiraBaseUrl,
+      auth: {
+        username: this.config.jiraUsername,
+        password: this.config.jiraApiToken,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Create axios instance for Xray Cloud API
+    this.xrayClient = axios.create({
+      baseURL: this.config.xrayCloudBaseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    this.authToken = null;
+  }
+
+  /**
+   * Authenticate with Xray Cloud
+   * @returns {Promise<string>} Authentication token
+   */
+  async authenticate() {
+    try {
+      logger.info('Authenticating with Xray Cloud');
+
+      const response = await axios.post(
+        `${this.config.xrayCloudBaseUrl}/authenticate`,
+        {
+          client_id: this.config.xrayClientId,
+          client_secret: this.config.xrayClientSecret,
+        }
+      );
+
+      this.authToken = response.data;
+
+      // Set the auth token in the Xray client
+      this.xrayClient.defaults.headers.common['Authorization'] =
+        `Bearer ${this.authToken}`;
+
+      logger.info('Successfully authenticated with Xray Cloud');
+      return this.authToken;
+    } catch (error) {
+      logger.error('Failed to authenticate with Xray Cloud', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get test cases from Xray
+   * @param {string} testKey - Test key (e.g., TEST-123)
+   * @returns {Promise<Object>} Test case data
+   */
+  async getTestCase(testKey) {
+    try {
+      logger.info(`Getting test case ${testKey} from Xray`);
+
+      const response = await this.jiraClient.get(
+        `/rest/api/3/issue/${testKey}`
+      );
+
+      logger.info(`Successfully retrieved test case ${testKey}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to get test case ${testKey} from Xray`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get test cases by JQL query
+   * @param {string} jql - JQL query
+   * @returns {Promise<Array<Object>>} Test cases
+   */
+  async getTestCasesByJql(jql) {
+    try {
+      logger.info(`Getting test cases by JQL: ${jql}`);
+
+      const response = await this.jiraClient.post('/rest/api/3/search', {
+        jql,
+        fields: [
+          'summary',
+          'description',
+          'status',
+          'labels',
+          'customfield_10000',
+        ], // Adjust fields as needed
+      });
+
+      logger.info(
+        `Successfully retrieved ${response.data.issues.length} test cases`
+      );
+      return response.data.issues;
+    } catch (error) {
+      logger.error(`Failed to get test cases by JQL: ${jql}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a test execution in Xray
+   * @param {Object} executionData - Test execution data
+   * @returns {Promise<Object>} Created test execution
+   */
+  async createTestExecution(executionData) {
+    try {
+      logger.info('Creating test execution in Xray');
+
+      const response = await this.jiraClient.post('/rest/api/3/issue', {
+        fields: {
+          project: {
+            key: this.config.jiraProjectKey,
+          },
+          summary:
+            executionData.summary ||
+            `Test Execution - ${new Date().toISOString()}`,
+          description: executionData.description || 'Automated test execution',
+          issuetype: {
+            name: 'Test Execution',
+          },
+          ...executionData.fields,
+        },
+      });
+
+      logger.info(`Successfully created test execution: ${response.data.key}`);
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to create test execution in Xray', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Import test results to Xray
+   * @param {string} format - Results format (e.g., 'cucumber', 'junit', 'nunit', 'xray')
+   * @param {string} resultsFile - Path to results file
+   * @param {Object} options - Import options
+   * @returns {Promise<Object>} Import response
+   */
+  async importTestResults(format, resultsFile, options = {}) {
+    try {
+      logger.info(
+        `Importing ${format} test results from ${resultsFile} to Xray`
+      );
+
+      // Ensure we have an auth token
+      if (!this.authToken) {
+        await this.authenticate();
+      }
+
+      // Read the results file
+      const results = fs.readFileSync(resultsFile, 'utf8');
+
+      // Determine the endpoint based on the format
+      let endpoint;
+      switch (format.toLowerCase()) {
+        case 'cucumber':
+          endpoint = '/import/execution/cucumber';
+          break;
+        case 'junit':
+          endpoint = '/import/execution/junit';
+          break;
+        case 'nunit':
+          endpoint = '/import/execution/nunit';
+          break;
+        case 'xray':
+          endpoint = '/import/execution';
+          break;
+        default:
+          throw new Error(`Unsupported format: ${format}`);
+      }
+
+      // Import the results
+      const response = await this.xrayClient.post(endpoint, results, {
+        params: options,
+      });
+
+      logger.info('Successfully imported test results to Xray');
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to import ${format} test results to Xray`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update test run status in Xray
+   * @param {string} testKey - Test key (e.g., TEST-123)
+   * @param {string} status - Test status (e.g., PASS, FAIL)
+   * @param {Object} options - Update options
+   * @returns {Promise<Object>} Update response
+   */
+  async updateTestRunStatus(testKey, status, options = {}) {
+    try {
+      logger.info(`Updating test run status for ${testKey} to ${status}`);
+
+      const response = await this.jiraClient.put(
+        `/rest/raven/1.0/api/testrun/${testKey}/status`,
+        {
+          status,
+          ...options,
+        }
+      );
+
+      logger.info(`Successfully updated test run status for ${testKey}`);
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to update test run status for ${testKey}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate Xray test execution report
+   * @param {string} executionKey - Test execution key (e.g., EXEC-123)
+   * @param {string} format - Report format (e.g., 'pdf', 'excel')
+   * @returns {Promise<Buffer>} Report data
+   */
+  async generateTestExecutionReport(executionKey, format = 'pdf') {
+    try {
+      logger.info(
+        `Generating ${format} report for test execution ${executionKey}`
+      );
+
+      const response = await this.jiraClient.get(
+        `/rest/raven/1.0/export/test/${executionKey}`,
+        {
+          params: { format },
+          responseType: 'arraybuffer',
+        }
+      );
+
+      logger.info(
+        `Successfully generated ${format} report for test execution ${executionKey}`
+      );
+      return response.data;
+    } catch (error) {
+      logger.error(
+        `Failed to generate ${format} report for test execution ${executionKey}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Save Xray test execution report to file
+   * @param {string} executionKey - Test execution key (e.g., EXEC-123)
+   * @param {string} format - Report format (e.g., 'pdf', 'excel')
+   * @param {string} outputPath - Output path
+   * @returns {Promise<string>} Path to the saved report
+   */
+  async saveTestExecutionReport(
+    executionKey,
+    format = 'pdf',
+    outputPath = './reports'
+  ) {
+    try {
+      logger.info(`Saving ${format} report for test execution ${executionKey}`);
+
+      // Generate the report
+      const reportData = await this.generateTestExecutionReport(
+        executionKey,
+        format
+      );
+
+      // Ensure the output directory exists
+      if (!fs.existsSync(outputPath)) {
+        fs.mkdirSync(outputPath, { recursive: true });
+      }
+
+      // Save the report
+      const reportPath = path.join(
+        outputPath,
+        `${executionKey}-report.${format}`
+      );
+      fs.writeFileSync(reportPath, reportData);
+
+      logger.info(
+        `Successfully saved ${format} report for test execution ${executionKey} to ${reportPath}`
+      );
+      return reportPath;
+    } catch (error) {
+      logger.error(
+        `Failed to save ${format} report for test execution ${executionKey}`,
+        error
+      );
+      throw error;
+    }
+  }
+}
+
+module.exports = XrayUtils;
+>>>>>>> 51948a2 (Main v1.0)

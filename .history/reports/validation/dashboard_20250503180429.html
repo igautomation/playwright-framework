@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Framework Validation Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      .dashboard {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .card {
+        flex: 1;
+        min-width: 250px;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .card h3 {
+        margin-top: 0;
+      }
+      .passed {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .warning {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .failed {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .skipped {
+        background-color: #e2e3e5;
+        color: #383d41;
+      }
+      .metric {
+        font-size: 36px;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+      pre {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        overflow: auto;
+        max-height: 400px;
+      }
+      .timestamp {
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Framework Validation Dashboard</h1>
+      <p>
+        This dashboard shows the current health status of the Playwright
+        framework.
+      </p>
+
+      <h2>Health Check Summary</h2>
+      <div class="dashboard">
+        <div class="card passed">
+          <h3>Passed Checks</h3>
+          <div class="metric">29</div>
+        </div>
+        <div class="card warning">
+          <h3>Warnings</h3>
+          <div class="metric">3</div>
+        </div>
+        <div class="card failed">
+          <h3>Failed Checks</h3>
+          <div class="metric">0</div>
+        </div>
+      </div>
+
+      <h2>Validation Tests Summary</h2>
+      <div class="dashboard">
+        <div class="card passed">
+          <h3>Passed Tests</h3>
+          <div class="metric">27</div>
+        </div>
+        <div class="card failed">
+          <h3>Failed Tests</h3>
+          <div class="metric">0</div>
+        </div>
+        <div class="card skipped">
+          <h3>Skipped Tests</h3>
+          <div class="metric">0</div>
+        </div>
+      </div>
+
+      <h2>Component Versions</h2>
+      <div class="dashboard">
+        <div class="card">
+          <h3>Node.js</h3>
+          <div class="metric">v23.11.0</div>
+        </div>
+        <div class="card">
+          <h3>npm</h3>
+          <div class="metric">10.9.2</div>
+        </div>
+        <div class="card">
+          <h3>Playwright</h3>
+          <div class="metric">1.52.0</div>
+        </div>
+        <div class="card">
+          <h3>Framework</h3>
+          <div class="metric">1.0.0</div>
+        </div>
+      </div>
+
+      <h2>Test Coverage</h2>
+      <div class="dashboard">
+        <div class="card">
+          <h3>Statements</h3>
+          <div class="metric">N/A</div>
+        </div>
+        <div class="card">
+          <h3>Branches</h3>
+          <div class="metric">N/A</div>
+        </div>
+        <div class="card">
+          <h3>Functions</h3>
+          <div class="metric">N/A</div>
+        </div>
+        <div class="card">
+          <h3>Lines</h3>
+          <div class="metric">N/A</div>
+        </div>
+      </div>
+
+      <h2>Health Check Output</h2>
+      <pre>
+🔍 Starting Framework Health Check
+
+📁 Checking directory structure...
+✅ Directory: src/cli exists
+✅ Directory: src/config exists
+✅ Directory: src/data exists
+✅ Directory: src/pages exists
+✅ Directory: src/tests exists
+✅ Directory: src/utils exists
+✅ Directory: reports exists
+✅ Directory: docs exists
+
+📄 Checking core files...
+✅ File: package.json exists
+✅ File: .env.example exists
+✅ File: src/cli/index.js exists
+✅ File: src/utils/common/logger.js exists
+✅ File: src/pages/BasePage.js exists
+
+📦 Checking dependencies...
+✅ Dependency: @playwright/test is installed
+✅ Dependency: allure-playwright is installed
+✅ Dependency: dotenv-safe is installed
+
+🔐 Checking environment variables...
+✅ Environment: BASE_URL is set
+✅ Environment: API_URL is set
+✅ Environment: USERNAME is set
+✅ Environment: PASSWORD is set
+
+🎭 Checking Playwright installation...
+✅ Playwright: Playwright is installed
+
+⌨️ Checking CLI functionality...
+✅ CLI: CLI is working
+
+🧪 Checking test discovery...
+✅ Tests: Test discovery is working
+
+🛠️ Checking utility classes...
+✅ Utility: WebInteractions is importable
+✅ Utility: ScreenshotUtils is importable
+✅ Utility: SelfHealingLocator is importable
+✅ Utility: ApiUtils is importable
+✅ Utility: TestDataFactory is importable
+
+🧪 Running a simple test...
+✅ Tests: Simple test executed successfully
+
+📊 Health Check Summary
+✅ Passed: 29
+⚠️ Warnings: 3
+❌ Failed: 0
+
+⚠️ Warnings:
+  - Playwright: chromium browser may not be installed
+  - Playwright: firefox browser may not be installed
+  - Playwright: webkit browser may not be installed
+
+⚠️ Framework health check passed with warnings.
+</pre
+      >
+
+      <h2>Validation Tests Output</h2>
+      <pre>
+Running 27 tests using 5 workers
+
+[2025-05-03T12:34:28.955Z] [INFO] Schema added: user
+  ✓  2 src/tests/framework-validation/schema-validator.spec.js:16:3 › Schema Validator @validation › should validate valid data (2ms)
+  ✓  4 src/tests/framework-validation/schema-validator.spec.js:33:3 › Schema Validator @validation › should detect missing required properties (2ms)
+  ✓  5 src/tests/framework-validation/schema-validator.spec.js:46:3 › Schema Validator @validation › should detect invalid property types (2ms)
+  ✓  6 src/tests/framework-validation/schema-validator.spec.js:58:3 › Schema Validator @validation › should detect invalid enum values (5ms)
+[2025-05-03T12:34:29.278Z] [INFO] Capturing DOM for page: test-page
+  ✓  7 src/tests/framework-validation/api-utils.spec.js:25:3 › API Utils @validation › should handle auth token (185ms)
+[2025-05-03T12:34:29.292Z] [INFO] DOM snapshot saved to: /Users/mzahirudeen/playwright-framework/snapshots/test-page-current.html
+  ✓  1 src/tests/framework-validation/self-healing-locator.spec.js:7:3 › Self-Healing Locator @validation › should find element with primary selector (223ms)
+  ✓  3 src/tests/framework-validation/dom-comparison.spec.js:7:3 › DOM Comparison Utils @validation › should capture DOM snapshot (230ms)
+  ✓  9 src/tests/framework-validation/api-utils.spec.js:31:3 › API Utils @validation › should set API key (63ms)
+  ✓  12 src/tests/framework-validation/api-utils.spec.js:38:3 › API Utils @validation › should have correct base URL (44ms)
+[2025-05-03T12:34:29.414Z] [INFO] Extracting locators from DOM
+  ✓  11 src/tests/framework-validation/dom-comparison.spec.js:32:3 › DOM Comparison Utils @validation › should extract locators from DOM (95ms)
+[2025-05-03T12:34:29.429Z] [INFO] Stored healed locator: #test-button -> [data-testid="test-button"]
+  ✓  10 src/tests/framework-validation/self-healing-locator.spec.js:22:3 › Self-Healing Locator @validation › should use fallback selector when primary selector fails (116ms)
+[2025-05-03T12:34:29.466Z] [INFO] Saving locators for page: test-page
+[2025-05-03T12:34:29.467Z] [INFO] Locators saved to: /Users/mzahirudeen/playwright-framework/data/locators/test-page.json
+[2025-05-03T12:34:29.467Z] [INFO] Loading locators for page: test-page
+[2025-05-03T12:34:29.468Z] [INFO] Loaded 2 locators for page: test-page
+[2025-05-03T12:34:29.468Z] [INFO] Extracting data from table: table
+  ✓  14 src/tests/framework-validation/dom-comparison.spec.js:57:3 › DOM Comparison Utils @validation › should save and load locators (51ms)
+  ✓  13 src/tests/framework-validation/web-scraping.spec.js:7:3 › Web Scraping Utils @validation › should extract table data (79ms)
+[2025-05-03T12:34:29.537Z] [INFO] Stored healed locator: #missing-button -> [data-testid="test-button"]
+  ✓  15 src/tests/framework-validation/self-healing-locator.spec.js:37:3 › Self-Healing Locator @validation › should store healed locators (112ms)
+[2025-05-03T12:34:29.571Z] [INFO] Extracting links with selector: a
+  ✓  16 src/tests/framework-validation/web-scraping.spec.js:49:3 › Web Scraping Utils @validation › should extract links (82ms)
+[2025-05-03T12:34:29.622Z] [INFO] Extracting text from elements: p
+  ✓  17 src/tests/framework-validation/web-scraping.spec.js:68:3 › Web Scraping Utils @validation › should extract text content (49ms)
+[2025-05-03T12:34:29.671Z] [INFO] Extracting structured data
+  ✓  18 src/tests/framework-validation/web-scraping.spec.js:87:3 › Web Scraping Utils @validation › should extract structured data (47ms)
+[2025-05-03T12:34:29.720Z] [INFO] Saving DOM snapshot: test-page
+[2025-05-03T12:34:29.722Z] [INFO] DOM snapshot saved to: /Users/mzahirudeen/playwright-framework/snapshots/test-page-2025-05-03T12-34-29-722Z.html
+  ✓  19 src/tests/framework-validation/web-scraping.spec.js:111:3 › Web Scraping Utils @validation › should save DOM snapshot (48ms)
+  ✓  8 src/tests/framework-validation/web-interactions.spec.js:5:3 › Web Interactions @validation › should navigate to a URL (881ms)
+  ✓  21 src/tests/framework-validation/web-interactions.spec.js:12:3 › Web Interactions @validation › should get text from element (61ms)
+  ✓  22 src/tests/framework-validation/web-interactions.spec.js:19:3 › Web Interactions @validation › should fill input field (78ms)
+  ✓  20 src/tests/framework-validation/core-components.spec.js:10:3 › Framework Core Components @validation › BasePage should be instantiable (92ms)
+  ✓  23 src/tests/framework-validation/core-components.spec.js:16:3 › Framework Core Components @validation › WebInteractions should be instantiable (34ms)
+  ✓  24 src/tests/framework-validation/core-components.spec.js:22:3 › Framework Core Components @validation › ScreenshotUtils should be instantiable (33ms)
+  ✓  25 src/tests/framework-validation/core-components.spec.js:28:3 › Framework Core Components @validation › SelfHealingLocator should be instantiable (33ms)
+  ✓  26 src/tests/framework-validation/core-components.spec.js:34:3 › Framework Core Components @validation › ApiUtils should be instantiable (1ms)
+  ✓  27 src/tests/framework-validation/core-components.spec.js:40:3 › Framework Core Components @validation › TestDataFactory should generate data (1ms)
+
+  27 passed (2.5s)
+</pre
+      >
+
+      <p class="timestamp">Generated on: 5/3/2025, 6:04:30 PM</p>
+    </div>
+  </body>
+</html>

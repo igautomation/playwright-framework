@@ -1,0 +1,307 @@
+<script>
+    // Update template
+    async function updateTemplate() {
+      try {
+        // Get form values
+        const id = document.getElementById('editTemplateId').value;
+        const name = document.getElementById('editTemplateName').value;
+        const description = document.getElementById('editTemplateDescription').value;
+        const tagsString = document.getElementById('editTemplateTags').value;
+        const tags = tagsString ? tagsString.split(',').map(tag => tag.trim()) : [];
+        
+        // Get data source config
+        const dataSourceType = document.getElementById('editDataSourceType').value;
+        let dataSource = { type: dataSourceType };
+        
+        if (dataSourceType === 'file') {
+          dataSource.fileType = document.getElementById('editFileType').value;
+          dataSource.fileName = document.getElementById('editFileName').value;
+        }
+        
+        // Get chart configs
+        const chartConfigs = document.querySelectorAll('#editChartsContainer .chart-config');
+        const charts = [];
+        
+        chartConfigs.forEach((chartDiv, index) => {
+          const chartType = chartDiv.querySelector('.chart-type').value;
+          const chartTitle = chartDiv.querySelector('.chart-title').value;
+          
+          const chartConfig = {
+            type: chartType,
+            title: chartTitle,
+            dimensions: {
+              width: 800,
+              height: 400
+            }
+          };
+          
+          if (chartType === 'bar' || chartType === 'line') {
+            chartConfig.xAxis = chartDiv.querySelector('.x-axis').value;
+            chartConfig.yAxis = chartDiv.querySelector('.y-axis').value.split(',').map(col => col.trim());
+          } else if (chartType === 'pie') {
+            chartConfig.labels = chartDiv.querySelector('.labels').value;
+            chartConfig.values = chartDiv.querySelector('.values').value;
+          } else if (chartType === 'table') {
+            chartConfig.columns = chartDiv.querySelector('.columns').value.split(',').map(col => col.trim());
+            chartConfig.filter = chartDiv.querySelector('.filter').value;
+            chartConfig.limit = parseInt(chartDiv.querySelector('.limit').value) || 50;
+          }
+          
+          charts.push(chartConfig);
+        });
+        
+        // Validate form
+        if (!name) {
+          alert('Template name is required');
+          return;
+        }
+        
+        if (charts.length === 0) {
+          alert('At least one chart is required');
+          return;
+        }
+        
+        // Create template object
+        const template = {
+          name,
+          description,
+          tags,
+          dataSource,
+          charts
+        };
+        
+        // Update template
+        const response = await fetch(`/api/templates/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(template)
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          alert(`Error: ${result.error}`);
+          return;
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editTemplateModal'));
+        modal.hide();
+        
+        // Show success message
+        showToast('Template updated successfully', 'success');
+        
+        // Reload templates
+        loadTemplates();
+        loadTags();
+      } catch (error) {
+        console.error('Error updating template:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Delete template
+    async function deleteTemplate() {
+      try {
+        const id = document.getElementById('editTemplateId').value;
+        
+        if (!confirm('Are you sure you want to delete this template?')) {
+          return;
+        }
+        
+        const response = await fetch(`/api/templates/${id}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          alert(`Error: ${result.error}`);
+          return;
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editTemplateModal'));
+        modal.hide();
+        
+        // Show success message
+        showToast('Template deleted successfully', 'success');
+        
+        // Reload templates
+        loadTemplates();
+        loadTags();
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Open use template modal
+    async function openUseTemplateModal(templateId) {
+      try {
+        // If templateId is not provided, use currentTemplate
+        if (!templateId && currentTemplate) {
+          templateId = currentTemplate.id;
+        }
+        
+        if (!templateId) {
+          alert('No template selected');
+          return;
+        }
+        
+        // Get template if not already loaded
+        if (!currentTemplate || currentTemplate.id !== templateId) {
+          const response = await fetch(`/api/templates/${templateId}`);
+          const data = await response.json();
+          
+          if (data.error) {
+            alert(`Error: ${data.error}`);
+            return;
+          }
+          
+          currentTemplate = data.template;
+        }
+        
+        // Set template ID
+        document.getElementById('useTemplateId').value = currentTemplate.id;
+        
+        // Set default report title
+        document.getElementById('reportTitle').value = `${currentTemplate.name} - ${new Date().toLocaleDateString()}`;
+        
+        // Generate parameter fields
+        const paramsContainer = document.getElementById('templateParamsContainer');
+        paramsContainer.innerHTML = '';
+        
+        // Add data source parameters
+        if (currentTemplate.dataSource.type === 'file' && !currentTemplate.dataSource.fileName) {
+          const fileDiv = document.createElement('div');
+          fileDiv.className = 'mb-3';
+          fileDiv.innerHTML = `
+            <label for="paramFileName" class="form-label">File Name</label>
+            <input type="text" class="form-control" id="paramFileName" required>
+          `;
+          paramsContainer.appendChild(fileDiv);
+        }
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('useTemplateModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Error opening use template modal:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Create report from template
+    async function createReportFromTemplate() {
+      try {
+        const templateId = document.getElementById('useTemplateId').value;
+        const reportTitle = document.getElementById('reportTitle').value;
+        
+        if (!templateId || !reportTitle) {
+          alert('Template ID and report title are required');
+          return;
+        }
+        
+        // Get parameters
+        const params = {
+          title: reportTitle,
+          dataSource: {}
+        };
+        
+        // Get file name parameter if present
+        const fileNameInput = document.getElementById('paramFileName');
+        if (fileNameInput) {
+          params.dataSource.fileName = fileNameInput.value;
+        }
+        
+        // Create report from template
+        const response = await fetch(`/api/templates/${templateId}/create-report`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(params)
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          alert(`Error: ${result.error}`);
+          return;
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('useTemplateModal'));
+        modal.hide();
+        
+        // Show success message
+        showToast('Report configuration created successfully', 'success');
+        
+        // Store report config in session storage
+        sessionStorage.setItem('reportConfig', JSON.stringify(result.reportConfig));
+        
+        // Redirect to visualize page
+        window.location.href = '/visualize?from=template';
+      } catch (error) {
+        console.error('Error creating report from template:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          func.apply(context, args);
+        }, wait);
+      };
+    }
+    
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      // Create toast container if it doesn't exist
+      let toastContainer = document.querySelector('.toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+      }
+      
+      // Create toast element
+      const toastId = `toast-${Date.now()}`;
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center text-white bg-${type} border-0`;
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.setAttribute('id', toastId);
+      
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Initialize and show toast
+      const bsToast = new bootstrap.Toast(toast);
+      bsToast.show();
+      
+      // Remove toast after it's hidden
+      toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+      });
+    }
+  });
+</script>

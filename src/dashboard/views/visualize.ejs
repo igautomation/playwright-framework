@@ -1,0 +1,776 @@
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Data Source</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="dataSource" class="form-label">Select Data Source</label>
+          <select class="form-select" id="dataSource">
+            <option value="">Select a data source...</option>
+            <option value="session">Current Session Data</option>
+            <option value="file">File</option>
+          </select>
+        </div>
+        
+        <div id="fileSourceContainer" style="display: none;">
+          <div class="mb-3">
+            <label for="fileType" class="form-label">File Type</label>
+            <select class="form-select" id="fileType">
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+              <option value="upload">Uploads</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="fileName" class="form-label">File Name</label>
+            <select class="form-select" id="fileName">
+              <option value="">Select a file...</option>
+            </select>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" id="loadDataBtn" disabled>Load Data</button>
+      </div>
+    </div>
+    
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="card-title">Chart Type</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <div class="card chart-type-card" data-chart-type="bar">
+              <div class="card-body text-center">
+                <i class="bi bi-bar-chart fs-1 text-primary"></i>
+                <h6 class="mt-2">Bar Chart</h6>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="card chart-type-card" data-chart-type="line">
+              <div class="card-body text-center">
+                <i class="bi bi-graph-up fs-1 text-success"></i>
+                <h6 class="mt-2">Line Chart</h6>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="card chart-type-card" data-chart-type="pie">
+              <div class="card-body text-center">
+                <i class="bi bi-pie-chart fs-1 text-warning"></i>
+                <h6 class="mt-2">Pie Chart</h6>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="card chart-type-card" data-chart-type="table">
+              <div class="card-body text-center">
+                <i class="bi bi-table fs-1 text-info"></i>
+                <h6 class="mt-2">Table</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Chart Configuration</h5>
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-primary" id="previewChartBtn" disabled>
+            <i class="bi bi-eye me-1"></i> Preview
+          </button>
+          <button class="btn btn-sm btn-outline-success" id="generateChartBtn" disabled>
+            <i class="bi bi-file-earmark-image me-1"></i> Generate
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="addToReportBtn" disabled>
+            <i class="bi bi-plus-circle me-1"></i> Add to Report
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="chartConfigContainer">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i> Select a data source and chart type to configure
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mt-4" id="chartPreviewCard" style="display: none;">
+      <div class="card-header">
+        <h5 class="card-title">Chart Preview</h5>
+      </div>
+      <div class="card-body">
+        <div id="chartPreview" class="chart-preview">
+          <div class="text-center text-muted">
+            <i class="bi bi-image fs-1"></i>
+            <p>Chart preview will appear here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Report Modal -->
+<div class="modal fade" id="createReportModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="reportTitle" class="form-label">Report Title</label>
+          <input type="text" class="form-control" id="reportTitle" placeholder="Enter report title">
+        </div>
+        
+        <h6>Charts</h6>
+        <div id="reportCharts" class="list-group mb-3">
+          <div class="list-group-item text-center text-muted">
+            No charts added yet
+          </div>
+        </div>
+        
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i> Add charts to your report by clicking "Add to Report" when configuring a chart
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="generateReportBtn" disabled>Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let currentData = null;
+    let currentChartType = null;
+    let reportCharts = [];
+    
+    // Handle data source selection
+    const dataSourceSelect = document.getElementById('dataSource');
+    const fileSourceContainer = document.getElementById('fileSourceContainer');
+    const fileTypeSelect = document.getElementById('fileType');
+    const fileNameSelect = document.getElementById('fileName');
+    const loadDataBtn = document.getElementById('loadDataBtn');
+    
+    dataSourceSelect.addEventListener('change', () => {
+      const source = dataSourceSelect.value;
+      
+      if (source === 'session') {
+        fileSourceContainer.style.display = 'none';
+        loadDataBtn.disabled = false;
+      } else if (source === 'file') {
+        fileSourceContainer.style.display = 'block';
+        loadDataBtn.disabled = !(fileTypeSelect.value && fileNameSelect.value);
+        
+        // Load file list
+        loadFileList(fileTypeSelect.value);
+      } else {
+        fileSourceContainer.style.display = 'none';
+        loadDataBtn.disabled = true;
+      }
+    });
+    
+    // Handle file type selection
+    fileTypeSelect.addEventListener('change', () => {
+      loadFileList(fileTypeSelect.value);
+    });
+    
+    // Handle file name selection
+    fileNameSelect.addEventListener('change', () => {
+      loadDataBtn.disabled = !(fileTypeSelect.value && fileNameSelect.value);
+    });
+    
+    // Load file list
+    async function loadFileList(fileType) {
+      try {
+        fileNameSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        const response = await fetch(`/api/files/${fileType}`);
+        const data = await response.json();
+        
+        fileNameSelect.innerHTML = '<option value="">Select a file...</option>';
+        
+        if (data.files && data.files.length > 0) {
+          data.files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            fileNameSelect.appendChild(option);
+          });
+        } else {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'No files available';
+          option.disabled = true;
+          fileNameSelect.appendChild(option);
+        }
+      } catch (error) {
+        console.error('Error loading file list:', error);
+        fileNameSelect.innerHTML = '<option value="">Error loading files</option>';
+      }
+    }
+    
+    // Handle load data button click
+    loadDataBtn.addEventListener('click', async () => {
+      const source = dataSourceSelect.value;
+      
+      if (source === 'session') {
+        // Load data from session storage
+        try {
+          const sessionData = sessionStorage.getItem('visualizeData');
+          if (!sessionData) {
+            alert('No data found in session storage. Please go to Data Explorer first.');
+            return;
+          }
+          
+          currentData = JSON.parse(sessionData);
+          showToast('Data loaded from session storage', 'success');
+          enableChartTypeSelection();
+        } catch (error) {
+          console.error('Error loading session data:', error);
+          alert('Error loading data from session storage');
+        }
+      } else if (source === 'file') {
+        // Load data from file
+        const fileType = fileTypeSelect.value;
+        const fileName = fileNameSelect.value;
+        
+        if (!fileType || !fileName) {
+          alert('Please select a file');
+          return;
+        }
+        
+        try {
+          const response = await fetch(`/api/data/${fileType}/${fileName}`);
+          const result = await response.json();
+          
+          if (result.error) {
+            alert(`Error: ${result.error}`);
+            return;
+          }
+          
+          currentData = result.data;
+          showToast(`Data loaded from ${fileName}`, 'success');
+          enableChartTypeSelection();
+        } catch (error) {
+          console.error('Error loading file data:', error);
+          alert('Error loading data from file');
+        }
+      }
+    });
+    
+    // Enable chart type selection
+    function enableChartTypeSelection() {
+      const chartTypeCards = document.querySelectorAll('.chart-type-card');
+      chartTypeCards.forEach(card => {
+        card.classList.add('cursor-pointer');
+        card.addEventListener('click', handleChartTypeSelection);
+      });
+    }
+    
+    // Handle chart type selection
+    function handleChartTypeSelection(event) {
+      const card = event.currentTarget;
+      const chartType = card.getAttribute('data-chart-type');
+      
+      // Update UI
+      document.querySelectorAll('.chart-type-card').forEach(c => {
+        c.classList.remove('selected');
+      });
+      card.classList.add('selected');
+      
+      // Set current chart type
+      currentChartType = chartType;
+      
+      // Show chart configuration
+      showChartConfiguration(chartType);
+    }
+    
+    // Show chart configuration
+    function showChartConfiguration(chartType) {
+      const configContainer = document.getElementById('chartConfigContainer');
+      
+      // Show loading
+      configContainer.innerHTML = `
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading configuration...</p>
+        </div>
+      `;
+      
+      // Get column names from data
+      const columns = Object.keys(currentData[0]);
+      
+      // Create configuration form based on chart type
+      let configHtml = '';
+      
+      if (chartType === 'bar' || chartType === 'line') {
+        configHtml = `
+          <div class="mb-3">
+            <label for="chartTitle" class="form-label">Chart Title</label>
+            <input type="text" class="form-control" id="chartTitle" placeholder="Enter chart title">
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="xAxisColumn" class="form-label">X-Axis Column</label>
+                <select class="form-select" id="xAxisColumn">
+                  <option value="">Select a column...</option>
+                  ${columns.map(col => `<option value="${col}">${col}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="yAxisColumns" class="form-label">Y-Axis Column(s)</label>
+                <select class="form-select" id="yAxisColumns" multiple>
+                  ${columns.map(col => `<option value="${col}">${col}</option>`).join('')}
+                </select>
+                <div class="form-text">Hold Ctrl/Cmd to select multiple columns</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (chartType === 'pie') {
+        configHtml = `
+          <div class="mb-3">
+            <label for="chartTitle" class="form-label">Chart Title</label>
+            <input type="text" class="form-control" id="chartTitle" placeholder="Enter chart title">
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="labelColumn" class="form-label">Label Column</label>
+                <select class="form-select" id="labelColumn">
+                  <option value="">Select a column...</option>
+                  ${columns.map(col => `<option value="${col}">${col}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="valueColumn" class="form-label">Value Column</label>
+                <select class="form-select" id="valueColumn">
+                  <option value="">Select a column...</option>
+                  ${columns.map(col => `<option value="${col}">${col}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (chartType === 'table') {
+        configHtml = `
+          <div class="mb-3">
+            <label for="chartTitle" class="form-label">Table Title</label>
+            <input type="text" class="form-control" id="chartTitle" placeholder="Enter table title">
+          </div>
+          <div class="mb-3">
+            <label for="tableColumns" class="form-label">Columns to Include</label>
+            <select class="form-select" id="tableColumns" multiple>
+              ${columns.map(col => `<option value="${col}" selected>${col}</option>`).join('')}
+            </select>
+            <div class="form-text">Hold Ctrl/Cmd to select multiple columns</div>
+          </div>
+          <div class="mb-3">
+            <label for="rowLimit" class="form-label">Row Limit</label>
+            <input type="number" class="form-control" id="rowLimit" value="50" min="1">
+          </div>
+        `;
+      }
+      
+      // Set configuration HTML
+      configContainer.innerHTML = configHtml;
+      
+      // Enable buttons
+      document.getElementById('previewChartBtn').disabled = false;
+      document.getElementById('generateChartBtn').disabled = false;
+      document.getElementById('addToReportBtn').disabled = false;
+    }
+    
+    // Handle preview chart button click
+    document.getElementById('previewChartBtn').addEventListener('click', () => {
+      const chartConfig = getChartConfig();
+      if (!chartConfig) return;
+      
+      // Show chart preview card
+      document.getElementById('chartPreviewCard').style.display = 'block';
+      
+      // Show loading in preview
+      document.getElementById('chartPreview').innerHTML = `
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Generating preview...</p>
+        </div>
+      `;
+      
+      // Create chart preview
+      createChartPreview(currentChartType, chartConfig);
+    });
+    
+    // Handle generate chart button click
+    document.getElementById('generateChartBtn').addEventListener('click', async () => {
+      const chartConfig = getChartConfig();
+      if (!chartConfig) return;
+      
+      try {
+        // Show loading
+        document.getElementById('generateChartBtn').disabled = true;
+        document.getElementById('generateChartBtn').innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Generating...
+        `;
+        
+        // Generate chart
+        const chart = await generateChart(currentChartType, chartConfig.data, chartConfig.options);
+        
+        // Open chart in new window
+        window.open(chart.path, '_blank');
+        
+        // Reset button
+        document.getElementById('generateChartBtn').disabled = false;
+        document.getElementById('generateChartBtn').innerHTML = `
+          <i class="bi bi-file-earmark-image me-1"></i> Generate
+        `;
+        
+        showToast('Chart generated successfully', 'success');
+      } catch (error) {
+        console.error('Error generating chart:', error);
+        alert(`Error generating chart: ${error.message}`);
+        
+        // Reset button
+        document.getElementById('generateChartBtn').disabled = false;
+        document.getElementById('generateChartBtn').innerHTML = `
+          <i class="bi bi-file-earmark-image me-1"></i> Generate
+        `;
+      }
+    });
+    
+    // Handle add to report button click
+    document.getElementById('addToReportBtn').addEventListener('click', () => {
+      const chartConfig = getChartConfig();
+      if (!chartConfig) return;
+      
+      // Add chart to report
+      reportCharts.push({
+        type: currentChartType,
+        title: chartConfig.options.title,
+        config: chartConfig.data,
+        options: chartConfig.options
+      });
+      
+      // Update report charts list
+      updateReportChartsList();
+      
+      // Enable generate report button
+      document.getElementById('generateReportBtn').disabled = false;
+      
+      showToast('Chart added to report', 'success');
+    });
+    
+    // Handle generate report button click
+    document.getElementById('generateReportBtn').addEventListener('click', async () => {
+      const reportTitle = document.getElementById('reportTitle').value || `Report-${Date.now()}`;
+      
+      try {
+        // Show loading
+        document.getElementById('generateReportBtn').disabled = true;
+        document.getElementById('generateReportBtn').innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Generating...
+        `;
+        
+        // Generate report
+        const report = await generateReport(reportCharts, reportTitle);
+        
+        // Open report in new window
+        window.open(report.path, '_blank');
+        
+        // Reset button
+        document.getElementById('generateReportBtn').disabled = false;
+        document.getElementById('generateReportBtn').innerHTML = 'Generate Report';
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createReportModal'));
+        modal.hide();
+        
+        showToast('Report generated successfully', 'success');
+      } catch (error) {
+        console.error('Error generating report:', error);
+        alert(`Error generating report: ${error.message}`);
+        
+        // Reset button
+        document.getElementById('generateReportBtn').disabled = false;
+        document.getElementById('generateReportBtn').innerHTML = 'Generate Report';
+      }
+    });
+    
+    // Update report charts list
+    function updateReportChartsList() {
+      const reportChartsList = document.getElementById('reportCharts');
+      
+      if (reportCharts.length === 0) {
+        reportChartsList.innerHTML = `
+          <div class="list-group-item text-center text-muted">
+            No charts added yet
+          </div>
+        `;
+        return;
+      }
+      
+      reportChartsList.innerHTML = '';
+      
+      reportCharts.forEach((chart, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        
+        let icon;
+        switch (chart.type) {
+          case 'bar':
+            icon = 'bi-bar-chart';
+            break;
+          case 'line':
+            icon = 'bi-graph-up';
+            break;
+          case 'pie':
+            icon = 'bi-pie-chart';
+            break;
+          case 'table':
+            icon = 'bi-table';
+            break;
+          default:
+            icon = 'bi-file-earmark-image';
+        }
+        
+        item.innerHTML = `
+          <div>
+            <i class="bi ${icon} me-2"></i>
+            ${chart.title || `${chart.type.charAt(0).toUpperCase() + chart.type.slice(1)} Chart`}
+          </div>
+          <button class="btn btn-sm btn-outline-danger remove-chart-btn" data-index="${index}">
+            <i class="bi bi-trash"></i>
+          </button>
+        `;
+        
+        reportChartsList.appendChild(item);
+      });
+      
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-chart-btn').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+          const index = parseInt(event.currentTarget.getAttribute('data-index'));
+          reportCharts.splice(index, 1);
+          updateReportChartsList();
+          
+          // Disable generate report button if no charts
+          document.getElementById('generateReportBtn').disabled = reportCharts.length === 0;
+        });
+      });
+    }
+    
+    // Get chart configuration
+    function getChartConfig() {
+      if (!currentData || !currentChartType) return null;
+      
+      const chartTitle = document.getElementById('chartTitle')?.value || '';
+      
+      let data, options;
+      
+      if (currentChartType === 'bar' || currentChartType === 'line') {
+        const xAxisColumn = document.getElementById('xAxisColumn').value;
+        const yAxisColumnsSelect = document.getElementById('yAxisColumns');
+        const yAxisColumns = Array.from(yAxisColumnsSelect.selectedOptions).map(opt => opt.value);
+        
+        if (!xAxisColumn || yAxisColumns.length === 0) {
+          alert('Please select X-axis and Y-axis columns');
+          return null;
+        }
+        
+        // Extract data
+        const labels = currentData.map(item => item[xAxisColumn]);
+        const datasets = yAxisColumns.map((col, index) => {
+          const colors = [
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)'
+          ];
+          
+          return {
+            label: col,
+            data: currentData.map(item => item[col]),
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length].replace('0.5', '1'),
+            borderWidth: 1
+          };
+        });
+        
+        data = { labels, datasets };
+        options = { title: chartTitle };
+      } else if (currentChartType === 'pie') {
+        const labelColumn = document.getElementById('labelColumn').value;
+        const valueColumn = document.getElementById('valueColumn').value;
+        
+        if (!labelColumn || !valueColumn) {
+          alert('Please select label and value columns');
+          return null;
+        }
+        
+        // Extract data
+        const labels = currentData.map(item => item[labelColumn]);
+        const values = currentData.map(item => item[valueColumn]);
+        
+        data = {
+          labels,
+          data: values,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)'
+          ]
+        };
+        options = { title: chartTitle };
+      } else if (currentChartType === 'table') {
+        const tableColumnsSelect = document.getElementById('tableColumns');
+        const tableColumns = Array.from(tableColumnsSelect.selectedOptions).map(opt => opt.value);
+        const rowLimit = parseInt(document.getElementById('rowLimit').value) || 50;
+        
+        if (tableColumns.length === 0) {
+          alert('Please select at least one column');
+          return null;
+        }
+        
+        // Extract data
+        const filteredData = currentData.slice(0, rowLimit).map(item => {
+          const newItem = {};
+          tableColumns.forEach(col => {
+            newItem[col] = item[col];
+          });
+          return newItem;
+        });
+        
+        data = filteredData;
+        options = { title: chartTitle, columns: tableColumns };
+      }
+      
+      return { data, options };
+    }
+    
+    // Create chart preview
+    function createChartPreview(chartType, config) {
+      const previewContainer = document.getElementById('chartPreview');
+      
+      if (chartType === 'table') {
+        // Create table preview
+        let tableHtml = `
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  ${config.options.columns.map(col => `<th>${col}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        config.data.forEach(row => {
+          tableHtml += '<tr>';
+          config.options.columns.forEach(col => {
+            tableHtml += `<td>${row[col] !== null && row[col] !== undefined ? row[col] : ''}</td>`;
+          });
+          tableHtml += '</tr>';
+        });
+        
+        tableHtml += `
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        previewContainer.innerHTML = tableHtml;
+      } else {
+        // Create canvas for chart preview
+        previewContainer.innerHTML = `
+          <canvas id="previewChart" width="400" height="300"></canvas>
+        `;
+        
+        const ctx = document.getElementById('previewChart').getContext('2d');
+        
+        // Create chart
+        let chartConfig;
+        
+        if (chartType === 'pie') {
+          chartConfig = {
+            type: 'pie',
+            data: {
+              labels: config.data.labels,
+              datasets: [{
+                data: config.data.data,
+                backgroundColor: config.data.backgroundColor
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                title: {
+                  display: !!config.options.title,
+                  text: config.options.title
+                },
+                legend: {
+                  position: 'right'
+                }
+              }
+            }
+          };
+        } else {
+          chartConfig = {
+            type: chartType,
+            data: {
+              labels: config.data.labels,
+              datasets: config.data.datasets
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                title: {
+                  display: !!config.options.title,
+                  text: config.options.title
+                }
+              }
+            }
+          };
+        }
+        
+        new Chart(ctx, chartConfig);
+      }
+    }
+    
+    // Check for session data
+    if (sessionStorage.getItem('visualizeData')) {
+      dataSourceSelect.value = 'session';
+      fileSourceContainer.style.display = 'none';
+      loadDataBtn.disabled = false;
+    }
+  });
+</script>

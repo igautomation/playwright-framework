@@ -1,0 +1,45 @@
+{
+  "title": "Product Analysis Report",
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Product Prices",
+      "xAxis": "Name",
+      "yAxis": ["Price"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "pie",
+      "title": "Category Distribution",
+      "labels": "Category",
+      "values": "Count",
+      "dimensions": {
+        "width": 600,
+        "height": 600
+      }
+    },
+    {
+      "type": "line",
+      "title": "Stock Levels Over Time",
+      "xAxis": "Date",
+      "yAxis": ["Stock"],
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    },
+    {
+      "type": "table",
+      "title": "Top Rated Products",
+      "columns": ["Name", "Price", "Rating", "Stock"],
+      "filter": "item.Rating > 4.5",
+      "dimensions": {
+        "width": 800,
+        "height": 400
+      }
+    }
+  ]
+}

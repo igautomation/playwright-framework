@@ -1,0 +1,49 @@
+{
+  "name": "Weekly Product Report",
+  "description": "Weekly report of product data",
+  "cronExpression": "0 8 * * 1",
+  "timezone": "America/New_York",
+  "active": true,
+  "recipients": ["user@example.com"],
+  "reportConfig": {
+    "title": "Weekly Product Report",
+    "dataSource": {
+      "type": "file",
+      "fileType": "json",
+      "fileName": "sample-data.json"
+    },
+    "charts": [
+      {
+        "type": "bar",
+        "title": "Product Prices",
+        "xAxis": "Name",
+        "yAxis": ["Price"],
+        "dimensions": {
+          "width": 800,
+          "height": 400
+        }
+      },
+      {
+        "type": "pie",
+        "title": "Category Distribution",
+        "labels": "Category",
+        "values": "Count",
+        "dimensions": {
+          "width": 600,
+          "height": 600
+        }
+      },
+      {
+        "type": "table",
+        "title": "Top Rated Products",
+        "columns": ["Name", "Price", "Rating", "Category"],
+        "filter": "item.Rating > 4.5",
+        "limit": 10,
+        "dimensions": {
+          "width": 800,
+          "height": 400
+        }
+      }
+    ]
+  }
+}

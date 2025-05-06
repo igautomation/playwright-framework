@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "required": ["id", "firstName", "lastName", "employeeId"],
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "The employee ID"
+    },
+    "firstName": {
+      "type": "string",
+      "description": "The employee's first name"
+    },
+    "middleName": {
+      "type": "string",
+      "description": "The employee's middle name"
+    },
+    "lastName": {
+      "type": "string",
+      "description": "The employee's last name"
+    },
+    "employeeId": {
+      "type": "string",
+      "description": "The employee's ID number"
+    },
+    "jobTitle": {
+      "type": "string",
+      "description": "The employee's job title"
+    },
+    "status": {
+      "type": "string",
+      "description": "The employee's status",
+      "enum": ["Active", "Terminated", "On Leave"]
+    },
+    "subUnit": {
+      "type": "string",
+      "description": "The employee's sub unit"
+    },
+    "supervisor": {
+      "type": "string",
+      "description": "The employee's supervisor"
+    }
+  }
+}

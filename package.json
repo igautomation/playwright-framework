@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "@your-org/playwright-framework",
   "version": "1.0.0",
   "description": "An enterprise-grade Playwright test automation framework for Web UI, API, CI/CD, Reporting, and Xray Integration.",
@@ -109,3 +110,65 @@
     "data/*": "./src/data/*"
   }
 }
+=======
+  "name": "playwright-framework",
+  "version": "1.0.0",
+  "description": "A comprehensive framework for web automation, testing, and reporting using Playwright",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "dashboard": "node src/dashboard/server.js",
+    "examples:playwright": "node examples/playwright/run-all-examples.js",
+    "examples:screenshot": "node examples/playwright/screenshot-example.js",
+    "examples:pdf": "node examples/playwright/pdf-example.js",
+    "examples:accessibility": "node examples/playwright/accessibility-example.js",
+    "examples:responsive": "node examples/playwright/responsive-example.js",
+    "examples:trace": "node examples/playwright/trace-example.js",
+    "examples:network": "node examples/playwright/network-mock-example.js",
+    "examples:error": "node examples/playwright/error-handling-example.js",
+    "examples:advanced": "node examples/playwright/advanced-utils-example.js"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "automation",
+    "reporting",
+    "visualization",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "canvas": "^2.11.0",
+    "chart.js": "^4.3.0",
+    "chartjs-node-canvas": "^5.0.0",
+    "dotenv": "^16.5.0",
+    "dotenv-safe": "^9.1.0",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.2",
+    "nodemailer": "^6.9.3",
+    "playwright": "^1.35.0",
+    "socket.io": "^4.6.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "jest": "^29.5.0"
+  },
+  "bin": {
+    "dashboard": "src/dashboard/cli.js",
+    "history": "src/cli/history.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "verbose": true,
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  }
+}
+>>>>>>> 51948a2 (Main v1.0)

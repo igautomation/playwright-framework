@@ -1,0 +1,342 @@
+<script>
+    // Add chart configuration
+    function addChartConfig() {
+      const chartsContainer = document.getElementById('chartsContainer');
+      const chartCount = chartsContainer.querySelectorAll('.chart-config').length;
+      
+      const chartDiv = document.createElement('div');
+      chartDiv.className = 'chart-config mb-3 border rounded p-3';
+      chartDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6>Chart ${chartCount + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger remove-chart-btn">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        
+        <div class="mb-3">
+          <label for="chartType${chartCount}" class="form-label">Chart Type</label>
+          <select class="form-select chart-type" id="chartType${chartCount}">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="table">Table</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="chartTitle${chartCount}" class="form-label">Chart Title</label>
+          <input type="text" class="form-control chart-title" id="chartTitle${chartCount}">
+        </div>
+        
+        <div class="chart-specific-config" id="chartConfig${chartCount}">
+          <div class="mb-3">
+            <label for="xAxis${chartCount}" class="form-label">X-Axis Column</label>
+            <input type="text" class="form-control x-axis" id="xAxis${chartCount}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="yAxis${chartCount}" class="form-label">Y-Axis Column(s)</label>
+            <input type="text" class="form-control y-axis" id="yAxis${chartCount}" placeholder="Comma-separated column names">
+          </div>
+        </div>
+      `;
+      
+      chartsContainer.appendChild(chartDiv);
+      
+      // Add event listener to remove button
+      const removeBtn = chartDiv.querySelector('.remove-chart-btn');
+      removeBtn.addEventListener('click', () => {
+        chartDiv.remove();
+        updateChartNumbers();
+      });
+      
+      // Add event listener to chart type select
+      const chartTypeSelect = chartDiv.querySelector('.chart-type');
+      chartTypeSelect.addEventListener('change', () => {
+        updateChartConfig(chartCount, chartTypeSelect.value);
+      });
+      
+      // Enable first remove button if we now have more than one chart
+      if (chartCount === 0) {
+        const firstRemoveBtn = chartsContainer.querySelector('.remove-chart-btn');
+        if (firstRemoveBtn) {
+          firstRemoveBtn.disabled = false;
+        }
+      }
+    }
+    
+    // Update chart numbers
+    function updateChartNumbers() {
+      const chartConfigs = document.querySelectorAll('.chart-config');
+      chartConfigs.forEach((chartDiv, index) => {
+        const heading = chartDiv.querySelector('h6');
+        heading.textContent = `Chart ${index + 1}`;
+      });
+      
+      // Disable remove button if only one chart left
+      if (chartConfigs.length === 1) {
+        const removeBtn = chartConfigs[0].querySelector('.remove-chart-btn');
+        removeBtn.disabled = true;
+      }
+    }
+    
+    // Update chart configuration based on type
+    function updateChartConfig(index, chartType) {
+      const chartConfigDiv = document.getElementById(`chartConfig${index}`);
+      
+      if (chartType === 'bar' || chartType === 'line') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="xAxis${index}" class="form-label">X-Axis Column</label>
+            <input type="text" class="form-control x-axis" id="xAxis${index}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="yAxis${index}" class="form-label">Y-Axis Column(s)</label>
+            <input type="text" class="form-control y-axis" id="yAxis${index}" placeholder="Comma-separated column names">
+          </div>
+        `;
+      } else if (chartType === 'pie') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="labels${index}" class="form-label">Labels Column</label>
+            <input type="text" class="form-control labels" id="labels${index}">
+          </div>
+          
+          <div class="mb-3">
+            <label for="values${index}" class="form-label">Values Column</label>
+            <input type="text" class="form-control values" id="values${index}">
+          </div>
+        `;
+      } else if (chartType === 'table') {
+        chartConfigDiv.innerHTML = `
+          <div class="mb-3">
+            <label for="columns${index}" class="form-label">Columns</label>
+            <input type="text" class="form-control columns" id="columns${index}" placeholder="Comma-separated column names">
+          </div>
+          
+          <div class="mb-3">
+            <label for="filter${index}" class="form-label">Filter (optional)</label>
+            <input type="text" class="form-control filter" id="filter${index}" placeholder="e.g. item.price > 100">
+          </div>
+          
+          <div class="mb-3">
+            <label for="limit${index}" class="form-label">Row Limit</label>
+            <input type="number" class="form-control limit" id="limit${index}" value="50" min="1">
+          </div>
+        `;
+      }
+    }
+    
+    // Save template
+    async function saveTemplate() {
+      try {
+        // Get form values
+        const name = document.getElementById('templateName').value;
+        const description = document.getElementById('templateDescription').value;
+        const tagsString = document.getElementById('templateTags').value;
+        const tags = tagsString ? tagsString.split(',').map(tag => tag.trim()) : [];
+        
+        // Get data source config
+        const dataSourceType = document.getElementById('dataSourceType').value;
+        let dataSource = { type: dataSourceType };
+        
+        if (dataSourceType === 'file') {
+          dataSource.fileType = document.getElementById('fileType').value;
+          dataSource.fileName = document.getElementById('fileName').value;
+        }
+        
+        // Get chart configs
+        const chartConfigs = document.querySelectorAll('.chart-config');
+        const charts = [];
+        
+        chartConfigs.forEach((chartDiv, index) => {
+          const chartType = chartDiv.querySelector('.chart-type').value;
+          const chartTitle = chartDiv.querySelector('.chart-title').value;
+          
+          const chartConfig = {
+            type: chartType,
+            title: chartTitle,
+            dimensions: {
+              width: 800,
+              height: 400
+            }
+          };
+          
+          if (chartType === 'bar' || chartType === 'line') {
+            chartConfig.xAxis = chartDiv.querySelector('.x-axis').value;
+            chartConfig.yAxis = chartDiv.querySelector('.y-axis').value.split(',').map(col => col.trim());
+          } else if (chartType === 'pie') {
+            chartConfig.labels = chartDiv.querySelector('.labels').value;
+            chartConfig.values = chartDiv.querySelector('.values').value;
+          } else if (chartType === 'table') {
+            chartConfig.columns = chartDiv.querySelector('.columns').value.split(',').map(col => col.trim());
+            chartConfig.filter = chartDiv.querySelector('.filter').value;
+            chartConfig.limit = parseInt(chartDiv.querySelector('.limit').value) || 50;
+          }
+          
+          charts.push(chartConfig);
+        });
+        
+        // Validate form
+        if (!name) {
+          alert('Template name is required');
+          return;
+        }
+        
+        if (charts.length === 0) {
+          alert('At least one chart is required');
+          return;
+        }
+        
+        // Create template object
+        const template = {
+          name,
+          description,
+          tags,
+          dataSource,
+          charts
+        };
+        
+        // Save template
+        const response = await fetch('/api/templates', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(template)
+        });
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          alert(`Error: ${result.error}`);
+          return;
+        }
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createTemplateModal'));
+        modal.hide();
+        
+        // Show success message
+        showToast('Template created successfully', 'success');
+        
+        // Reload templates
+        loadTemplates();
+        loadTags();
+      } catch (error) {
+        console.error('Error saving template:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Open template details modal
+    async function openTemplateDetailsModal(templateId) {
+      try {
+        const modal = new bootstrap.Modal(document.getElementById('templateDetailsModal'));
+        modal.show();
+        
+        const templateDetails = document.getElementById('templateDetails');
+        templateDetails.innerHTML = `
+          <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading template details...</p>
+          </div>
+        `;
+        
+        const response = await fetch(`/api/templates/${templateId}`);
+        const data = await response.json();
+        
+        if (data.error) {
+          templateDetails.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i> ${data.error}
+            </div>
+          `;
+          return;
+        }
+        
+        currentTemplate = data.template;
+        
+        // Update modal title
+        document.getElementById('detailsTemplateTitle').textContent = currentTemplate.name;
+        
+        // Format dates
+        const createdDate = new Date(currentTemplate.createdAt).toLocaleString();
+        const updatedDate = new Date(currentTemplate.updatedAt).toLocaleString();
+        
+        // Render template details
+        let detailsHtml = `
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p><strong>Name:</strong> ${currentTemplate.name}</p>
+              <p><strong>Description:</strong> ${currentTemplate.description || 'None'}</p>
+              <p><strong>Created:</strong> ${createdDate}</p>
+              <p><strong>Updated:</strong> ${updatedDate}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Data Source:</strong> ${currentTemplate.dataSource.type}</p>
+              ${currentTemplate.dataSource.type === 'file' ? `
+                <p><strong>File Type:</strong> ${currentTemplate.dataSource.fileType}</p>
+                <p><strong>File Name:</strong> ${currentTemplate.dataSource.fileName || 'Specified at runtime'}</p>
+              ` : ''}
+              <p><strong>Tags:</strong> ${currentTemplate.tags && currentTemplate.tags.length > 0 ? currentTemplate.tags.join(', ') : 'None'}</p>
+            </div>
+          </div>
+          
+          <h6>Charts</h6>
+          <div class="list-group">
+        `;
+        
+        currentTemplate.charts.forEach((chart, index) => {
+          detailsHtml += `
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${chart.title || `Chart ${index + 1}`}</h6>
+                <small>${chart.type.charAt(0).toUpperCase() + chart.type.slice(1)} Chart</small>
+              </div>
+              <p class="mb-1">
+          `;
+          
+          if (chart.type === 'bar' || chart.type === 'line') {
+            detailsHtml += `
+              X-Axis: ${chart.xAxis}<br>
+              Y-Axis: ${Array.isArray(chart.yAxis) ? chart.yAxis.join(', ') : chart.yAxis}
+            `;
+          } else if (chart.type === 'pie') {
+            detailsHtml += `
+              Labels: ${chart.labels}<br>
+              Values: ${chart.values}
+            `;
+          } else if (chart.type === 'table') {
+            detailsHtml += `
+              Columns: ${Array.isArray(chart.columns) ? chart.columns.join(', ') : chart.columns}<br>
+              ${chart.filter ? `Filter: ${chart.filter}<br>` : ''}
+              Limit: ${chart.limit || 50} rows
+            `;
+          }
+          
+          detailsHtml += `
+              </p>
+            </div>
+          `;
+        });
+        
+        detailsHtml += '</div>';
+        
+        templateDetails.innerHTML = detailsHtml;
+        
+        // Clear sample data
+        document.getElementById('sampleData').innerHTML = '';
+      } catch (error) {
+        console.error('Error loading template details:', error);
+        document.getElementById('templateDetails').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i> Error loading template details: ${error.message}
+          </div>
+        `;
+      }
+    }</script>

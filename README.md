@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Salesforce Playwright Test Automation Framework
 
 A comprehensive, production-grade test automation framework for Salesforce applications using Playwright.
@@ -37,11 +38,133 @@ cp .env.example .env
 Edit the `.env` file with your Salesforce credentials.
 
 4. Run tests:
+=======
+# Playwright Framework
+
+A comprehensive framework for web automation, testing, and reporting using Playwright.
+
+## Overview
+
+This framework integrates [Playwright](https://playwright.dev/) to provide powerful capabilities for:
+
+- Screenshot capture
+- PDF generation
+- Accessibility testing
+- Responsive design testing
+- Network mocking
+- Debugging with traces
+- Error handling
+
+## Features
+
+### PlaywrightService
+
+A unified service for browser automation tasks:
+
+```javascript
+const { PlaywrightService } = require('./src/utils/common');
+
+const playwrightService = new PlaywrightService();
+
+// Capture screenshot
+await playwrightService.captureScreenshot('https://example.com', {
+  path: 'screenshot.png',
+  fullPage: true
+});
+
+// Generate PDF
+await playwrightService.generatePdf('https://example.com', {
+  path: 'document.pdf',
+  format: 'A4'
+});
+
+// Run accessibility audit
+const accessibilityResults = await playwrightService.runAccessibilityAudit('https://example.com');
+```
+
+### Enhanced Error Handling
+
+Robust error handling with retry mechanisms, timeouts, and graceful degradation:
+
+```javascript
+const { PlaywrightErrorHandler } = require('./src/utils/common');
+
+// Retry mechanism
+const retryableFunction = PlaywrightErrorHandler.withRetry(
+  async () => {
+    // Operation that might fail intermittently
+  },
+  { maxRetries: 3, retryDelay: 1000 }
+);
+
+// Timeout handling
+const timeoutFunction = PlaywrightErrorHandler.withTimeout(
+  async () => {
+    // Operation that might hang
+  },
+  5000, // 5 second timeout
+  { action: 'performing operation' }
+);
+
+// Graceful degradation
+const gracefulFunction = PlaywrightErrorHandler.withGracefulDegradation(
+  // Primary function
+  async () => {
+    // Operation that might fail
+  },
+  // Fallback function
+  async (args, error) => {
+    // Alternative implementation
+  }
+);
+```
+
+### Integration with Reporting System
+
+The framework integrates with a reporting system for generating charts, tables, and reports:
+
+- Enhanced screenshot capabilities for charts and tables
+- PDF generation for reports
+- Accessibility testing for reports
+- Responsive design testing for reports
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/playwright-framework.git
+
+# Install dependencies
+cd playwright-framework
+npm install
+```
+
+## Usage
+
+### Running Examples
+
+```bash
+# Run all examples
+npm run examples:playwright
+
+# Run specific examples
+npm run examples:screenshot
+npm run examples:pdf
+npm run examples:accessibility
+npm run examples:responsive
+npm run examples:trace
+npm run examples:network
+npm run examples:error
+```
+
+### Running Tests
+>>>>>>> 51948a2 (Main v1.0)
 
 ```bash
 # Run all tests
 npm test
 
+<<<<<<< HEAD
 # Run UI tests only
 npm run test:ui
 
@@ -150,3 +273,29 @@ NODE_ENV=qa npm test
 ## 📄 License
 
 MIT
+=======
+# Run tests in watch mode
+npm run test:watch
+```
+
+### Starting the Dashboard
+
+```bash
+npm run dashboard
+```
+
+## Documentation
+
+- [Playwright Integration Guide](docs/playwright-integration-guide.md)
+- [Error Handling Guide](docs/error-handling-guide.md)
+- [Report Templates Guide](docs/report-templates-guide.md)
+- [Report History Guide](docs/report-history-guide.md)
+
+## Examples
+
+Check out the [examples](examples/playwright) directory for practical examples of using the framework.
+
+## License
+
+MIT
+>>>>>>> 51948a2 (Main v1.0)

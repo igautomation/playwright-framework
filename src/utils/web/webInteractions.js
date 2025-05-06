@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/utils/web/webInteractions.js
 
 /**
@@ -251,3 +252,416 @@ class WebInteractions {
 }
 
 export default WebInteractions;
+=======
+const { expect } = require('@playwright/test');
+const logger = require('../common/logger');
+
+/**
+ * Web Interactions utility class for common web interactions
+ */
+class WebInteractions {
+  /**
+   * Constructor
+   * @param {import('@playwright/test').Page} page - Playwright page object
+   */
+  constructor(page) {
+    this.page = page;
+  }
+
+  /**
+   * Get text from an element
+   * @param {string} selector - Element selector
+   * @param {Object} options - Options for the operation
+   * @returns {Promise<string>} Element text
+   */
+  async getText(selector, options = {}) {
+    try {
+      logger.debug(`Getting text from element: ${selector}`);
+      const element = this.page.locator(selector);
+      return await element.textContent(options);
+    } catch (error) {
+      logger.error(`Failed to get text from element: ${selector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify text in an element
+   * @param {string} selector - Element selector
+   * @param {string} expectedText - Expected text
+   * @param {Object} options - Options for the operation
+   * @returns {Promise<void>}
+   */
+  async verifyText(selector, expectedText, options = {}) {
+    try {
+      logger.debug(
+        `Verifying text in element: ${selector}, expected: ${expectedText}`
+      );
+      const element = this.page.locator(selector);
+      await expect(element).toHaveText(expectedText, options);
+    } catch (error) {
+      logger.error(`Failed to verify text in element: ${selector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Maximize browser window
+   * @returns {Promise<void>}
+   */
+  async maximizeBrowser() {
+    try {
+      logger.debug('Maximizing browser window');
+      await this.page.setViewportSize({ width: 1920, height: 1080 });
+    } catch (error) {
+      logger.error('Failed to maximize browser window', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handle dropdown selection by text
+   * @param {string} selector - Dropdown selector
+   * @param {string} text - Text to select
+   * @returns {Promise<void>}
+   */
+  async handleDropdown(selector, text) {
+    try {
+      logger.debug(`Selecting option "${text}" from dropdown: ${selector}`);
+      const dropdown = this.page.locator(selector);
+      await dropdown.selectOption({ label: text });
+    } catch (error) {
+      logger.error(
+        `Failed to select option "${text}" from dropdown: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Handle dropdown selection by value
+   * @param {string} selector - Dropdown selector
+   * @param {string} value - Value to select
+   * @returns {Promise<void>}
+   */
+  async handleDropdownByValue(selector, value) {
+    try {
+      logger.debug(`Selecting value "${value}" from dropdown: ${selector}`);
+      const dropdown = this.page.locator(selector);
+      await dropdown.selectOption({ value });
+    } catch (error) {
+      logger.error(
+        `Failed to select value "${value}" from dropdown: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Verify dropdown values
+   * @param {string} selector - Dropdown selector
+   * @param {Array<string>} expectedValues - Expected dropdown values
+   * @returns {Promise<void>}
+   */
+  async verifyDropdownValues(selector, expectedValues) {
+    try {
+      logger.debug(`Verifying dropdown values for: ${selector}`);
+      const dropdown = this.page.locator(selector);
+      const options = await dropdown.locator('option').allTextContents();
+
+      // Filter out empty options
+      const actualValues = options.filter((option) => option.trim() !== '');
+
+      // Verify each expected value is in the actual values
+      for (const expectedValue of expectedValues) {
+        if (!actualValues.includes(expectedValue)) {
+          throw new Error(
+            `Expected value "${expectedValue}" not found in dropdown options: ${actualValues.join(', ')}`
+          );
+        }
+      }
+    } catch (error) {
+      logger.error(`Failed to verify dropdown values for: ${selector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Perform mouse hover on an element
+   * @param {string} selector - Element selector
+   * @returns {Promise<void>}
+   */
+  async mouseHover(selector) {
+    try {
+      logger.debug(`Hovering over element: ${selector}`);
+      await this.page.locator(selector).hover();
+    } catch (error) {
+      logger.error(`Failed to hover over element: ${selector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload a file
+   * @param {string} selector - File input selector
+   * @param {string} filePath - Path to the file
+   * @returns {Promise<void>}
+   */
+  async uploadFile(selector, filePath) {
+    try {
+      logger.debug(`Uploading file: ${filePath} to input: ${selector}`);
+      const fileInput = this.page.locator(selector);
+      await fileInput.setInputFiles(filePath);
+    } catch (error) {
+      logger.error(
+        `Failed to upload file: ${filePath} to input: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Perform keyboard action
+   * @param {string} key - Key to press
+   * @returns {Promise<void>}
+   */
+  async keyboardAction(key) {
+    try {
+      logger.debug(`Pressing key: ${key}`);
+      await this.page.keyboard.press(key);
+    } catch (error) {
+      logger.error(`Failed to press key: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handle autocomplete input
+   * @param {string} inputSelector - Input selector
+   * @param {string} text - Text to enter
+   * @param {string} suggestionSelector - Suggestion selector
+   * @param {string} suggestionText - Suggestion text to select
+   * @returns {Promise<void>}
+   */
+  async handleAutocomplete(
+    inputSelector,
+    text,
+    suggestionSelector,
+    suggestionText
+  ) {
+    try {
+      logger.debug(`Handling autocomplete for input: ${inputSelector}`);
+
+      // Type text in the input
+      await this.page.locator(inputSelector).fill(text);
+
+      // Wait for suggestions to appear
+      await this.page.waitForSelector(suggestionSelector);
+
+      // Click on the suggestion with the specified text
+      await this.page
+        .locator(`${suggestionSelector}:has-text("${suggestionText}")`)
+        .click();
+    } catch (error) {
+      logger.error(
+        `Failed to handle autocomplete for input: ${inputSelector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Handle browser alert
+   * @param {boolean} accept - Whether to accept or dismiss the alert
+   * @returns {Promise<string>} Alert text
+   */
+  async handleAlert(accept = true) {
+    try {
+      logger.debug(`Handling alert, accept: ${accept}`);
+
+      // Set up alert handler
+      let alertText = '';
+      this.page.on('dialog', async (dialog) => {
+        alertText = dialog.message();
+        if (accept) {
+          await dialog.accept();
+        } else {
+          await dialog.dismiss();
+        }
+      });
+
+      return alertText;
+    } catch (error) {
+      logger.error('Failed to handle alert', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handle iframe
+   * @param {string} frameSelector - Frame selector
+   * @param {Function} callback - Callback function to execute in the frame context
+   * @returns {Promise<void>}
+   */
+  async handleFrame(frameSelector, callback) {
+    try {
+      logger.debug(`Handling frame: ${frameSelector}`);
+
+      // Get the frame
+      const frame = this.page.frameLocator(frameSelector);
+
+      // Execute the callback with the frame
+      await callback(frame);
+    } catch (error) {
+      logger.error(`Failed to handle frame: ${frameSelector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Switch to a tab by index
+   * @param {number} index - Tab index
+   * @returns {Promise<void>}
+   */
+  async switchTab(index) {
+    try {
+      logger.debug(`Switching to tab with index: ${index}`);
+
+      // Get all pages in the browser context
+      const pages = this.page.context().pages();
+
+      // Check if the index is valid
+      if (index >= 0 && index < pages.length) {
+        // Switch to the specified page
+        await pages[index].bringToFront();
+        this.page = pages[index];
+      } else {
+        throw new Error(
+          `Invalid tab index: ${index}, available tabs: ${pages.length}`
+        );
+      }
+    } catch (error) {
+      logger.error(`Failed to switch to tab with index: ${index}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Wait for network idle
+   * @param {Object} options - Options for the operation
+   * @returns {Promise<void>}
+   */
+  async waitForNetworkIdle(options = {}) {
+    try {
+      logger.debug('Waiting for network idle');
+      await this.page.waitForLoadState('networkidle', options);
+    } catch (error) {
+      logger.error('Failed to wait for network idle', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Wait for element to be visible
+   * @param {string} selector - Element selector
+   * @param {Object} options - Options for the operation
+   * @returns {Promise<void>}
+   */
+  async waitForElementVisible(selector, options = {}) {
+    try {
+      logger.debug(`Waiting for element to be visible: ${selector}`);
+      await this.page
+        .locator(selector)
+        .waitFor({ state: 'visible', ...options });
+    } catch (error) {
+      logger.error(
+        `Failed to wait for element to be visible: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Check if element exists
+   * @param {string} selector - Element selector
+   * @returns {Promise<boolean>} Whether the element exists
+   */
+  async elementExists(selector) {
+    try {
+      logger.debug(`Checking if element exists: ${selector}`);
+      const count = await this.page.locator(selector).count();
+      return count > 0;
+    } catch (error) {
+      logger.error(`Failed to check if element exists: ${selector}`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Get element count
+   * @param {string} selector - Element selector
+   * @returns {Promise<number>} Element count
+   */
+  async getElementCount(selector) {
+    try {
+      logger.debug(`Getting element count for: ${selector}`);
+      return await this.page.locator(selector).count();
+    } catch (error) {
+      logger.error(`Failed to get element count for: ${selector}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get attribute value
+   * @param {string} selector - Element selector
+   * @param {string} attribute - Attribute name
+   * @returns {Promise<string>} Attribute value
+   */
+  async getAttribute(selector, attribute) {
+    try {
+      logger.debug(
+        `Getting attribute "${attribute}" from element: ${selector}`
+      );
+      const element = this.page.locator(selector);
+      return await element.getAttribute(attribute);
+    } catch (error) {
+      logger.error(
+        `Failed to get attribute "${attribute}" from element: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Verify attribute value
+   * @param {string} selector - Element selector
+   * @param {string} attribute - Attribute name
+   * @param {string} expectedValue - Expected attribute value
+   * @returns {Promise<void>}
+   */
+  async verifyAttribute(selector, attribute, expectedValue) {
+    try {
+      logger.debug(
+        `Verifying attribute "${attribute}" in element: ${selector}, expected: ${expectedValue}`
+      );
+      const element = this.page.locator(selector);
+      await expect(element).toHaveAttribute(attribute, expectedValue);
+    } catch (error) {
+      logger.error(
+        `Failed to verify attribute "${attribute}" in element: ${selector}`,
+        error
+      );
+      throw error;
+    }
+  }
+}
+
+module.exports = WebInteractions;
+>>>>>>> 51948a2 (Main v1.0)

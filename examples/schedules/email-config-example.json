@@ -1,0 +1,10 @@
+{
+  "host": "smtp.example.com",
+  "port": 587,
+  "secure": false,
+  "auth": {
+    "user": "reports@example.com",
+    "pass": "your-password-here"
+  },
+  "from": "Reports <reports@example.com>"
+}

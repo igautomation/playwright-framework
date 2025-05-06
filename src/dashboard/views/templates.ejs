@@ -1,0 +1,60 @@
+<%- include('templates-modals') %>
+
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Report Templates</h5>
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+          <i class="bi bi-plus-circle me-1"></i> Create Template
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="searchInput" class="form-label">Search</label>
+              <input type="text" class="form-control" id="searchInput" placeholder="Search templates...">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="tagFilter" class="form-label">Tag</label>
+              <select class="form-select" id="tagFilter">
+                <option value="">All Tags</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="sortBy" class="form-label">Sort By</label>
+              <select class="form-select" id="sortBy">
+                <option value="name">Name</option>
+                <option value="updatedAt">Last Updated</option>
+                <option value="createdAt">Created Date</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div id="templatesContainer">
+          <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading templates...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="templateCardsContainer">
+  <!-- Template cards will be rendered here -->
+</div>
+
+<%- include('templates-script-part1') %>
+<%- include('templates-script-part2') %>
+<%- include('templates-script-part3') %>
+<%- include('templates-script-part4') %>

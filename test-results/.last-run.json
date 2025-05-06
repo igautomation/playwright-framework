@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "status": "failed",
   "failedTests": [
     "e907b7a545abc30c8323-6a3250fff2a9a043ef13",
@@ -16,4 +17,8 @@
     "4c3a774d296c770a43cb-f6f80ae9600c8291505c",
     "fae837f865b8886eaed8-dba1c7949460eb6e32a8"
   ]
+=======
+  "status": "passed",
+  "failedTests": []
+>>>>>>> 51948a2 (Main v1.0)
 }

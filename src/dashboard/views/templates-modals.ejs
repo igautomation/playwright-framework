@@ -1,0 +1,260 @@
+<!-- Create Template Modal -->
+<div class="modal fade" id="createTemplateModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="templateForm">
+          <div class="mb-3">
+            <label for="templateName" class="form-label">Template Name</label>
+            <input type="text" class="form-control" id="templateName" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="templateDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="templateDescription" rows="2"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="templateTags" class="form-label">Tags (comma-separated)</label>
+            <input type="text" class="form-control" id="templateTags" placeholder="e.g. sales, monthly, finance">
+          </div>
+          
+          <hr>
+          
+          <h6>Data Source</h6>
+          
+          <div class="mb-3">
+            <label for="dataSourceType" class="form-label">Source Type</label>
+            <select class="form-select" id="dataSourceType">
+              <option value="file">File</option>
+              <option value="api">API</option>
+              <option value="database">Database</option>
+            </select>
+          </div>
+          
+          <div id="fileSourceConfig">
+            <div class="mb-3">
+              <label for="fileType" class="form-label">File Type</label>
+              <select class="form-select" id="fileType">
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="fileName" class="form-label">File Name</label>
+              <input type="text" class="form-control" id="fileName" placeholder="e.g. data.json">
+              <div class="form-text">Leave blank to specify at runtime</div>
+            </div>
+          </div>
+          
+          <hr>
+          
+          <h6>Charts</h6>
+          
+          <div id="chartsContainer">
+            <div class="chart-config mb-3 border rounded p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6>Chart 1</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-chart-btn" disabled>
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+              
+              <div class="mb-3">
+                <label for="chartType0" class="form-label">Chart Type</label>
+                <select class="form-select chart-type" id="chartType0">
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="table">Table</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="chartTitle0" class="form-label">Chart Title</label>
+                <input type="text" class="form-control chart-title" id="chartTitle0">
+              </div>
+              
+              <div class="chart-specific-config" id="chartConfig0">
+                <div class="mb-3">
+                  <label for="xAxis0" class="form-label">X-Axis Column</label>
+                  <input type="text" class="form-control x-axis" id="xAxis0">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="yAxis0" class="form-label">Y-Axis Column(s)</label>
+                  <input type="text" class="form-control y-axis" id="yAxis0" placeholder="Comma-separated column names">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" class="btn btn-outline-primary" id="addChartBtn">
+            <i class="bi bi-plus-circle me-1"></i> Add Chart
+          </button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveTemplateBtn">Save Template</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Template Modal -->
+<div class="modal fade" id="editTemplateModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTemplateForm">
+          <input type="hidden" id="editTemplateId">
+          <div class="mb-3">
+            <label for="editTemplateName" class="form-label">Template Name</label>
+            <input type="text" class="form-control" id="editTemplateName" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="editTemplateDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editTemplateDescription" rows="2"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="editTemplateTags" class="form-label">Tags (comma-separated)</label>
+            <input type="text" class="form-control" id="editTemplateTags" placeholder="e.g. sales, monthly, finance">
+          </div>
+          
+          <hr>
+          
+          <h6>Data Source</h6>
+          
+          <div class="mb-3">
+            <label for="editDataSourceType" class="form-label">Source Type</label>
+            <select class="form-select" id="editDataSourceType">
+              <option value="file">File</option>
+              <option value="api">API</option>
+              <option value="database">Database</option>
+            </select>
+          </div>
+          
+          <div id="editFileSourceConfig">
+            <div class="mb-3">
+              <label for="editFileType" class="form-label">File Type</label>
+              <select class="form-select" id="editFileType">
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="editFileName" class="form-label">File Name</label>
+              <input type="text" class="form-control" id="editFileName" placeholder="e.g. data.json">
+              <div class="form-text">Leave blank to specify at runtime</div>
+            </div>
+          </div>
+          
+          <hr>
+          
+          <h6>Charts</h6>
+          
+          <div id="editChartsContainer">
+            <!-- Chart configurations will be added here -->
+          </div>
+          
+          <button type="button" class="btn btn-outline-primary" id="editAddChartBtn">
+            <i class="bi bi-plus-circle me-1"></i> Add Chart
+          </button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger me-auto" id="deleteTemplateBtn">Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="updateTemplateBtn">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Template Details Modal -->
+<div class="modal fade" id="templateDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsTemplateTitle">Template Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="templateDetails">
+          <div class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading template details...</p>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <h6>Sample Data</h6>
+        <div id="sampleDataContainer">
+          <button class="btn btn-sm btn-outline-primary" id="generateSampleDataBtn">
+            <i class="bi bi-database-add me-1"></i> Generate Sample Data
+          </button>
+          <div id="sampleData" class="mt-3"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="dropdown me-auto">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="templateActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Actions
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="templateActionsDropdown">
+            <li><a class="dropdown-item" href="#" id="cloneTemplateBtn">Clone Template</a></li>
+            <li><a class="dropdown-item" href="#" id="exportTemplateBtn">Export Template</a></li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="useTemplateBtn">Use Template</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Use Template Modal -->
+<div class="modal fade" id="useTemplateModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Use Template</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="useTemplateForm">
+          <input type="hidden" id="useTemplateId">
+          
+          <div class="mb-3">
+            <label for="reportTitle" class="form-label">Report Title</label>
+            <input type="text" class="form-control" id="reportTitle" required>
+          </div>
+          
+          <div id="templateParamsContainer">
+            <!-- Template parameters will be added here -->
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="createReportBtn">Create Report</button>
+      </div>
+    </div>
+  </div>
+</div>

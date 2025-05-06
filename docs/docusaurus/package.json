@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+<<<<<<< HEAD
+=======
+    "docusaurus": "docusaurus",
+>>>>>>> 51948a2 (Main v1.0)
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
@@ -10,6 +14,7 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
+<<<<<<< HEAD
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
@@ -20,6 +25,25 @@
     "prism-react-renderer": "^2.3.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+=======
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.0.1",
+    "@docusaurus/preset-classic": "^3.0.1",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^2.0.0",
+    "prism-react-renderer": "^2.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.0.1",
+    "@docusaurus/tsconfig": "^3.0.1",
+    "@docusaurus/types": "^3.0.1",
+    "typescript": "^5.2.2"
+>>>>>>> 51948a2 (Main v1.0)
   },
   "browserslist": {
     "production": [
@@ -33,10 +57,15 @@
       "last 1 safari version"
     ]
   },
+<<<<<<< HEAD
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.5.1",
     "@docusaurus/core": "^3.5.2",
     "@docusaurus/preset-classic": "^3.5.2"
+=======
+  "engines": {
+    "node": ">=18.0"
+>>>>>>> 51948a2 (Main v1.0)
   }
 }

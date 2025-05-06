@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+<<<<<<< HEAD
 // src/cli/index.js
 
 // Core dependencies
@@ -229,3 +230,50 @@ function loadEnvironmentVariables(projectDir) {
     process.exit(1);
   }
 })();
+=======
+/**
+ * CLI entry point for the framework
+ */
+const { program } = require('commander');
+const path = require('path');
+const packageJson = require('../../package.json');
+
+// Set up the CLI program
+program
+  .name('playwright-framework')
+  .description('Enterprise-grade Playwright test automation framework')
+  .version(packageJson.version);
+
+// Add commands
+program
+  .command('run')
+  .description('Run tests')
+  .option('-t, --tags <tags>', 'Run tests with specific tags')
+  .option('-p, --project <project>', 'Run tests with specific project')
+  .option('-h, --headed', 'Run tests in headed mode')
+  .option('-d, --debug', 'Run tests in debug mode')
+  .option('-r, --reporter <reporter>', 'Specify reporter')
+  .option('-e, --env <env>', 'Specify environment')
+  .action(require('./commands/run'));
+
+program
+  .command('list-tags')
+  .description('List all available tags')
+  .action(() => {
+    console.log('Listing tags...');
+    // Implementation for listing tags
+  });
+
+program
+  .command('self-test')
+  .description('Run framework self-test')
+  .action(require('./commands/self-test'));
+
+// Parse command line arguments
+program.parse(process.argv);
+
+// If no arguments provided, show help
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
+>>>>>>> 51948a2 (Main v1.0)
