@@ -1,0 +1,129 @@
+[
+  {
+    "id": "prod-001",
+    "name": "Smartphone X",
+    "description": "Latest smartphone with advanced features",
+    "category": "Electronics",
+    "price": 999.99,
+    "currency": "USD",
+    "stock": 150,
+    "rating": 4.8,
+    "reviews": 1245,
+    "specifications": {
+      "display": "6.7 inch OLED",
+      "processor": "Octa-core 2.8GHz",
+      "storage": "256GB",
+      "camera": "48MP + 12MP + 12MP",
+      "battery": "4500mAh"
+    },
+    "images": [
+      "smartphone-x-front.jpg",
+      "smartphone-x-back.jpg",
+      "smartphone-x-side.jpg"
+    ],
+    "colors": ["Black", "Silver", "Blue"],
+    "featured": true,
+    "releaseDate": "2023-09-15T00:00:00Z"
+  },
+  {
+    "id": "prod-002",
+    "name": "Laptop Pro",
+    "description": "High-performance laptop for professionals",
+    "category": "Electronics",
+    "price": 1499.99,
+    "currency": "USD",
+    "stock": 75,
+    "rating": 4.7,
+    "reviews": 892,
+    "specifications": {
+      "display": "15.6 inch 4K",
+      "processor": "Intel Core i9",
+      "storage": "1TB SSD",
+      "memory": "32GB DDR4",
+      "graphics": "NVIDIA RTX 3080"
+    },
+    "images": [
+      "laptop-pro-front.jpg",
+      "laptop-pro-open.jpg",
+      "laptop-pro-side.jpg"
+    ],
+    "colors": ["Space Gray", "Silver"],
+    "featured": true,
+    "releaseDate": "2023-07-20T00:00:00Z"
+  },
+  {
+    "id": "prod-003",
+    "name": "Wireless Earbuds",
+    "description": "Premium wireless earbuds with noise cancellation",
+    "category": "Audio",
+    "price": 199.99,
+    "currency": "USD",
+    "stock": 200,
+    "rating": 4.5,
+    "reviews": 1567,
+    "specifications": {
+      "batteryLife": "8 hours",
+      "chargingCase": "24 hours additional",
+      "connectivity": "Bluetooth 5.2",
+      "waterResistance": "IPX7"
+    },
+    "images": [
+      "earbuds-case.jpg",
+      "earbuds-pair.jpg",
+      "earbuds-single.jpg"
+    ],
+    "colors": ["White", "Black", "Blue", "Red"],
+    "featured": false,
+    "releaseDate": "2023-05-10T00:00:00Z"
+  },
+  {
+    "id": "prod-004",
+    "name": "Smart Watch",
+    "description": "Fitness and health tracking smartwatch",
+    "category": "Wearables",
+    "price": 299.99,
+    "currency": "USD",
+    "stock": 120,
+    "rating": 4.6,
+    "reviews": 783,
+    "specifications": {
+      "display": "1.4 inch AMOLED",
+      "batteryLife": "7 days",
+      "sensors": ["Heart rate", "SpO2", "ECG", "GPS"],
+      "waterResistance": "50m"
+    },
+    "images": [
+      "smartwatch-front.jpg",
+      "smartwatch-side.jpg",
+      "smartwatch-back.jpg"
+    ],
+    "colors": ["Black", "Silver", "Gold", "Rose Gold"],
+    "featured": true,
+    "releaseDate": "2023-08-05T00:00:00Z"
+  },
+  {
+    "id": "prod-005",
+    "name": "Bluetooth Speaker",
+    "description": "Portable waterproof bluetooth speaker",
+    "category": "Audio",
+    "price": 129.99,
+    "currency": "USD",
+    "stock": 180,
+    "rating": 4.4,
+    "reviews": 952,
+    "specifications": {
+      "power": "30W",
+      "batteryLife": "12 hours",
+      "connectivity": "Bluetooth 5.0",
+      "waterResistance": "IPX7"
+    },
+    "images": [
+      "speaker-front.jpg",
+      "speaker-side.jpg",
+      "speaker-back.jpg"
+    ],
+    "colors": ["Black", "Blue", "Red", "Green"],
+    "featured": false,
+    "releaseDate": "2023-06-15T00:00:00Z"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "555-123-4567",
+    "address": {
+      "street": "123 Main St",
+      "city": "Boston",
+      "state": "MA",
+      "zipCode": "02108",
+      "country": "USA"
+    },
+    "role": "admin",
+    "department": "Engineering",
+    "active": true,
+    "createdAt": "2023-01-15T08:30:00Z"
+  },
+  {
+    "id": 2,
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "555-987-6543",
+    "address": {
+      "street": "456 Oak Ave",
+      "city": "San Francisco",
+      "state": "CA",
+      "zipCode": "94107",
+      "country": "USA"
+    },
+    "role": "user",
+    "department": "Marketing",
+    "active": true,
+    "createdAt": "2023-02-20T10:15:00Z"
+  },
+  {
+    "id": 3,
+    "firstName": "Robert",
+    "lastName": "Johnson",
+    "email": "robert.johnson@example.com",
+    "phone": "555-456-7890",
+    "address": {
+      "street": "789 Pine Rd",
+      "city": "Seattle",
+      "state": "WA",
+      "zipCode": "98101",
+      "country": "USA"
+    },
+    "role": "manager",
+    "department": "Product",
+    "active": true,
+    "createdAt": "2023-03-10T14:45:00Z"
+  },
+  {
+    "id": 4,
+    "firstName": "Emily",
+    "lastName": "Davis",
+    "email": "emily.davis@example.com",
+    "phone": "555-789-0123",
+    "address": {
+      "street": "321 Elm St",
+      "city": "Austin",
+      "state": "TX",
+      "zipCode": "78701",
+      "country": "USA"
+    },
+    "role": "user",
+    "department": "Sales",
+    "active": false,
+    "createdAt": "2023-04-05T09:20:00Z"
+  },
+  {
+    "id": 5,
+    "firstName": "Michael",
+    "lastName": "Wilson",
+    "email": "michael.wilson@example.com",
+    "phone": "555-321-6547",
+    "address": {
+      "street": "654 Maple Dr",
+      "city": "Chicago",
+      "state": "IL",
+      "zipCode": "60601",
+      "country": "USA"
+    },
+    "role": "user",
+    "department": "Support",
+    "active": true,
+    "createdAt": "2023-05-12T11:30:00Z"
+  }
+]

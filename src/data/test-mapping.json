@@ -1,4 +1,118 @@
 {
-  "Reqres.in API CRUD Tests › Create User": "TEST-101",
-  "Reqres.in API CRUD Tests › Update User": "TEST-102"
+  "testSuites": {
+    "smoke": {
+      "description": "Critical path tests that verify core functionality",
+      "tests": [
+        "src/tests/api/rest/user-api.spec.js",
+        "src/tests/ui/smoke/login.spec.js",
+        "src/tests/ui/smoke/checkout.spec.js"
+      ],
+      "priority": "high",
+      "runOnCI": true
+    },
+    "regression": {
+      "description": "Full regression test suite",
+      "tests": [
+        "src/tests/api/rest/reqres-crud.api.spec.js",
+        "src/tests/ui/regression/product-catalog.spec.js",
+        "src/tests/ui/regression/user-profile.spec.js",
+        "src/tests/ui/regression/shopping-cart.spec.js"
+      ],
+      "priority": "medium",
+      "runOnCI": true
+    },
+    "visual": {
+      "description": "Visual regression tests",
+      "tests": [
+        "src/tests/visual/visualRegressionTest.spec.js"
+      ],
+      "priority": "medium",
+      "runOnCI": true
+    },
+    "accessibility": {
+      "description": "Accessibility compliance tests",
+      "tests": [
+        "src/tests/accessibility/accessibilityTest.spec.js"
+      ],
+      "priority": "medium",
+      "runOnCI": true
+    },
+    "performance": {
+      "description": "Performance and load tests",
+      "tests": [
+        "src/tests/performance/performanceTest.spec.js"
+      ],
+      "priority": "low",
+      "runOnCI": false
+    },
+    "localization": {
+      "description": "Internationalization and localization tests",
+      "tests": [
+        "src/tests/localization/localizationTest.spec.js"
+      ],
+      "priority": "low",
+      "runOnCI": false
+    }
+  },
+  "testData": {
+    "users": {
+      "source": "src/data/json/users.json",
+      "tests": [
+        "src/tests/api/rest/user-api.spec.js",
+        "src/tests/ui/smoke/login.spec.js"
+      ]
+    },
+    "products": {
+      "source": "src/data/json/products.json",
+      "tests": [
+        "src/tests/ui/regression/product-catalog.spec.js",
+        "src/tests/ui/regression/shopping-cart.spec.js"
+      ]
+    },
+    "apiResponses": {
+      "source": "src/data/json/api-responses.json",
+      "tests": [
+        "src/tests/api/rest/reqres-crud.api.spec.js"
+      ]
+    },
+    "testUsers": {
+      "source": "src/data/yaml/test-users.yaml",
+      "tests": [
+        "src/tests/ui/smoke/login.spec.js",
+        "src/tests/ui/regression/user-profile.spec.js"
+      ]
+    },
+    "visualConfig": {
+      "source": "src/data/yaml/visual-test-config.yaml",
+      "tests": [
+        "src/tests/visual/visualRegressionTest.spec.js"
+      ]
+    }
+  },
+  "environments": {
+    "development": {
+      "baseUrl": "https://dev.example.com",
+      "apiUrl": "https://dev-api.example.com",
+      "credentials": {
+        "username": "dev_user",
+        "password": "dev_password"
+      }
+    },
+    "staging": {
+      "baseUrl": "https://staging.example.com",
+      "apiUrl": "https://staging-api.example.com",
+      "credentials": {
+        "username": "staging_user",
+        "password": "staging_password"
+      }
+    },
+    "production": {
+      "baseUrl": "https://www.example.com",
+      "apiUrl": "https://api.example.com",
+      "credentials": {
+        "username": "prod_user",
+        "password": "prod_password"
+      }
+    }
+  }
 }

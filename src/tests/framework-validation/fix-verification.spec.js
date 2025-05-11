@@ -2,38 +2,10 @@ const { test, expect } = require('@playwright/test');
 const schemaValidator = require('../../utils/api/schemaValidator');
 const TestDataFactory = require('../../utils/common/testDataFactory');
 const BasePage = require('../../pages/BasePage');
+const { testSchema, simpleTestSchema, testOverrides } = require('../fixtures/schema-fixtures');
 
 test.describe('Fix Verification Tests @validation', () => {
   test('TestDataFactory should generate payload from schema with required fields', async () => {
-    // Create a test schema with required fields
-    const testSchema = {
-      type: 'object',
-      required: ['id', 'name', 'email', 'isActive'],
-      properties: {
-        id: {
-          type: 'number',
-          description: 'The ID'
-        },
-        name: {
-          type: 'string',
-          description: 'The name'
-        },
-        email: {
-          type: 'string',
-          format: 'email',
-          description: 'The email'
-        },
-        description: {
-          type: 'string',
-          description: 'The description'
-        },
-        isActive: {
-          type: 'boolean',
-          description: 'Active status'
-        }
-      }
-    };
-
     // Register the schema
     schemaValidator.addSchema('test', testSchema);
 
@@ -57,35 +29,8 @@ test.describe('Fix Verification Tests @validation', () => {
   });
 
   test('TestDataFactory should apply overrides correctly', async () => {
-    // Create a test schema
-    const testSchema = {
-      type: 'object',
-      required: ['id', 'name'],
-      properties: {
-        id: {
-          type: 'number',
-          description: 'The ID'
-        },
-        name: {
-          type: 'string',
-          description: 'The name'
-        },
-        email: {
-          type: 'string',
-          format: 'email',
-          description: 'The email'
-        }
-      }
-    };
-
     // Generate payload with overrides
-    const overrides = {
-      id: 12345,
-      name: 'Test Name',
-      email: 'test@example.com'
-    };
-    
-    const payload = TestDataFactory.generatePayloadFromSchema(testSchema, overrides);
+    const payload = TestDataFactory.generatePayloadFromSchema(simpleTestSchema, testOverrides);
     
     // Verify overrides were applied
     expect(payload.id).toBe(12345);

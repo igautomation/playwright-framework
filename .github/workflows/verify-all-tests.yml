@@ -1,0 +1,81 @@
+name: Verify All Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Run with debug logging'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  verify:
+    name: Verify All Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      
+      - name: Create .env file
+        run: |
+          cat > .env << 'EOL'
+          # Environment configuration
+          API_BASE_URL=https://reqres.in
+          API_GRAPHQL_PATH=/graphql
+          BASE_URL=https://example.com
+          API_KEY=123456
+          OAUTH2_TOKEN=dummy-token
+          
+          # Login Credentials
+          LOGIN_USERNAME=testuser
+          LOGIN_PASSWORD=secure123
+          TEST_USERNAME=testuser@example.com
+          TEST_PASSWORD=password123
+          
+          # Playwright Runtime Settings
+          NODE_ENV=test
+          HEADLESS=true
+          SLOWMO=0
+          
+          # CI Runtime Vars
+          CI=true
+          WORKERS=2
+          EOL
+      
+      - name: Run test functionality verification
+        run: npm run test:unit -- tests/test-functionality.test.js
+      
+      - name: Verify all tests
+        if: success()
+        run: npm run test:verify -- --generate-report
+        env:
+          DEBUG: ${{ inputs.debug && '*' || '' }}
+      
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-verification-results
+          path: |
+            reports/
+            playwright-report/
+            test-results/
+          retention-days: 30

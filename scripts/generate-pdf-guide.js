@@ -20,8 +20,8 @@ try {
 }
 
 const markdownpdf = require('markdown-pdf');
-const docsDir = path.resolve(__dirname, '../docs/docusaurus/docs');
-const outputDir = path.resolve(__dirname, '../docs/pdf');
+const docsDir = path.resolve(__dirname, '../docs-site/docs');
+const outputDir = path.resolve(__dirname, '../docs-site/pdf');
 
 // Create output directory if it doesn't exist
 if (!fs.existsSync(outputDir)) {

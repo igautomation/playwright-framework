@@ -1,5 +1,4 @@
 // src/pages/locators/BaseLocator.js
-
 import { expect } from '@playwright/test';
 
 /**

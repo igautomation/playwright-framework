@@ -2,6 +2,15 @@ const { test, expect } = require('@playwright/test');
 const DataProvider = require('../../utils/web/dataProvider');
 const fs = require('fs');
 const path = require('path');
+const {
+  testJsonData,
+  testCsvData,
+  testComplexCsvData,
+  testAutoJsonData,
+  testAutoCsvData,
+  testMergeData1,
+  testMergeData2
+} = require('../fixtures/data-provider-fixtures');
 
 test.describe('Data Provider @validation', () => {
   let dataProvider;
@@ -25,31 +34,15 @@ test.describe('Data Provider @validation', () => {
   });
 
   test('should save and load JSON data', async () => {
-    const testData = {
-      name: 'Test Product',
-      price: 99.99,
-      features: ['Feature 1', 'Feature 2'],
-      details: {
-        sku: 'SKU123',
-        weight: '2kg'
-      }
-    };
-    
-    const filepath = dataProvider.saveAsJson(testData, 'test-product');
+    const filepath = dataProvider.saveAsJson(testJsonData, 'test-product');
     expect(fs.existsSync(filepath)).toBeTruthy();
     
     const loadedData = dataProvider.loadFromJson('test-product');
-    expect(loadedData).toEqual(testData);
+    expect(loadedData).toEqual(testJsonData);
   });
 
   test('should save and load CSV data', async () => {
-    const testData = [
-      { name: 'Product 1', price: '99.99', category: 'Electronics' },
-      { name: 'Product 2', price: '49.99', category: 'Books' },
-      { name: 'Product 3', price: '149.99', category: 'Furniture' }
-    ];
-    
-    const filepath = dataProvider.saveAsCsv(testData, 'test-products');
+    const filepath = dataProvider.saveAsCsv(testCsvData, 'test-products');
     expect(fs.existsSync(filepath)).toBeTruthy();
     
     const loadedData = dataProvider.loadFromCsv('test-products');
@@ -60,12 +53,7 @@ test.describe('Data Provider @validation', () => {
   });
 
   test('should handle CSV data with commas and quotes', async () => {
-    const testData = [
-      { name: 'Product, with comma', description: 'Description with "quotes"', price: '99.99' },
-      { name: 'Another "quoted" product', description: 'Multiple, commas, here', price: '49.99' }
-    ];
-    
-    const filepath = dataProvider.saveAsCsv(testData, 'test-complex-csv');
+    const filepath = dataProvider.saveAsCsv(testComplexCsvData, 'test-complex-csv');
     expect(fs.existsSync(filepath)).toBeTruthy();
     
     const loadedData = dataProvider.loadFromCsv('test-complex-csv');
@@ -76,14 +64,8 @@ test.describe('Data Provider @validation', () => {
   });
 
   test('should save data based on file extension', async () => {
-    const jsonData = { name: 'Test', value: 123 };
-    const csvData = [
-      { name: 'Row 1', value: '123' },
-      { name: 'Row 2', value: '456' }
-    ];
-    
-    const jsonPath = dataProvider.saveData(jsonData, 'auto-test.json');
-    const csvPath = dataProvider.saveData(csvData, 'auto-test.csv');
+    const jsonPath = dataProvider.saveData(testAutoJsonData, 'auto-test.json');
+    const csvPath = dataProvider.saveData(testAutoCsvData, 'auto-test.csv');
     
     expect(fs.existsSync(jsonPath)).toBeTruthy();
     expect(fs.existsSync(csvPath)).toBeTruthy();
@@ -91,17 +73,14 @@ test.describe('Data Provider @validation', () => {
     const loadedJson = dataProvider.loadData('auto-test.json');
     const loadedCsv = dataProvider.loadData('auto-test.csv');
     
-    expect(loadedJson).toEqual(jsonData);
+    expect(loadedJson).toEqual(testAutoJsonData);
     expect(loadedCsv).toHaveLength(2);
   });
 
   test('should merge multiple data files', async () => {
     // Create test files
-    const data1 = [{ id: 1, name: 'Item 1' }];
-    const data2 = [{ id: 2, name: 'Item 2' }];
-    
-    dataProvider.saveAsCsv(data1, 'merge-source-1');
-    dataProvider.saveAsCsv(data2, 'merge-source-2');
+    dataProvider.saveAsCsv(testMergeData1, 'merge-source-1');
+    dataProvider.saveAsCsv(testMergeData2, 'merge-source-2');
     
     const mergedPath = dataProvider.mergeDataFiles(
       ['merge-source-1.csv', 'merge-source-2.csv'],

@@ -8,99 +8,133 @@ This guide will help you get started with writing and running tests using the Pl
 
 ## Writing Your First Test
 
-Let's create a simple test that verifies the login functionality of a web application.
+Let's create a simple test that navigates to a website and verifies its title.
+
+### 1. Create a Test File
+
+Create a new file in the `src/tests` directory, e.g., `src/tests/my-first-test.spec.js`:
+
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('My First Test Suite', () => {
+  test('should have the correct title', async ({ page }) => {
+    // Navigate to the website
+    await page.goto('https://playwright.dev');
+    
+    // Verify the title
+    await expect(page).toHaveTitle(/Playwright/);
+  });
+  
+  test('should have visible get started link', async ({ page }) => {
+    // Navigate to the website
+    await page.goto('https://playwright.dev');
+    
+    // Click the get started link
+    await page.getByRole('link', { name: 'Get started' }).click();
+    
+    // Verify the URL
+    await expect(page).toHaveURL(/.*intro/);
+  });
+});
+```
+
+### 2. Run the Test
+
+Run the test using the CLI:
+
+```bash
+npx playwright test src/tests/my-first-test.spec.js
+```
+
+You should see output indicating that the tests passed.
+
+## Using Page Objects
+
+For better organization and reusability, let's refactor the test to use page objects.
 
 ### 1. Create a Page Object
 
-First, create a page object for the login page. Create a file at `src/pages/LoginPage.js`:
+Create a new file in the `src/pages` directory, e.g., `src/pages/PlaywrightHomePage.js`:
 
 ```javascript
-const BasePage = require('./BasePage');
-const { expect } = require('@playwright/test');
-
-class LoginPage extends BasePage {
+class PlaywrightHomePage {
+  /**
+   * @param {import('@playwright/test').Page} page 
+   */
   constructor(page) {
-    super(page);
-
-    // Define page locators
-    this.locators = {
-      usernameInput: 'input[name="username"]',
-      passwordInput: 'input[name="password"]',
-      loginButton: 'button[type="submit"]',
-      errorMessage: '.error-message',
-    };
+    this.page = page;
+    this.getStartedLink = page.getByRole('link', { name: 'Get started' });
   }
 
+  /**
+   * Navigate to the Playwright homepage
+   */
   async navigate() {
-    await super.navigate('/login');
-    return this;
+    await this.page.goto('https://playwright.dev');
   }
 
-  async login(username, password) {
-    await this.fill(this.locators.usernameInput, username);
-    await this.fill(this.locators.passwordInput, password);
-    await this.click(this.locators.loginButton);
-    return this;
-  }
-
-  async verifyLoginSuccess() {
-    // Wait for navigation to dashboard
-    await this.page.waitForURL('**/dashboard**');
-    return this;
-  }
-
-  async verifyLoginError(expectedErrorMessage) {
-    await this.verifyElementVisible(this.locators.errorMessage);
-    await this.verifyText(this.locators.errorMessage, expectedErrorMessage);
-    return this;
+  /**
+   * Click the "Get Started" link
+   */
+  async clickGetStarted() {
+    await this.getStartedLink.click();
   }
 }
 
-module.exports = LoginPage;
+module.exports = { PlaywrightHomePage };
 ```
 
-### 2. Create a Test Fixture
+### 2. Update the Test
 
-Create a fixture file at `src/tests/fixtures/loginFixture.js`:
-
-```javascript
-const { test: base } = require('@playwright/test');
-const LoginPage = require('../../pages/LoginPage');
-
-const test = base.extend({
-  loginPage: async ({ page }, use) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await use(loginPage);
-  },
-});
-
-module.exports = { test };
-```
-
-### 3. Write a Test
-
-Create a test file at `src/tests/ui/login.spec.js`:
+Update your test to use the page object:
 
 ```javascript
-const { test } = require('../fixtures/loginFixture');
-const { expect } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
+const { PlaywrightHomePage } = require('../pages/PlaywrightHomePage');
 
-test.describe('Login Functionality @smoke @ui', () => {
-  test('Successful login with valid credentials @p1', async ({ loginPage }) => {
-    // Login with valid credentials
-    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
+test.describe('My First Test Suite with Page Objects', () => {
+  let homePage;
 
-    // Verify login was successful
-    await loginPage.verifyLoginSuccess();
+  test.beforeEach(async ({ page }) => {
+    homePage = new PlaywrightHomePage(page);
+    await homePage.navigate();
   });
 
-  test('Failed login with invalid credentials @p1', async ({ loginPage }) => {
-    // Login with invalid credentials
-    await loginPage.login('invalid', 'invalid');
+  test('should have the correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Playwright/);
+  });
+  
+  test('should navigate to get started page', async ({ page }) => {
+    await homePage.clickGetStarted();
+    await expect(page).toHaveURL(/.*intro/);
+  });
+});
+```
 
-    // Verify error message
-    await loginPage.verifyLoginError('Invalid username or password');
+## Adding API Tests
+
+Let's add a simple API test:
+
+```javascript
+const { test, expect } = require('@playwright/test');
+const { ApiUtils } = require('../utils/api/apiUtils');
+
+test.describe('API Tests', () => {
+  let apiUtils;
+
+  test.beforeEach(async () => {
+    apiUtils = new ApiUtils();
+  });
+
+  test('should get user data', async () => {
+    const response = await apiUtils.get('https://reqres.in/api/users/2');
+    
+    expect(response.status()).toBe(200);
+    
+    const body = await response.json();
+    expect(body.data.id).toBe(2);
+    expect(body.data.email).toBeTruthy();
   });
 });
 ```
@@ -109,71 +143,75 @@ test.describe('Login Functionality @smoke @ui', () => {
 
 ### Run All Tests
 
-To run all tests:
-
 ```bash
-npx framework test
-```
-
-### Run Specific Tests by Tag
-
-To run tests with specific tags:
-
-```bash
-# Run smoke tests
-npx framework test --tags @smoke
-
-# Run UI tests
-npx framework test --tags @ui
-
-# Run smoke tests that are also UI tests
-npx framework test --tags "@smoke && @ui"
-
-# Run smoke tests but exclude flaky tests
-npx framework test --tags "@smoke && !@flaky"
+npm test
 ```
 
 ### Run Tests in Headed Mode
 
-To run tests in headed mode (with browser visible):
-
 ```bash
-npx framework test --headed
+npm run test:headed
 ```
 
-### List Available Tests
-
-To list all available tests:
+### Run Tests in Debug Mode
 
 ```bash
-npx framework test --list
+npm run test:debug
 ```
 
-### List Available Tags
-
-To list all available tags:
+### Run Tests with UI Mode
 
 ```bash
-npx framework list-tags
+npm run test:ui
 ```
 
-## Viewing Reports
-
-After running tests, you can view the reports:
+### Run Specific Test File
 
 ```bash
-# View HTML report
-npx framework generate-report --type html
+npx playwright test path/to/test.spec.js
+```
 
-# View Allure report
-npx framework generate-report --type allure
+### Run Tests with Specific Tag
+
+```bash
+npx playwright test --grep @smoke
+```
+
+## Verifying Tests
+
+Verify that your tests follow best practices:
+
+```bash
+npm run verify
+```
+
+## Linting Tests
+
+Lint your test files:
+
+```bash
+npm run lint
+```
+
+Fix linting issues automatically:
+
+```bash
+npm run lint:fix
+```
+
+## Generating Reports
+
+Generate test reports:
+
+```bash
+npm run report
 ```
 
 ## Next Steps
 
-Now that you've created and run your first test, you can:
+Now that you've written your first tests, you can:
 
-1. Learn more about [Page Objects](../guides/ui-testing)
-2. Explore [API Testing](../guides/api-testing)
-3. Set up [CI/CD Integration](../guides/ci-cd-integration)
-4. Check out the [API Reference](../api/cli) for more details on the available commands and utilities
+- [Configure the framework](configuration) for your specific needs
+- Learn about [UI testing](../guides/ui-testing) in depth
+- Explore [API testing](../guides/api-testing) capabilities
+- Set up [CI/CD integration](../guides/ci-cd-integration)

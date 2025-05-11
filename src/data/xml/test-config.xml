@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testConfiguration>
+  <environments>
+    <environment name="development">
+      <baseUrl>https://dev.example.com</baseUrl>
+      <apiUrl>https://dev-api.example.com</apiUrl>
+      <database>
+        <host>localhost</host>
+        <port>5432</port>
+        <name>dev_db</name>
+        <user>dev_user</user>
+      </database>
+      <features>
+        <feature name="newUserRegistration" enabled="true" />
+        <feature name="paymentProcessing" enabled="false" />
+        <feature name="socialLogin" enabled="true" />
+      </features>
+    </environment>
+    
+    <environment name="staging">
+      <baseUrl>https://staging.example.com</baseUrl>
+      <apiUrl>https://staging-api.example.com</apiUrl>
+      <database>
+        <host>staging-db.example.com</host>
+        <port>5432</port>
+        <name>staging_db</name>
+        <user>staging_user</user>
+      </database>
+      <features>
+        <feature name="newUserRegistration" enabled="true" />
+        <feature name="paymentProcessing" enabled="true" />
+        <feature name="socialLogin" enabled="true" />
+      </features>
+    </environment>
+    
+    <environment name="production">
+      <baseUrl>https://www.example.com</baseUrl>
+      <apiUrl>https://api.example.com</apiUrl>
+      <database>
+        <host>db.example.com</host>
+        <port>5432</port>
+        <name>prod_db</name>
+        <user>prod_user</user>
+      </database>
+      <features>
+        <feature name="newUserRegistration" enabled="true" />
+        <feature name="paymentProcessing" enabled="true" />
+        <feature name="socialLogin" enabled="true" />
+      </features>
+    </environment>
+  </environments>
+  
+  <testData>
+    <users>
+      <user id="admin">
+        <username>admin_user</username>
+        <password>Admin@123</password>
+        <email>admin@example.com</email>
+        <role>administrator</role>
+      </user>
+      <user id="standard">
+        <username>standard_user</username>
+        <password>Standard@123</password>
+        <email>user@example.com</email>
+        <role>user</role>
+      </user>
+      <user id="guest">
+        <username>guest_user</username>
+        <password>Guest@123</password>
+        <email>guest@example.com</email>
+        <role>guest</role>
+      </user>
+    </users>
+    
+    <products>
+      <product id="prod-001">
+        <name>Smartphone X</name>
+        <price>999.99</price>
+        <category>Electronics</category>
+      </product>
+      <product id="prod-002">
+        <name>Laptop Pro</name>
+        <price>1499.99</price>
+        <category>Electronics</category>
+      </product>
+      <product id="prod-003">
+        <name>Wireless Earbuds</name>
+        <price>199.99</price>
+        <category>Audio</category>
+      </product>
+    </products>
+  </testData>
+  
+  <reporting>
+    <screenshots>true</screenshots>
+    <videos>true</videos>
+    <traces>true</traces>
+    <console>true</console>
+    <reporters>
+      <reporter name="html" enabled="true" />
+      <reporter name="junit" enabled="true" />
+      <reporter name="allure" enabled="true" />
+    </reporters>
+  </reporting>
+  
+  <browserSettings>
+    <browser name="chromium">
+      <headless>true</headless>
+      <slowMo>0</slowMo>
+      <defaultTimeout>30000</defaultTimeout>
+      <viewport>
+        <width>1280</width>
+        <height>720</height>
+      </viewport>
+    </browser>
+    <browser name="firefox">
+      <headless>true</headless>
+      <slowMo>0</slowMo>
+      <defaultTimeout>30000</defaultTimeout>
+      <viewport>
+        <width>1280</width>
+        <height>720</height>
+      </viewport>
+    </browser>
+    <browser name="webkit">
+      <headless>true</headless>
+      <slowMo>0</slowMo>
+      <defaultTimeout>30000</defaultTimeout>
+      <viewport>
+        <width>1280</width>
+        <height>720</height>
+      </viewport>
+    </browser>
+  </browserSettings>
+</testConfiguration>

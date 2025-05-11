@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# User Guide\nThis is the Playwright Framework user guide.
-=======
 # Playwright Framework User Guide
 
 ## Prerequisites
@@ -11,19 +8,10 @@
 
 ## Installation
 
-````bash
-npm install @your-org/playwright-framework
-npx framework init
-npx playwright install --with-deps
-
-# Playwright Framework User Guide
-
-Welcome to the Playwright Framework documentation. This guide will help you get started with the enterprise-grade test automation framework.
-
-## Installation
 ```bash
 npm install @your-org/playwright-framework
 npx framework init
 npx playwright install --with-deps
-````
->>>>>>> 51948a2 (Main v1.0)
+```
+
+Welcome to the Playwright Framework documentation. This guide will help you get started with the enterprise-grade test automation framework.

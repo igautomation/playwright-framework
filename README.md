@@ -1,1067 +1,589 @@
-# Playwright Automation Framework
+# Playwright Framework
 
-![Playwright](https://img.shields.io/badge/Playwright-45ba4b?style=for-the-badge&logo=playwright&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Testing](https://img.shields.io/badge/Testing-8A2BE2?style=for-the-badge&logo=testing-library&logoColor=white)
-
-A comprehensive, modular test automation framework built with Playwright. This framework supports UI testing, API testing, visual regression, accessibility testing, performance testing, and localization testing in a unified architecture.
-
-## Table of Contents
-
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Environment Configuration](#environment-configuration)
-- [Framework Architecture](#framework-architecture)
-- [Test Types](#test-types)
-- [Key Components](#key-components)
-- [Writing Tests](#writing-tests)
-- [Running Tests](#running-tests)
-- [Docker Support](#docker-support)
-- [Reporting](#reporting)
-- [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
-- [Advanced Topics](#advanced-topics)
-- [CI/CD Integration](#cicd-integration)
-- [Additional Resources](#additional-resources)
+Enterprise-grade test automation framework built with Playwright.
 
 ## Features
 
-- **Multi-browser Testing**: Run tests on Chromium, Firefox, WebKit, and mobile viewports
-- **API Testing**: Comprehensive REST API testing capabilities with schema validation
-- **Visual Testing**: Compare screenshots across different environments and device sizes
-- **Accessibility Testing**: Automated accessibility audits using Playwright's accessibility features
-- **Performance Testing**: Measure and analyze page load and interaction performance
-- **Localization Testing**: Test applications across different languages and locales
-- **Data-Driven Testing**: Support for YAML, JSON, XML, and Excel data sources
-- **Self-Healing Locators**: Automatically recover from broken selectors
-- **Reporting**: Detailed HTML and Allure reports with screenshots and videos
-- **CI/CD Integration**: GitHub Actions workflows for continuous testing
-- **Docker Support**: Run tests in containerized environments for consistency
+- Comprehensive CLI for test execution and management
+- Advanced test verification and validation
+- Test coverage analysis without instrumentation
+- Test linting with best practices enforcement
+- Multiple report formats (HTML, JSON, Markdown)
+- CI/CD integration (GitHub Actions, Jenkins, GitLab)
+- Test quality dashboard with historical trends
+- Self-healing locators
+- Visual testing capabilities
+- API testing support
+- Performance testing utilities
+- Accessibility testing
 
-## Prerequisites
-
-- Node.js 16 or higher
-- npm 7 or higher
-- Git
-- Basic knowledge of JavaScript and testing concepts
-- Docker (optional, for containerized execution)
-
-## Getting Started
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/playwright-framework.git
-   cd playwright-framework
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Set up environment configuration:
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your configuration
-   ```
-
-4. Install Playwright browsers:
-   ```bash
-   npx playwright install
-   ```
-
-5. Run a sample test to verify your setup:
-   ```bash
-   npx playwright test src/tests/visual/visualRegressionTest.spec.js --project=chromium
-   ```
-
-## Environment Configuration
-
-The framework uses environment variables for configuration. You can set these variables in a `.env` file or directly in your environment.
-
-### Configuration Files
-
-- `.env`: Environment-specific variables (not committed to version control)
-- `src/config/environment.js`: Central configuration module that loads variables
-- `src/config/environments/[environment].js`: Environment-specific defaults
-
-### Key Configuration Parameters
-
-```javascript
-// Example of accessing configuration in tests
-const config = require('../../config/environment');
-
-// URLs
-const baseUrl = config.baseUrl;           // e.g., 'https://example.com'
-const apiUrl = config.apiUrl;             // e.g., 'https://api.example.com'
-
-// Authentication
-const username = config.credentials.username;  // e.g., 'testuser'
-const password = config.credentials.password;  // e.g., 'password123'
-
-// Timeouts
-const timeout = config.timeouts.default;  // e.g., 30000 (ms)
-```
-
-### Environment-Specific Configuration
-
-You can set the `NODE_ENV` environment variable to load different configurations:
+## Installation
 
 ```bash
-# Development environment
-NODE_ENV=development npm test
+# Install dependencies
+npm install
 
-# Production environment
-NODE_ENV=production npm test
+# Install Playwright browsers
+npx playwright install
+
+# Install specific browsers if needed
+npx playwright install chromium
+npx playwright install firefox
+npx playwright install webkit
+
+# Verify browser installations
+node scripts/verify-browsers.js
+
+# Run framework health check
+node scripts/framework-health-check.js
 ```
 
-## Framework Architecture
+## Available Commands
 
-Our framework follows a modular architecture designed for scalability, maintainability, and reusability:
+### Test Execution
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in headed mode
+npm run test:headed
+
+# Run tests in debug mode
+npm run test:debug
+
+# Run tests with UI mode
+npm run test:ui
+
+# Run specific test file
+npx playwright test path/to/test.spec.js
+
+# Run tests with specific tag
+npx playwright test --grep @smoke
+
+# Run tests in specific project
+npx playwright test --project=chromium
+
+# List all available tests
+npx playwright test --list
+
+# Run tests in parallel
+npx playwright test --workers=4
+
+# Run tests with specific reporter
+npx playwright test --reporter=html
+
+# Run tests with specific configuration
+npx playwright test --config=custom-config.js
+
+# Run tests with specific environment variables
+BASE_URL=https://example.com npx playwright test
+
+# Run tests with specific timeout
+npx playwright test --timeout=60000
+
+# Run tests with retries
+npx playwright test --retries=3
+
+# Run tests with specific shard
+npx playwright test --shard=1/3
+
+# Run all tests one by one
+npm run test:one-by-one
+
+# Run all tests one by one using shell script
+npm run test:one-by-one:sh
+```
+
+### Test Verification
+
+```bash
+# Verify test files for best practices
+npm run verify
+# or with options
+npx playwright-framework verify-tests --dir src/tests --pattern "**/*.spec.js"
+
+# Lint test files
+npm run lint
+# or with options
+npx playwright-framework test-lint --dir src/tests --pattern "**/*.spec.js"
+
+# Lint test files and fix issues automatically
+npm run lint:fix
+# or with options
+npx playwright-framework test-lint --dir src/tests --pattern "**/*.spec.js" --fix
+
+# Analyze test coverage
+npm run coverage
+# or with options
+npx playwright-framework test-coverage-analyze --test-dir src/tests --source-dir src --threshold 80 --open
+
+# Generate test reports
+npm run report
+# or with options
+npx playwright-framework test-report --output-dir reports --types html,json,markdown --open
+
+# Generate test quality dashboard
+npm run dashboard
+# or with options
+npx playwright-framework test-dashboard --add-run --open
+
+# Set up CI/CD integration
+npm run ci:setup
+# or with options
+npx playwright-framework ci-setup --system github --name "Playwright Tests"
+
+# Run framework self-test
+npm run self-test
+```
+
+### CLI Help Commands
+
+```bash
+# Show main help
+npx playwright-framework --help
+
+# Show help for specific command
+npx playwright-framework verify-tests --help
+npx playwright-framework test-lint --help
+npx playwright-framework test-report --help
+npx playwright-framework test-coverage-analyze --help
+npx playwright-framework ci-setup --help
+npx playwright-framework test-dashboard --help
+```
+
+## Test Verification Options
+
+### Verify Tests
+
+```bash
+npx playwright-framework verify-tests [options]
+
+Options:
+  -d, --dir <directory>    Test directory to verify
+  -p, --pattern <pattern>  File pattern to match
+  --ignore-errors          Continue even if errors are found
+```
+
+### Test Lint
+
+```bash
+npx playwright-framework test-lint [options]
+
+Options:
+  -d, --dir <directory>    Test directory to lint
+  -p, --pattern <pattern>  File pattern to match
+  --fix                    Automatically fix issues when possible
+  --ignore-errors          Continue even if errors are found
+```
+
+### Test Report
+
+```bash
+npx playwright-framework test-report [options]
+
+Options:
+  -o, --output-dir <directory>   Output directory for reports
+  -t, --types <types>            Report types to generate (comma-separated)
+  -r, --results-dir <directory>  Test results directory
+  --open                         Open reports after generation
+  -v, --verbose                  Show verbose output
+```
+
+### Test Coverage Analysis
+
+```bash
+npx playwright-framework test-coverage-analyze [options]
+
+Options:
+  --test-dir <directory>        Test directory
+  --source-dir <directory>      Source directory to analyze
+  -o, --output-dir <directory>  Output directory for coverage reports
+  -t, --threshold <percentage>  Coverage threshold percentage
+  --exclude <patterns>          Comma-separated patterns to exclude
+  --ignore-threshold            Continue even if coverage is below threshold
+  --open                        Open coverage report after generation
+```
+
+### CI Setup
+
+```bash
+npx playwright-framework ci-setup [options]
+
+Options:
+  -s, --system <system>         CI system (github, jenkins, gitlab)
+  -n, --name <name>             Workflow/pipeline name
+  -b, --branches <branches>     Comma-separated list of branches to trigger on
+  --node-version <version>      Node.js version
+  --test-command <command>      Test command
+  --report-command <command>    Report command
+```
+
+### Test Dashboard
+
+```bash
+npx playwright-framework test-dashboard [options]
+
+Options:
+  -d, --data-dir <directory>     Dashboard data directory
+  -o, --output <path>            Output file path
+  --add-run                      Add current test run to dashboard
+  -r, --results-dir <directory>  Test results directory
+  --run-id <id>                  Run ID
+  --history-size <size>          Number of runs to keep in history
+  --open                         Open dashboard after generation
+```
+
+## Environment Variables
+
+The framework supports the following environment variables:
 
 ```
-playwright-framework/
-├── .github/                  # GitHub Actions workflows
-├── allure-results/           # Allure report data
-├── playwright-report/        # HTML report
-├── src/
-│   ├── config/               # Configuration files
-│   │   ├── environment.js    # Central configuration module
-│   │   └── environments/     # Environment-specific configs
-│   ├── data/                 # Test data files (YAML, JSON, etc.)
-│   ├── fixtures/             # Test fixtures and contexts
-│   ├── pages/                # Page Object Models
-│   ├── tests/                # Test files
-│   │   ├── accessibility/    # Accessibility tests
-│   │   ├── api/              # API tests
-│   │   ├── e2e/              # End-to-end tests
-│   │   ├── localization/     # Localization tests
-│   │   ├── performance/      # Performance tests
-│   │   ├── visual/           # Visual regression tests
-│   │   └── ...
-│   └── utils/                # Utility functions and helpers
-│       ├── accessibility/    # Accessibility testing utilities
-│       ├── api/              # API testing utilities
-│       ├── common/           # Common utilities
-│       ├── localization/     # Localization utilities
-│       ├── performance/      # Performance testing utilities
-│       ├── reporting/        # Reporting utilities
-│       ├── visual/           # Visual comparison utilities
-│       └── web/              # Web interaction utilities
-├── test-results/             # Test results and artifacts
-├── visual-baselines/         # Visual baseline images
-├── visual-diffs/             # Visual difference images
-├── .env                      # Environment variables (not in version control)
-├── .env.example              # Example environment variables
-├── .eslintrc.js              # ESLint configuration
-├── .prettierrc               # Prettier configuration
-├── Dockerfile                # Docker configuration
-├── docker-compose.yml        # Docker Compose configuration
-├── package.json              # Project dependencies and scripts
-└── playwright.config.js      # Playwright configuration
+# URLs
+BASE_URL=https://example.com
+API_URL=https://api.example.com
+
+# Authentication
+USERNAME=testuser
+PASSWORD=testpass
+API_KEY=your-api-key
+AUTH_TOKEN=your-auth-token
+
+# Timeouts (in milliseconds)
+DEFAULT_TIMEOUT=30000
+SHORT_TIMEOUT=5000
+LONG_TIMEOUT=60000
+PAGE_LOAD_TIMEOUT=30000
+ANIMATION_TIMEOUT=1000
+
+# Test Data
+TEST_DATA_PATH=src/data
+
+# Visual Testing
+VISUAL_BASELINE_DIR=visual-baselines
+VISUAL_DIFF_DIR=visual-diffs
+VISUAL_THRESHOLD=0.1
+
+# Browser Configuration
+HEADLESS=true
+SLOW_MO=0
+DEFAULT_BROWSER=chromium
+
+# Reporting
+SCREENSHOT_ON_FAILURE=true
+VIDEO_ON_FAILURE=true
+ALLURE_RESULTS_DIR=allure-results
+
+# Feature Flags
+SELF_HEALING=true
+RETRY_ON_FAILURE=true
+PARALLEL_EXECUTION=true
 ```
 
-### Key Design Principles
+## Sample Applications
 
-1. **Separation of Concerns**: Tests, page objects, and utilities are separated.
-2. **Page Object Model**: UI interactions are encapsulated in page objects.
-3. **Data-Driven Testing**: Tests can be parameterized with external data.
-4. **Modularity**: Components are designed to be reusable and independent.
-5. **Extensibility**: Framework can be extended with new utilities and test types.
+This framework includes tests for the following sample applications:
 
-## Test Types
+### API Testing Sample
 
-Our framework supports multiple test types:
+[Reqres.in](https://reqres.in/) - A hosted REST API service that provides realistic responses for testing.
 
-### UI Testing
+Features used in our tests:
+- GET /users - List users
+- GET /users/{id} - Get a single user
+- POST /users - Create a user
+- PUT /users/{id} - Update a user
+- PATCH /users/{id} - Partially update a user
+- DELETE /users/{id} - Delete a user
+- POST /register - Register a user
+- POST /login - Login a user
 
-Tests that interact with the application through the browser interface.
+### UI Testing Sample
+
+[OrangeHRM Demo](https://opensource-demo.orangehrmlive.com/web/index.php/auth/login) - An open-source HR management system demo.
+
+Default credentials:
+- Username: Admin
+- Password: admin123
+
+Features used in our tests:
+- Login functionality
+- Dashboard navigation
+- Admin page access
+- Forgot password flow
+- Error handling
+
+## Writing Tests
+
+### Basic Test Structure
 
 ```javascript
-// Example UI test
-const config = require('../../config/environment');
+const { test, expect } = require('@playwright/test');
 
-test('should login successfully', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  await loginPage.navigate();
-  await loginPage.login(
-    config.credentials.username,
-    config.credentials.password
-  );
-  await expect(page).toHaveURL(/dashboard/);
+test.describe('Feature: Example Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    // Setup code before each test
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+  });
+
+  test('should perform an action', async ({ page }) => {
+    // Test code
+    await page.fill('input[name="username"]', 'Admin');
+    await page.fill('input[name="password"]', 'admin123');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('.oxd-topbar-header')).toBeVisible();
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Teardown code after each test
+  });
+});
+```
+
+### Using Page Objects
+
+```javascript
+const { test, expect } = require('@playwright/test');
+const { LoginPage } = require('../pages/orangehrm/LoginPage');
+const { DashboardPage } = require('../pages/orangehrm/DashboardPage');
+
+test.describe('OrangeHRM Authentication', () => {
+  let loginPage;
+  let dashboardPage;
+
+  test.beforeEach(async ({ page }) => {
+    loginPage = new LoginPage(page);
+    dashboardPage = new DashboardPage(page);
+    await loginPage.navigate();
+  });
+
+  test('should login successfully', async () => {
+    await loginPage.login('Admin', 'admin123');
+    const isDashboardLoaded = await dashboardPage.isDashboardLoaded();
+    expect(isDashboardLoaded).toBeTruthy();
+  });
 });
 ```
 
 ### API Testing
 
-Tests that interact with the application's API endpoints.
+```javascript
+const { test, expect } = require('@playwright/test');
+
+test.describe('Reqres.in API Tests', () => {
+  test('should create a user', async ({ request }) => {
+    const userData = {
+      name: 'John Doe',
+      job: 'QA Engineer'
+    };
+    
+    const response = await request.post('https://reqres.in/api/users', {
+      data: userData,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    expect(response.status()).toBe(201);
+    
+    const body = await response.json();
+    expect(body.name).toBe(userData.name);
+    expect(body.job).toBe(userData.job);
+  });
+});
+```
+
+### Combined API and UI Testing
 
 ```javascript
-// Example API test
-const config = require('../../config/environment');
+const { test, expect } = require('@playwright/test');
 
-test('should create a new user', async () => {
-  const api = new ApiUtils(config.apiUrl);
-  const user = User.createRandom();
-  const response = await api.post('/users', user.toJSON());
-  expect(response.status).toBe(201);
+test.describe('Combined API and UI Tests', () => {
+  test('should get users from API and login to OrangeHRM', async ({ page, request }) => {
+    // 1. Get users from reqres.in API
+    const response = await request.get('https://reqres.in/api/users?page=1');
+    const apiResponse = await response.json();
+    
+    // 2. Verify API response
+    expect(apiResponse.page).toBe(1);
+    expect(apiResponse.data.length).toBeGreaterThan(0);
+    
+    // 3. Navigate to OrangeHRM and login
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.fill('input[name="username"]', 'Admin');
+    await page.fill('input[name="password"]', 'admin123');
+    await page.click('button[type="submit"]');
+    
+    // 4. Verify successful login
+    await expect(page.locator('.oxd-topbar-header')).toBeVisible();
+  });
 });
 ```
 
 ### Visual Testing
 
-Tests that compare screenshots to detect visual regressions.
-
 ```javascript
-// Example visual test
-const config = require('../../config/environment');
+const { test } = require('@playwright/test');
+const { VisualComparisonUtils } = require('../utils/visual/visualComparisonUtils');
 
-test('homepage should match baseline', async ({ page }) => {
-  const visualUtils = new VisualComparisonUtils(page);
-  await page.goto(config.baseUrl);
-  await visualUtils.compareScreenshot('homepage', {
-    threshold: config.visual.threshold
-  });
-});
-```
+test.describe('Visual Tests', () => {
+  let visualUtils;
 
-### Accessibility Testing
-
-Tests that check for accessibility issues.
-
-```javascript
-// Example accessibility test
-const config = require('../../config/environment');
-
-test('homepage should be accessible', async ({ page }) => {
-  const a11y = new AccessibilityUtils(page);
-  await page.goto(config.baseUrl);
-  const violations = await a11y.audit();
-  expect(violations.length).toBe(0);
-});
-```
-
-### Performance Testing
-
-Tests that measure and analyze performance metrics.
-
-```javascript
-// Example performance test
-const config = require('../../config/environment');
-
-test('page should load within threshold', async ({ page }) => {
-  const perfUtils = new PerformanceUtils(page);
-  const metrics = await perfUtils.measurePageLoad(config.baseUrl);
-  expect(metrics.loadTime).toBeLessThan(config.timeouts.pageLoad);
-});
-```
-
-### Localization Testing
-
-Tests that verify application behavior across different languages and locales.
-
-```javascript
-// Example localization test
-const config = require('../../config/environment');
-
-test('should display content in Spanish', async ({ page }) => {
-  const l10n = new LocalizationUtils(page);
-  await l10n.setLocale('es-ES');
-  await page.goto(config.baseUrl);
-  const content = await l10n.extractTextContent();
-  expect(content).toContain('Bienvenido');
-});
-```
-
-## Key Components
-
-### Page Object Model
-
-Page objects encapsulate UI interactions and provide a higher-level API for tests.
-
-```javascript
-// Example page object
-const config = require('../../config/environment');
-
-class LoginPage extends BasePage {
-  constructor(page) {
-    super(page);
-    this.url = `${config.baseUrl}/login`;
-    this.usernameInput = '#username';
-    this.passwordInput = '#password';
-    this.loginButton = 'button[type="submit"]';
-  }
-
-  async login(username, password) {
-    await this.fill(this.usernameInput, username);
-    await this.fill(this.passwordInput, password);
-    await this.click(this.loginButton);
-  }
-}
-```
-
-### Data Models
-
-Data models represent entities in the application and provide methods for validation and serialization.
-
-```javascript
-// Example usage of User model
-const User = require('../../utils/api/models/User');
-const config = require('../../config/environment');
-
-// Create a user with credentials from config
-const user = new User(config.credentials.username, config.credentials.password);
-user.firstName = 'John';
-user.lastName = 'Doe';
-user.email = 'john.doe@example.com';
-
-// Validate user data
-const validationResult = user.validate();
-if (!validationResult.valid) {
-  console.error(validationResult.errors);
-}
-
-// Serialize to JSON
-const userData = user.toJSON();
-```
-
-### Utility Classes
-
-Utility classes provide reusable functionality for tests.
-
-```javascript
-// Example API utility usage
-const ApiUtils = require('../../utils/api/apiUtils');
-const config = require('../../config/environment');
-
-const api = new ApiUtils(config.apiUrl);
-const response = await api.get('/users/1');
-
-// Example visual comparison utility usage
-const VisualComparisonUtils = require('../../utils/visual/visualComparisonUtils');
-const visualUtils = new VisualComparisonUtils(page);
-await visualUtils.compareScreenshot('homepage', {
-  threshold: config.visual.threshold,
-  baselineDir: config.visual.baselineDir,
-  diffDir: config.visual.diffDir
-});
-
-// Example web interactions utility usage
-const WebInteractions = require('../../utils/web/webInteractions');
-const web = new WebInteractions(page);
-await web.navigate(config.baseUrl);
-await web.click('#login-button');
-```
-
-### Test Fixtures
-
-Fixtures provide setup and teardown functionality for tests.
-
-```javascript
-// Example fixture usage
-const base = require('@playwright/test');
-const LoginPage = require('../../pages/LoginPage');
-const config = require('../../config/environment');
-
-const test = base.extend({
-  loggedInPage: async ({ page }, use) => {
-    // Setup: Log in
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.login(
-      config.credentials.username,
-      config.credentials.password
-    );
-    
-    // Use the fixture
-    await use(page);
-    
-    // Teardown: Log out
-    const header = new HeaderComponent(page);
-    await header.logout();
-  }
-});
-
-// Use the fixture in a test
-test('dashboard should display user info', async ({ loggedInPage }) => {
-  const dashboard = new DashboardPage(loggedInPage);
-  await expect(dashboard.userInfo).toBeVisible();
-});
-```
-
-## Writing Tests
-
-### Step 1: Identify the Test Scenario
-
-- Determine what functionality you need to test
-- Define the expected behavior
-- Identify the test data required
-
-### Step 2: Create or Reuse Page Objects (for UI tests)
-
-- Check if existing page objects can be reused
-- Create new page objects if needed
-- Define locators and methods for the page
-
-### Step 3: Write the Test
-
-- Create a new file in the appropriate test directory
-- Import necessary dependencies and page objects
-- Write test cases using the Playwright test framework
-
-### Step 4: Run and Debug
-
-- Run your test with `npx playwright test path/to/your/test.spec.js`
-- Use `--debug` flag for step-by-step debugging
-- Use `--headed` flag to see the browser during test execution
-
-### Example Test Structure
-
-```javascript
-// Import dependencies
-const { test, expect } = require('@playwright/test');
-const LoginPage = require('../../pages/LoginPage');
-const DashboardPage = require('../../pages/DashboardPage');
-const User = require('../../utils/api/models/User');
-const config = require('../../config/environment');
-
-// Test suite
-test.describe('User Authentication', () => {
-  // Test data
-  const user = User.createRandom();
-  
-  // Before each test
   test.beforeEach(async ({ page }) => {
-    // Setup code
+    visualUtils = new VisualComparisonUtils(page);
+    await page.goto('https://example.com');
   });
-  
-  // Test case
-  test('should login successfully with valid credentials', async ({ page }) => {
-    // Arrange
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    
-    // Act
-    await loginPage.login(
-      config.credentials.username,
-      config.credentials.password
-    );
-    
-    // Assert
-    const dashboardPage = new DashboardPage(page);
-    await expect(dashboardPage.welcomeMessage).toBeVisible();
-    await expect(dashboardPage.welcomeMessage).toContainText(user.firstName);
+
+  test('homepage should match baseline', async ({ page }) => {
+    await visualUtils.compareScreenshot('homepage');
   });
-  
-  // After each test
-  test.afterEach(async ({ page }) => {
-    // Teardown code
+
+  test('component should match baseline', async ({ page }) => {
+    await visualUtils.compareElement('.header', 'header-component');
   });
-});
-```
-
-## Running Tests
-
-### Running All Tests
-
-```bash
-npm test
-```
-
-### Running Specific Test Categories
-
-```bash
-# Run visual tests
-npm run test:visual
-
-# Run accessibility tests
-npm run test:accessibility
-
-# Run API tests
-npm run test:api
-
-# Run performance tests
-npm run test:performance
-
-# Run localization tests
-npm run test:localization
-```
-
-### Running Tests with Specific Browser
-
-```bash
-npx playwright test --project=chromium
-npx playwright test --project=firefox
-npx playwright test --project=webkit
-```
-
-### Running Tests with UI Mode
-
-```bash
-npx playwright test --ui
-```
-
-### Running Tests with Debugging
-
-```bash
-npx playwright test --debug
-```
-
-### Running Tests with Headed Browser
-
-```bash
-npx playwright test --headed
-```
-
-### Running Tests with Specific Tags
-
-```bash
-npx playwright test --grep @smoke
-```
-
-## Docker Support
-
-This framework can be run in Docker containers, which ensures consistent test execution across different environments.
-
-### Using Docker
-
-1. Build the Docker image:
-   ```bash
-   docker build -t playwright-framework .
-   ```
-
-2. Run tests using Docker:
-   ```bash
-   docker run -it --rm \
-     -v $(pwd)/test-results:/app/test-results \
-     -v $(pwd)/playwright-report:/app/playwright-report \
-     -e BASE_URL=https://your-app.com \
-     -e API_URL=https://api.your-app.com \
-     -e TEST_USERNAME=your_username \
-     -e TEST_PASSWORD=your_password \
-     playwright-framework
-   ```
-
-### Using Docker Compose
-
-1. Run tests using Docker Compose:
-   ```bash
-   # Set environment variables in .env file or export them
-   export BASE_URL=https://your-app.com
-   export API_URL=https://api.your-app.com
-   export TEST_USERNAME=your_username
-   export TEST_PASSWORD=your_password
-
-   # Run the tests
-   docker-compose up
-   ```
-
-2. Run specific tests:
-   ```bash
-   docker-compose run --rm playwright npm run test:visual
-   ```
-
-### Running Tests in Different Environments
-
-You can easily switch between environments by setting the `NODE_ENV` variable:
-
-```bash
-# Run tests in development environment
-docker-compose run --rm -e NODE_ENV=development playwright npm test
-
-# Run tests in production environment
-docker-compose run --rm -e NODE_ENV=production playwright npm test
-```
-
-### Debugging in Docker
-
-To debug tests running in Docker:
-
-```bash
-# Run with headed browser for debugging
-docker run -it --rm \
-  -v $(pwd)/test-results:/app/test-results \
-  -v $(pwd)/playwright-report:/app/playwright-report \
-  -e HEADLESS=false \
-  -e PWDEBUG=1 \
-  playwright-framework
-```
-
-### Benefits of Docker
-
-- **Consistency**: Tests run in the same environment regardless of where they're executed
-- **Isolation**: Tests don't interfere with the host system
-- **Portability**: Easy to run tests on any system with Docker installed
-- **CI/CD Integration**: Seamless integration with CI/CD pipelines
-
-## Reporting
-
-### HTML Report
-
-The framework generates HTML reports with test results, screenshots, and videos. Open the report after test execution:
-
-```bash
-npm run report
-```
-
-### Allure Report
-
-The framework also supports Allure reporting:
-
-```bash
-npm run report:allure
-```
-
-### Custom Reports
-
-You can generate custom reports using the reporting utilities:
-
-```javascript
-const ReportUtils = require('../../utils/reporting/reportUtils');
-const config = require('../../config/environment');
-
-ReportUtils.generateHtmlReport({
-  resultsDir: 'test-results',
-  reportDir: 'playwright-report'
 });
 ```
 
 ## Best Practices
 
-### 1. Test Organization
+### Test Organization
 
-- Group related tests in the same file
-- Use descriptive test names that explain the behavior being tested
-- Follow the AAA pattern: Arrange, Act, Assert
+- Group tests by feature or functionality
+- Use descriptive test names that explain the expected behavior
+- Follow the AAA pattern (Arrange, Act, Assert)
+- Keep tests independent and isolated
+- Use beforeEach/afterEach for setup and teardown
+- Use tags to categorize tests (@smoke, @regression, etc.)
 
-### 2. Selector Strategy
+### Test Data Management
 
-- Prefer data attributes for test automation: `data-testid="login-button"`
-- Use semantic selectors when possible: `button[type="submit"]`
-- Avoid brittle selectors like CSS classes that may change frequently
-- Document complex selectors with comments
+- Use test data factories for generating dynamic data
+- Store static test data in separate files (JSON, YAML, CSV)
+- Avoid hardcoding test data in test files
+- Clean up test data after tests when necessary
+- Use unique identifiers for test data to avoid conflicts
 
-### 3. Test Independence
+### Error Handling
 
-- Each test should be independent and not rely on the state from previous tests
-- Use `beforeEach` and `afterEach` hooks for setup and teardown
-- Reset application state between tests
+- Use try/catch blocks for expected errors
+- Add proper assertions for error scenarios
+- Use custom error handlers for better error messages
+- Log relevant information for debugging
 
-### 4. Error Handling
+### Performance Considerations
 
-- Add meaningful assertions that clearly indicate what is being tested
-- Use custom error messages for complex assertions
-- Handle expected errors gracefully
-
-### 5. Test Data Management
-
-- Use factory methods to generate test data
-- Avoid hardcoding test data in tests
-- Use external data sources for data-driven testing
-
-### 6. Performance Considerations
-
-- Keep tests focused and efficient
-- Avoid unnecessary actions and assertions
-- Use parallel execution when possible
-
-### 7. Maintainability
-
-- Follow DRY (Don't Repeat Yourself) principles
-- Extract common functionality into helper methods
-- Keep page objects and utilities up-to-date
-
-### 8. Configuration Management
-
-- Never hardcode environment-specific values in tests
-- Use the configuration module for all environment-specific values
-- Provide sensible defaults for all configuration parameters
+- Minimize browser instances by reusing contexts
+- Use request interception to mock network requests when appropriate
+- Parallelize tests when possible
+- Use proper timeouts and avoid fixed waits
 
 ## Troubleshooting
 
-### Common Issues and Solutions
+### Common Issues
 
-#### 1. Element Not Found
-
-**Symptoms**: Test fails with "Element not found" or "Timeout waiting for selector"
-
-**Solutions**:
-- Check if the selector is correct
-- Add explicit waits: `await page.waitForSelector('#element')`
-- Check if the element is in an iframe
-- Check if the element is dynamically loaded
-
-#### 2. Test Flakiness
-
-**Symptoms**: Tests pass sometimes and fail other times
-
-**Solutions**:
-- Add proper waits for application state
-- Use retry mechanisms for flaky operations
-- Implement self-healing locators
-- Check for race conditions
-
-#### 3. Authentication Issues
-
-**Symptoms**: Tests fail due to authentication problems
-
-**Solutions**:
-- Check if credentials are correct in your environment configuration
-- Verify authentication flow
-- Use API authentication when possible
-- Store and reuse authentication tokens
-
-#### 4. Visual Comparison Failures
-
-**Symptoms**: Visual tests fail due to minor differences
-
-**Solutions**:
-- Adjust comparison threshold in configuration
-- Update baseline images
-- Use masking for dynamic content
-- Check for environment-specific differences
-
-#### 5. Docker-Specific Issues
-
-**Symptoms**: Tests work locally but fail in Docker
-
-**Solutions**:
-- Check if browsers are installed correctly in the Docker image
-- Verify environment variables are passed correctly
-- Ensure volumes are mounted properly
-- Check for permission issues with mounted volumes
-
-### Debugging Techniques
-
-1. **Visual Debugging**:
+1. **Browser not installed**
    ```bash
-   npx playwright test --headed --debug
+   npx playwright install
    ```
 
-2. **Trace Viewer**:
+2. **Missing dependencies**
    ```bash
-   npx playwright show-trace test-results/trace.zip
+   npm install --save fast-xml-parser node-fetch @faker-js/faker exceljs js-yaml pixelmatch pngjs
    ```
 
-3. **Screenshots and Videos**:
-   - Check the `test-results` directory for artifacts
+3. **Test discovery issues**
+   - Ensure test files end with `.spec.js`
+   - Check that test files are in the correct directory
+   - Verify that test files import the Playwright test library
 
-4. **Logging**:
-   ```javascript
-   console.log('Debug info:', value);
-   ```
+4. **Test execution issues**
+   - Check for proper setup in beforeEach/beforeAll hooks
+   - Verify that selectors are correct and unique
+   - Increase timeouts for slow operations
+   - Use debug mode to step through tests
 
-5. **Playwright Inspector**:
-   ```bash
-   npx playwright codegen https://example.com
-   ```
+5. **Visual testing issues**
+   - Ensure baseline images exist
+   - Check threshold values for comparison
+   - Verify that screenshots are taken in consistent environments
 
-## Advanced Topics
+### Debugging Tips
 
-### 1. Custom Fixtures
+- Use `test.debug()` to pause test execution
+- Use `page.pause()` to open the inspector
+- Add `await page.screenshot({ path: 'debug.png' })` for visual debugging
+- Use `console.log()` with `--debug` flag for detailed logs
+- Check test videos and screenshots in the test results directory
 
-Create custom fixtures for complex setup and teardown:
+## Project Structure
 
-```javascript
-// src/fixtures/authFixtures.js
-const base = require('@playwright/test');
-const LoginPage = require('../pages/LoginPage');
-const config = require('../config/environment');
-
-exports.test = base.test.extend({
-  authenticatedPage: async ({ page }, use) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.login(
-      config.credentials.username,
-      config.credentials.password
-    );
-    await use(page);
-    // Logout or cleanup after test
-  }
-});
+```
+playwright-framework/
+├── src/
+│   ├── cli/            # CLI commands
+│   │   ├── commands/   # Command implementations
+│   │   └── index.js    # CLI entry point
+│   ├── config/         # Configuration files
+│   │   ├── env/        # Environment-specific configs
+│   │   └── playwright.config.js # Main config
+│   ├── data/           # Test data
+│   │   ├── csv/        # CSV test data
+│   │   ├── json/       # JSON test data
+│   │   └── yaml/       # YAML test data
+│   ├── pages/          # Page objects
+│   │   ├── components/ # Reusable page components
+│   │   └── locators/   # Page locators
+│   ├── tests/          # Test files
+│   │   ├── api/        # API tests
+│   │   ├── e2e/        # End-to-end tests
+│   │   ├── ui/         # UI tests
+│   │   └── visual/     # Visual tests
+│   └── utils/          # Utility functions
+│       ├── ci/         # CI/CD integration utilities
+│       ├── common/     # Common utilities
+│       ├── reporting/  # Reporting utilities
+│       └── web/        # Web testing utilities
+├── reports/            # Test reports
+│   ├── html/           # HTML reports
+│   ├── allure/         # Allure reports
+│   └── dashboard/      # Dashboard reports
+├── scripts/            # Helper scripts
+├── playwright.config.js # Playwright configuration
+└── package.json
 ```
 
-### 2. API and UI Integration
+## Dependencies
 
-Combine API and UI testing for efficient test scenarios:
-
-```javascript
-const config = require('../../config/environment');
-
-test('should create user via API and verify in UI', async ({ page }) => {
-  // Create user via API
-  const api = new ApiUtils(config.apiUrl);
-  const user = User.createRandom();
-  await api.post('/users', user.toJSON());
-  
-  // Verify user in UI
-  const loginPage = new LoginPage(page);
-  await loginPage.navigate();
-  await loginPage.login(user.username, user.password);
-  
-  // Assert user is logged in
-  const dashboardPage = new DashboardPage(page);
-  await expect(dashboardPage.userInfo).toContainText(user.fullName);
-});
-```
-
-### 3. Parallel Test Execution
-
-Configure parallel execution in `playwright.config.js`:
-
-```javascript
-const config = require('./src/config/environment');
-
-module.exports = {
-  workers: config.features.parallelExecution ? 4 : 1,
-  fullyParallel: config.features.parallelExecution,
-  // other config...
-};
-```
-
-### 4. Test Sharding
-
-Run tests across multiple machines:
+The framework requires the following dependencies:
 
 ```bash
-npx playwright test --shard=1/3
-npx playwright test --shard=2/3
-npx playwright test --shard=3/3
+# Core dependencies
+npm install --save @playwright/test playwright
+
+# Test verification dependencies
+npm install --save @babel/parser @babel/traverse glob eslint eslint-plugin-jest eslint-plugin-playwright
+
+# Data handling dependencies
+npm install --save fast-xml-parser node-fetch @faker-js/faker exceljs js-yaml
+
+# Visual testing dependencies
+npm install --save pixelmatch pngjs
+
+# Reporting dependencies
+npm install --save allure-playwright
+
+# CLI dependencies
+npm install --save commander dotenv-safe
 ```
-
-### 5. Custom Reporters
-
-Create custom reporters for specialized reporting needs:
-
-```javascript
-// src/utils/reporting/customReporter.js
-class CustomReporter {
-  onBegin(config, suite) {
-    console.log(`Starting the run with ${suite.allTests().length} tests`);
-  }
-  
-  onTestEnd(test, result) {
-    console.log(`Test ${test.title}: ${result.status}`);
-  }
-  
-  onEnd(result) {
-    console.log(`Finished the run: ${result.status}`);
-  }
-}
-
-module.exports = CustomReporter;
-```
-
-### 6. Visual Comparison Strategies
-
-Implement different visual comparison strategies:
-
-```javascript
-const config = require('../../config/environment');
-
-// Full page comparison
-await visualUtils.compareScreenshot('homepage', {
-  threshold: config.visual.threshold
-});
-
-// Element comparison
-await visualUtils.compareElementScreenshot('#header', 'header', {
-  threshold: config.visual.threshold
-});
-
-// Responsive comparison
-await visualUtils.compareResponsiveScreenshots('homepage', [
-  { width: 1920, height: 1080 },
-  { width: 768, height: 1024 },
-  { width: 375, height: 667 }
-], {
-  threshold: config.visual.threshold
-});
-
-// Comparison with masking
-await visualUtils.compareScreenshot('homepage', {
-  threshold: config.visual.threshold,
-  mask: ['.dynamic-content', '.ads']
-});
-```
-
-### 7. Data-Driven Testing
-
-Implement data-driven tests using external data sources:
-
-```javascript
-const { readYaml } = require('../../utils/common/dataOrchestrator');
-const config = require('../../config/environment');
-
-const testData = readYaml(`${config.testData.dataPath}/users.yaml`);
-
-for (const user of testData.users) {
-  test(`should login with user ${user.username}`, async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.login(user.username, user.password);
-    await expect(page).toHaveURL(/dashboard/);
-  });
-}
-```
-
-## CI/CD Integration
-
-### GitHub Actions
-
-The framework includes GitHub Actions workflows for continuous integration:
-
-```yaml
-# .github/workflows/playwright.yml
-name: Playwright Tests
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build Docker image
-        run: docker build -t playwright-framework .
-      - name: Run tests
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}/test-results:/app/test-results \
-            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
-            -e BASE_URL=${{ secrets.BASE_URL }} \
-            -e API_URL=${{ secrets.API_URL }} \
-            -e TEST_USERNAME=${{ secrets.TEST_USERNAME }} \
-            -e TEST_PASSWORD=${{ secrets.TEST_PASSWORD }} \
-            -e NODE_ENV=production \
-            playwright-framework
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-report
-          path: playwright-report/
-```
-
-### Jenkins
-
-Example Jenkins pipeline:
-
-```groovy
-pipeline {
-  agent {
-    docker {
-      image 'mcr.microsoft.com/playwright:v1.40.0-focal'
-    }
-  }
-  environment {
-    NODE_ENV = 'production'
-    BASE_URL = credentials('base-url')
-    API_URL = credentials('api-url')
-    TEST_USERNAME = credentials('test-username')
-    TEST_PASSWORD = credentials('test-password')
-  }
-  stages {
-    stage('Install dependencies') {
-      steps {
-        sh 'npm ci'
-      }
-    }
-    stage('Run tests') {
-      steps {
-        sh 'npm test'
-      }
-    }
-    stage('Generate report') {
-      steps {
-        sh 'npm run report:allure'
-      }
-    }
-  }
-  post {
-    always {
-      archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
-      publishHTML(target: [
-        allowMissing: false,
-        alwaysLinkToLastBuild: true,
-        keepAll: true,
-        reportDir: 'playwright-report',
-        reportFiles: 'index.html',
-        reportName: 'Playwright Report'
-      ])
-    }
-  }
-}
-```
-
-## Working with the User Model
-
-Our framework includes a sophisticated User model for API testing:
-
-```javascript
-const User = require('../../utils/api/models/User');
-const config = require('../../config/environment');
-
-// Create a user with credentials from config
-const user = new User(config.credentials.username, config.credentials.password);
-user.firstName = 'John';
-user.lastName = 'Doe';
-user.email = 'john.doe@example.com';
-
-// Validate user data
-const validationResult = user.validate(true);
-if (!validationResult.valid) {
-  console.error(validationResult.errors);
-}
-
-// Serialize to JSON (excluding password)
-const userData = user.toJSON(false);
-
-// Clone a user
-const clonedUser = user.clone();
-
-// Compare users
-const areEqual = user1.equals(clonedUser);
-```
-
-The User model provides:
-
-- Private fields with proper encapsulation
-- Getters and setters for all properties
-- Automatic timestamp tracking
-- Validation with customizable strictness
-- Serialization with password protection
-- Utility methods like `clone()`, `equals()`, and `createRandom()`
-
-## Additional Resources
-
-- [Playwright Documentation](https://playwright.dev/docs/intro)
-- [Playwright API Reference](https://playwright.dev/docs/api/class-playwright)
-- [Allure Report Documentation](https://docs.qameta.io/allure/)
-- [JavaScript MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-- [Docker Documentation](https://docs.docker.com/)
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -am 'Add my feature'`
-4. Push to the branch: `git push origin feature/my-feature`
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-Happy testing!
+MIT

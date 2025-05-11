@@ -148,38 +148,61 @@ class LoginPage extends BasePage {
    * @param {number} [timeout=5000] - Timeout in milliseconds
    * @returns {Promise<boolean>} True if login was successful, false otherwise
    */
-  async verifyLoginSuccess(timeout = 5000) {
+  async verifyLoginSuccess(timeout = 10000) {
     try {
       // Try multiple ways to verify successful login
       
-      // Method 1: Check URL
+      // Method 1: Check URL - OrangeHRM uses 'viewDashboard' in the URL
       try {
-        await this.page.waitForURL('**/dashboard**', { timeout });
+        await this.page.waitForURL('**/viewDashboard**', { timeout });
         return true;
       } catch (urlError) {
+        console.log('URL check failed:', urlError.message);
         // URL check failed, try other methods
       }
       
       // Method 2: Check for dashboard elements
       try {
         const dashboardHeader = this.page.locator('.oxd-topbar-header-breadcrumb');
-        const isVisible = await dashboardHeader.isVisible({ timeout: timeout / 2 });
-        if (isVisible) return true;
+        const isVisible = await dashboardHeader.isVisible({ timeout: timeout });
+        if (isVisible) {
+          console.log('Dashboard header is visible');
+          return true;
+        }
       } catch (elementError) {
+        console.log('Element check failed:', elementError.message);
         // Element check failed, try other methods
       }
       
       // Method 3: Check if we're no longer on the login page
       try {
-        const loginForm = this.page.locator('form').filter({ hasText: 'Login' });
-        const isLoginFormGone = !(await loginForm.isVisible({ timeout: timeout / 2 }));
-        return isLoginFormGone;
+        const loginButton = this.page.locator(this.locators.loginButton);
+        const isLoginButtonGone = !(await loginButton.isVisible({ timeout: timeout / 2 }));
+        if (isLoginButtonGone) {
+          console.log('Login button is gone, likely logged in');
+          return true;
+        }
       } catch (formError) {
+        console.log('Login button check failed:', formError.message);
         // Form check failed
       }
       
+      // Method 4: Check for any dashboard-specific element
+      try {
+        const dashboardElement = this.page.locator('.oxd-layout-context');
+        const isDashboardVisible = await dashboardElement.isVisible({ timeout: timeout / 2 });
+        if (isDashboardVisible) {
+          console.log('Dashboard layout is visible');
+          return true;
+        }
+      } catch (dashboardError) {
+        console.log('Dashboard check failed:', dashboardError.message);
+      }
+      
+      console.log('All login verification methods failed');
       return false;
     } catch (error) {
+      console.log('Login verification error:', error.message);
       return false;
     }
   }

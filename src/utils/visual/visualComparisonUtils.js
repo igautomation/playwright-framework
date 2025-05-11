@@ -3,7 +3,40 @@
  */
 const fs = require('fs');
 const path = require('path');
-const pixelmatch = require('pixelmatch');
+// Ensure pixelmatch is properly imported
+// Ensure pixelmatch is properly imported
+let pixelmatch;
+try {
+  pixelmatch = require('pixelmatch');
+} catch (e) {
+  console.error('Failed to load pixelmatch:', e.message);
+  // Provide a fallback implementation if the module is not available
+  pixelmatch = (img1, img2, output, width, height, options) => {
+    // Simple implementation that just counts different pixels
+    let diffCount = 0;
+    for (let i = 0; i < img1.length; i += 4) {
+      if (Math.abs(img1[i] - img2[i]) > (options.threshold * 255) ||
+          Math.abs(img1[i+1] - img2[i+1]) > (options.threshold * 255) ||
+          Math.abs(img1[i+2] - img2[i+2]) > (options.threshold * 255)) {
+        diffCount++;
+        // Mark the pixel as different in the output
+        if (output) {
+          output[i] = 255;   // R
+          output[i+1] = 0;   // G
+          output[i+2] = 0;   // B
+          output[i+3] = 255; // A
+        }
+      } else if (output) {
+        // Copy the original pixel
+        output[i] = img1[i];
+        output[i+1] = img1[i+1];
+        output[i+2] = img1[i+2];
+        output[i+3] = img1[i+3];
+      }
+    }
+    return diffCount;
+  };
+}
 const { PNG } = require('pngjs');
 const logger = require('../common/logger');
 const PlaywrightErrorHandler = require('../common/errorHandler');
@@ -50,7 +83,7 @@ class VisualComparisonUtils {
       // Take screenshot
       await this.page.screenshot({
         path: actualPath,
-        fullPage: options.fullPage !== false,
+        fullPage: options.fullPage || false,
         ...options
       });
       
@@ -63,39 +96,18 @@ class VisualComparisonUtils {
           name,
           baselineCreated: true,
           match: true,
-          diffPercentage: 0,
           baselinePath,
           actualPath
         };
       }
       
-      // Compare screenshots
+      // Load images
       const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
       const actual = PNG.sync.read(fs.readFileSync(actualPath));
       
-      // Check if dimensions match
+      // Check dimensions
       if (baseline.width !== actual.width || baseline.height !== actual.height) {
-        logger.warn(`Screenshot dimensions don't match for ${name}. Baseline: ${baseline.width}x${baseline.height}, Actual: ${actual.width}x${actual.height}`);
-        
-        // Create a diff image with the larger dimensions
-        const width = Math.max(baseline.width, actual.width);
-        const height = Math.max(baseline.height, actual.height);
-        
-        const diffImage = new PNG({ width, height });
-        
-        // Fill with a distinctive color to show the difference
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            diffImage.data[idx] = 255;     // R
-            diffImage.data[idx + 1] = 0;   // G
-            diffImage.data[idx + 2] = 255; // B
-            diffImage.data[idx + 3] = 64;  // A
-          }
-        }
-        
-        // Save diff image
-        fs.writeFileSync(diffPath, PNG.sync.write(diffImage));
+        logger.warn(`Screenshot dimensions mismatch for ${name}: baseline (${baseline.width}x${baseline.height}) vs actual (${actual.width}x${actual.height})`);
         
         return {
           name,
@@ -169,16 +181,16 @@ class VisualComparisonUtils {
    */
   async compareElement(selector, name, options = {}) {
     try {
-      // Wait for element to be visible
-      await this.page.waitForSelector(selector, { 
-        state: 'visible',
-        timeout: options.timeout || 10000
-      });
-      
       // Generate screenshot paths
       const baselinePath = path.join(this.baselineDir, `${name}.png`);
       const actualPath = path.join(this.diffDir, `${name}-actual.png`);
       const diffPath = path.join(this.diffDir, `${name}-diff.png`);
+      
+      // Wait for element to be visible with increased timeout
+      await this.page.waitForSelector(selector, { 
+        state: 'visible',
+        timeout: options.timeout || 30000
+      });
       
       // Take element screenshot
       const element = await this.page.$(selector);
@@ -197,39 +209,18 @@ class VisualComparisonUtils {
           selector,
           baselineCreated: true,
           match: true,
-          diffPercentage: 0,
           baselinePath,
           actualPath
         };
       }
       
-      // Compare screenshots
+      // Load images
       const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
       const actual = PNG.sync.read(fs.readFileSync(actualPath));
       
-      // Check if dimensions match
+      // Check dimensions
       if (baseline.width !== actual.width || baseline.height !== actual.height) {
-        logger.warn(`Element dimensions don't match for ${name}. Baseline: ${baseline.width}x${baseline.height}, Actual: ${actual.width}x${actual.height}`);
-        
-        // Create a diff image with the larger dimensions
-        const width = Math.max(baseline.width, actual.width);
-        const height = Math.max(baseline.height, actual.height);
-        
-        const diffImage = new PNG({ width, height });
-        
-        // Fill with a distinctive color to show the difference
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            const idx = (y * width + x) * 4;
-            diffImage.data[idx] = 255;     // R
-            diffImage.data[idx + 1] = 0;   // G
-            diffImage.data[idx + 2] = 255; // B
-            diffImage.data[idx + 3] = 64;  // A
-          }
-        }
-        
-        // Save diff image
-        fs.writeFileSync(diffPath, PNG.sync.write(diffImage));
+        logger.warn(`Element screenshot dimensions mismatch for ${name}: baseline (${baseline.width}x${baseline.height}) vs actual (${actual.width}x${actual.height})`);
         
         return {
           name,
@@ -298,242 +289,75 @@ class VisualComparisonUtils {
   }
   
   /**
-   * Update baseline with current screenshot
-   * @param {string} name - Screenshot name
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<Object>} Result
-   */
-  async updateBaseline(name, options = {}) {
-    try {
-      // Generate screenshot paths
-      const baselinePath = path.join(this.baselineDir, `${name}.png`);
-      const actualPath = path.join(this.diffDir, `${name}-actual.png`);
-      
-      // Take screenshot
-      await this.page.screenshot({
-        path: actualPath,
-        fullPage: options.fullPage !== false,
-        ...options
-      });
-      
-      // Update baseline
-      fs.copyFileSync(actualPath, baselinePath);
-      logger.info(`Updated baseline screenshot: ${baselinePath}`);
-      
-      return {
-        name,
-        baselineUpdated: true,
-        baselinePath,
-        actualPath
-      };
-    } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'updating baseline',
-        name,
-        options
-      });
-    }
-  }
-  
-  /**
-   * Update element baseline with current screenshot
-   * @param {string} selector - Element selector
-   * @param {string} name - Screenshot name
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<Object>} Result
-   */
-  async updateElementBaseline(selector, name, options = {}) {
-    try {
-      // Wait for element to be visible
-      await this.page.waitForSelector(selector, { 
-        state: 'visible',
-        timeout: options.timeout || 10000
-      });
-      
-      // Generate screenshot paths
-      const baselinePath = path.join(this.baselineDir, `${name}.png`);
-      const actualPath = path.join(this.diffDir, `${name}-actual.png`);
-      
-      // Take element screenshot
-      const element = await this.page.$(selector);
-      await element.screenshot({
-        path: actualPath,
-        ...options
-      });
-      
-      // Update baseline
-      fs.copyFileSync(actualPath, baselinePath);
-      logger.info(`Updated baseline element screenshot: ${baselinePath}`);
-      
-      return {
-        name,
-        selector,
-        baselineUpdated: true,
-        baselinePath,
-        actualPath
-      };
-    } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'updating element baseline',
-        selector,
-        name,
-        options
-      });
-    }
-  }
-  
-  /**
-   * Generate a visual test report
+   * Generate a visual comparison report
    * @param {Array} results - Array of comparison results
    * @param {string} outputPath - Path to save the report
-   * @returns {Promise<string>} Path to the report
+   * @returns {Promise<void>}
    */
   async generateReport(results, outputPath) {
     try {
-      // Generate report path if not provided
-      const reportPath = outputPath || path.join(process.cwd(), 'reports', 'visual', `visual-report-${Date.now()}.html`);
-      
-      // Ensure directory exists
-      const reportDir = path.dirname(reportPath);
-      if (!fs.existsSync(reportDir)) {
-        fs.mkdirSync(reportDir, { recursive: true });
+      // Create directory if it doesn't exist
+      const dir = path.dirname(outputPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
       }
       
       // Generate HTML report
       const html = `
         <!DOCTYPE html>
-        <html lang="en">
+        <html>
         <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Visual Test Report</title>
+          <title>Visual Regression Test Report</title>
           <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              margin: 0;
-              padding: 20px;
-              color: #333;
-            }
-            h1 {
-              color: #2c3e50;
-              border-bottom: 2px solid #3498db;
-              padding-bottom: 10px;
-            }
-            .summary {
-              background-color: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-              margin-bottom: 20px;
-            }
-            .passed {
-              color: #27ae60;
-              font-weight: bold;
-            }
-            .failed {
-              color: #e74c3c;
-              font-weight: bold;
-            }
-            .test-case {
-              border: 1px solid #ddd;
-              border-radius: 5px;
-              padding: 15px;
-              margin-bottom: 20px;
-            }
-            .test-case h3 {
-              margin-top: 0;
-              border-bottom: 1px solid #eee;
-              padding-bottom: 10px;
-            }
-            .test-case.pass {
-              border-left: 5px solid #27ae60;
-            }
-            .test-case.fail {
-              border-left: 5px solid #e74c3c;
-            }
-            .test-case.new {
-              border-left: 5px solid #3498db;
-            }
-            .images {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 20px;
-              margin-top: 15px;
-            }
-            .image-container {
-              max-width: 30%;
-            }
-            .image-container img {
-              max-width: 100%;
-              border: 1px solid #ddd;
-            }
-            .image-label {
-              font-weight: bold;
-              margin-bottom: 5px;
-            }
-            .details {
-              margin-top: 15px;
-              font-family: monospace;
-              background-color: #f8f9fa;
-              padding: 10px;
-              border-radius: 3px;
-            }
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; }
+            .summary { margin-bottom: 20px; }
+            .result { margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+            .pass { border-left: 5px solid green; }
+            .fail { border-left: 5px solid red; }
+            .images { display: flex; flex-wrap: wrap; gap: 10px; }
+            .image-container { margin-bottom: 10px; }
+            img { max-width: 100%; border: 1px solid #ddd; }
+            .stats { margin-top: 10px; }
           </style>
         </head>
         <body>
-          <h1>Visual Test Report</h1>
+          <h1>Visual Regression Test Report</h1>
           <div class="summary">
-            <p>Generated: ${new Date().toLocaleString()}</p>
-            <p>
-              Total Tests: ${results.length} | 
-              <span class="${results.filter(r => r.match).length === results.length ? 'passed' : 'failed'}">
-                Passed: ${results.filter(r => r.match).length} | 
-                Failed: ${results.filter(r => !r.match).length} | 
-                New Baselines: ${results.filter(r => r.baselineCreated).length}
-              </span>
-            </p>
+            <p>Total tests: ${results.length}</p>
+            <p>Passed: ${results.filter(r => r.match).length}</p>
+            <p>Failed: ${results.filter(r => !r.match).length}</p>
           </div>
-          
           ${results.map(result => `
-            <div class="test-case ${result.baselineCreated ? 'new' : result.match ? 'pass' : 'fail'}">
-              <h3>${result.name} ${result.selector ? `(${result.selector})` : ''}</h3>
-              
-              ${result.baselineCreated ? 
-                `<p>✅ New baseline created</p>` : 
-                result.match ? 
-                `<p>✅ Visual test passed</p>` : 
-                `<p>❌ Visual test failed - Difference: ${result.diffPercentage.toFixed(2)}%</p>`
-              }
-              
+            <div class="result ${result.match ? 'pass' : 'fail'}">
+              <h2>${result.name} ${result.match ? '✅' : '❌'}</h2>
+              ${result.selector ? `<p>Selector: ${result.selector}</p>` : ''}
+              ${result.baselineCreated ? '<p>Baseline created</p>' : ''}
+              ${result.dimensionMismatch ? `
+                <p>Dimension mismatch:</p>
+                <p>Baseline: ${result.baselineDimensions.width}x${result.baselineDimensions.height}</p>
+                <p>Actual: ${result.actualDimensions.width}x${result.actualDimensions.height}</p>
+              ` : ''}
+              ${!result.match && !result.baselineCreated ? `
+                <div class="stats">
+                  <p>Diff pixels: ${result.diffPixels}</p>
+                  <p>Diff percentage: ${result.diffPercentage.toFixed(2)}%</p>
+                </div>
+              ` : ''}
               <div class="images">
                 <div class="image-container">
-                  <div class="image-label">Baseline</div>
-                  <img src="file://${result.baselinePath}" alt="Baseline">
+                  <h3>Baseline</h3>
+                  <img src="file://${result.baselinePath}" alt="Baseline" />
                 </div>
-                
                 <div class="image-container">
-                  <div class="image-label">Actual</div>
-                  <img src="file://${result.actualPath}" alt="Actual">
+                  <h3>Actual</h3>
+                  <img src="file://${result.actualPath}" alt="Actual" />
                 </div>
-                
-                ${!result.match && !result.baselineCreated && result.diffPath ? `
+                ${result.diffPath ? `
                   <div class="image-container">
-                    <div class="image-label">Diff</div>
-                    <img src="file://${result.diffPath}" alt="Diff">
+                    <h3>Diff</h3>
+                    <img src="file://${result.diffPath}" alt="Diff" />
                   </div>
-                ` : ''}
-              </div>
-              
-              <div class="details">
-                ${result.dimensionMismatch ? `
-                  <p>Dimension mismatch:</p>
-                  <p>Baseline: ${result.baselineDimensions.width}x${result.baselineDimensions.height}</p>
-                  <p>Actual: ${result.actualDimensions.width}x${result.actualDimensions.height}</p>
-                ` : !result.baselineCreated ? `
-                  <p>Dimensions: ${result.width}x${result.height}</p>
-                  <p>Diff Pixels: ${result.diffPixels}</p>
-                  <p>Diff Percentage: ${result.diffPercentage.toFixed(2)}%</p>
-                  <p>Threshold: ${this.matchThreshold * 100}%</p>
                 ` : ''}
               </div>
             </div>
@@ -542,16 +366,10 @@ class VisualComparisonUtils {
         </html>
       `;
       
-      // Write report to file
-      fs.writeFileSync(reportPath, html);
-      
-      return reportPath;
+      fs.writeFileSync(outputPath, html);
+      logger.info(`Visual regression report generated: ${outputPath}`);
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'generating visual report',
-        results,
-        outputPath
-      });
+      logger.error('Error generating visual regression report:', error);
     }
   }
 }

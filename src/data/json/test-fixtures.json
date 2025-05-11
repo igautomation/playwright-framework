@@ -1,0 +1,109 @@
+{
+  "loginFixtures": {
+    "validCredentials": {
+      "email": "eve.holt@reqres.in",
+      "password": "cityslicka"
+    },
+    "invalidCredentials": {
+      "email": "invalid@example.com",
+      "password": "wrongpassword"
+    },
+    "missingEmail": {
+      "password": "cityslicka"
+    },
+    "missingPassword": {
+      "email": "eve.holt@reqres.in"
+    }
+  },
+  
+  "registerFixtures": {
+    "validRegistration": {
+      "email": "eve.holt@reqres.in",
+      "password": "pistol"
+    },
+    "invalidRegistration": {
+      "email": "sydney@fife"
+    },
+    "duplicateEmail": {
+      "email": "eve.holt@reqres.in",
+      "password": "different"
+    }
+  },
+  
+  "userFixtures": {
+    "newUser": {
+      "name": "John Doe",
+      "job": "Software Engineer"
+    },
+    "updateUser": {
+      "name": "John Doe",
+      "job": "Senior Software Engineer"
+    },
+    "partialUpdate": {
+      "job": "Technical Lead"
+    }
+  },
+  
+  "productFixtures": {
+    "newProduct": {
+      "name": "Test Product",
+      "description": "A product for testing",
+      "category": "Test",
+      "price": 99.99,
+      "stock": 100
+    },
+    "updateProduct": {
+      "name": "Updated Test Product",
+      "price": 129.99,
+      "stock": 50
+    }
+  },
+  
+  "searchFixtures": {
+    "basicSearch": {
+      "term": "smartphone",
+      "category": "electronics"
+    },
+    "advancedSearch": {
+      "term": "laptop",
+      "filters": {
+        "minPrice": 500,
+        "maxPrice": 2000,
+        "brands": ["Apple", "Dell", "HP"],
+        "inStock": true
+      },
+      "sort": "price_asc"
+    }
+  },
+  
+  "checkoutFixtures": {
+    "shippingAddress": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "address1": "123 Main St",
+      "address2": "Apt 4B",
+      "city": "Boston",
+      "state": "MA",
+      "zipCode": "02108",
+      "country": "USA",
+      "phone": "555-123-4567"
+    },
+    "billingAddress": {
+      "sameAsShipping": true
+    },
+    "paymentMethod": {
+      "type": "credit_card",
+      "cardNumber": "4111111111111111",
+      "expiryMonth": "12",
+      "expiryYear": "2025",
+      "cvv": "123",
+      "nameOnCard": "John Doe"
+    },
+    "shippingMethod": {
+      "id": "standard",
+      "name": "Standard Shipping",
+      "price": 5.99,
+      "estimatedDelivery": "3-5 business days"
+    }
+  }
+}

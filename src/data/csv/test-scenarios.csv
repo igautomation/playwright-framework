@@ -1,0 +1,11 @@
+id,testName,description,priority,tags,expectedResult,dataSource
+TS001,Login with valid credentials,Verify user can login with valid username and password,P1,"auth,smoke,regression",User should be logged in successfully and redirected to dashboard,users.csv
+TS002,Login with invalid credentials,Verify system handles invalid login attempts correctly,P1,"auth,negative,regression",System should display appropriate error message,users.csv
+TS003,User registration,Verify new user registration process,P1,"auth,regression",User should be registered successfully,users.csv
+TS004,Password reset,Verify password reset functionality,P2,"auth,regression",User should receive password reset email,users.csv
+TS005,Product search,Verify product search functionality,P1,"search,smoke,regression",Search results should match search criteria,products.csv
+TS006,Product filtering,Verify product filtering by category,P2,"search,regression",Products should be filtered by selected category,products.csv
+TS007,Add to cart,Verify adding products to shopping cart,P1,"cart,smoke,regression",Product should be added to cart successfully,products.csv
+TS008,Update cart quantity,Verify updating product quantity in cart,P2,"cart,regression",Cart quantity should be updated correctly,products.csv
+TS009,Remove from cart,Verify removing products from cart,P2,"cart,regression",Product should be removed from cart,products.csv
+TS010,Checkout process,Verify complete checkout process,P1,"checkout,smoke,regression",Order should be placed successfully,users.csv

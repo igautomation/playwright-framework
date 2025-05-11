@@ -1,0 +1,65 @@
+visual_testing:
+  threshold: 0.1  # Percentage difference threshold for visual comparison
+  baselineDir: ./visual-baselines
+  diffDir: ./visual-diffs
+  updateBaselines: false  # Set to true to update baselines automatically
+  
+viewports:
+  desktop:
+    width: 1920
+    height: 1080
+    deviceScaleFactor: 1
+  
+  tablet:
+    width: 768
+    height: 1024
+    deviceScaleFactor: 1
+    isMobile: true
+  
+  mobile:
+    width: 375
+    height: 667
+    deviceScaleFactor: 2
+    isMobile: true
+    
+pages:
+  home:
+    url: /
+    elements:
+      - selector: header
+        name: header
+        threshold: 0.05
+      - selector: .hero-section
+        name: hero
+        threshold: 0.1
+      - selector: footer
+        name: footer
+        threshold: 0.05
+        
+  products:
+    url: /products
+    elements:
+      - selector: .product-grid
+        name: product-grid
+        threshold: 0.1
+      - selector: .filter-sidebar
+        name: filters
+        threshold: 0.05
+        
+  checkout:
+    url: /checkout
+    elements:
+      - selector: .checkout-form
+        name: checkout-form
+        threshold: 0.05
+      - selector: .order-summary
+        name: order-summary
+        threshold: 0.05
+        
+ignore_regions:
+  - selector: .dynamic-content
+    reason: Content changes frequently
+  - selector: .timestamp
+    reason: Time-based content
+  - selector: .advertisement
+    reason: Ads change dynamically

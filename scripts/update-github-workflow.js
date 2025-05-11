@@ -11,7 +11,8 @@ const yaml = require('js-yaml');
 console.log('Updating GitHub workflow...');
 
 // Path to the GitHub workflow file
-const workflowPath = path.resolve(
+// Allow overriding the path via environment variable for testing
+const workflowPath = process.env.WORKFLOW_PATH || path.resolve(
   __dirname,
   '../.github/workflows/playwright.yml'
 );
@@ -35,11 +36,11 @@ try {
     'runs-on': 'ubuntu-latest',
     steps: [
       {
-        uses: 'actions/checkout@v3',
+        uses: 'actions/checkout@v4',
       },
       {
         name: 'Set up Node.js',
-        uses: 'actions/setup-node@v3',
+        uses: 'actions/setup-node@v4',
         with: {
           'node-version': '18',
           cache: 'npm',
@@ -70,7 +71,7 @@ try {
       {
         name: 'Upload accessibility results',
         if: 'always()',
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'accessibility-results',
           path: 'reports/accessibility',
@@ -85,11 +86,11 @@ try {
     'runs-on': 'ubuntu-latest',
     steps: [
       {
-        uses: 'actions/checkout@v3',
+        uses: 'actions/checkout@v4',
       },
       {
         name: 'Set up Node.js',
-        uses: 'actions/setup-node@v3',
+        uses: 'actions/setup-node@v4',
         with: {
           'node-version': '18',
           cache: 'npm',
@@ -120,7 +121,7 @@ try {
       {
         name: 'Upload performance results',
         if: 'always()',
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'performance-results',
           path: ['reports/performance', 'reports/lighthouse'],
@@ -136,11 +137,11 @@ try {
     'runs-on': 'ubuntu-latest',
     steps: [
       {
-        uses: 'actions/checkout@v3',
+        uses: 'actions/checkout@v4',
       },
       {
         name: 'Set up Node.js',
-        uses: 'actions/setup-node@v3',
+        uses: 'actions/setup-node@v4',
         with: {
           'node-version': '18',
           cache: 'npm',
@@ -171,7 +172,7 @@ try {
       {
         name: 'Upload visual test results',
         if: 'always()',
-        uses: 'actions/upload-artifact@v3',
+        uses: 'actions/upload-artifact@v4',
         with: {
           name: 'visual-test-results',
           path: ['test-results', 'playwright-report'],
@@ -189,11 +190,11 @@ try {
     if: "github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'",
     steps: [
       {
-        uses: 'actions/checkout@v3',
+        uses: 'actions/checkout@v4',
       },
       {
         name: 'Set up Node.js',
-        uses: 'actions/setup-node@v3',
+        uses: 'actions/setup-node@v4',
         with: {
           'node-version': '18',
           cache: 'npm',
@@ -201,11 +202,11 @@ try {
       },
       {
         name: 'Install dependencies',
-        run: 'cd docs/docusaurus && npm ci',
+        run: 'cd docs-site && npm ci',
       },
       {
         name: 'Build documentation',
-        run: 'cd docs/docusaurus && npm run build',
+        run: 'cd docs-site && npm run build',
       },
       {
         name: 'Generate PDF guide',
@@ -216,7 +217,7 @@ try {
         uses: 'peaceiris/actions-gh-pages@v3',
         with: {
           github_token: '${{ secrets.GITHUB_TOKEN }}',
-          publish_dir: './docs/docusaurus/build',
+          publish_dir: './docs-site/build',
           destination_dir: 'docs',
         },
       },
@@ -226,11 +227,11 @@ try {
   // Add proper string escaping for GitHub Actions expressions
   const stringifyWithEscaping = (obj) => {
     // Convert to string first
-    let yamlStr = yaml.dump(obj, { lineWidth: -1 });
+    let yamlStr = yaml.dump(obj, { lineWidth: -1, quotingType: '"' });
     
-    // Replace GitHub Actions expressions to prevent YAML parsing issues
-    // This is a workaround for the fact that js-yaml doesn't handle GitHub Actions expressions well
-    yamlStr = yamlStr.replace(/\${{/g, "$\\{{");
+    // Fix GitHub Actions expressions to prevent YAML parsing issues
+    // We need to ensure expressions like ${{ secrets.API_URL }} are preserved correctly
+    yamlStr = yamlStr.replace(/"\${{ (.*?) }}"/g, "${{ $1 }}");
     
     return yamlStr;
   };

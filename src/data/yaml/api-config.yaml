@@ -1,0 +1,50 @@
+api:
+  baseUrl: https://reqres.in
+  version: v1
+  timeout: 30000
+  retries: 2
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  
+endpoints:
+  users:
+    path: /api/users
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    params:
+      page: 1
+      per_page: 10
+  
+  login:
+    path: /api/login
+    methods:
+      - POST
+    
+  register:
+    path: /api/register
+    methods:
+      - POST
+      
+authentication:
+  type: bearer
+  tokenEndpoint: /api/login
+  credentials:
+    email: eve.holt@reqres.in
+    password: cityslicka
+    
+environments:
+  development:
+    baseUrl: https://reqres.in
+    apiKey: dev-api-key-123
+    
+  staging:
+    baseUrl: https://reqres.in
+    apiKey: staging-api-key-456
+    
+  production:
+    baseUrl: https://reqres.in
+    apiKey: prod-api-key-789

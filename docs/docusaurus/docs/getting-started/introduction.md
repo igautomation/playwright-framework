@@ -4,57 +4,111 @@ sidebar_position: 1
 
 # Introduction
 
-Welcome to the **Enterprise-Grade Playwright Framework** documentation! This framework is designed to provide a robust, scalable, and maintainable solution for test automation using Playwright.
+Welcome to the **Playwright Framework** documentation!
+
+This enterprise-grade test automation framework is built on top of Playwright, providing a comprehensive solution for web testing, API testing, and more.
 
 ## What is Playwright Framework?
 
-Playwright Framework is a comprehensive test automation solution built on top of Microsoft's Playwright. It provides a structured approach to writing, executing, and maintaining automated tests for web applications, with support for both UI and API testing.
+Playwright Framework is a robust, scalable test automation solution that extends the capabilities of Microsoft's Playwright. It provides:
 
-## Key Features
-
-### Web UI Testing
-
-- **Page Object Model (POM)** implementation with best practices
-- **Self-healing locators** that adapt to UI changes
+- **Comprehensive CLI** for test execution and management
+- **Advanced test verification** and validation
+- **Test coverage analysis** without instrumentation
+- **Test linting** with best practices enforcement
+- **Multiple report formats** (HTML, JSON, Markdown)
+- **CI/CD integration** (GitHub Actions, Jenkins, GitLab)
+- **Test quality dashboard** with historical trends
+- **Self-healing locators** for resilient tests
 - **Visual testing** capabilities
-- **Reusable web interactions** for common tasks
-
-### API Testing
-
-- **REST and GraphQL** support
-- **POJO serialization** with getters/setters
-- **Request/response interception** and validation
-- **Mock server** capabilities
-
-### Advanced Features
-
-- **Test Data Factory** for dynamic data generation
-- **Reporting** with Allure, HTML, and JSON
-- **CI/CD integration** with GitHub Actions and Jenkins
-- **Test management** integration with Jira/Xray
-- **Flaky test detection** and quarantine
-
-## Why Use This Framework?
-
-- **Productivity**: Accelerate test development with reusable components and utilities
-- **Maintainability**: Structured approach with separation of concerns
-- **Reliability**: Robust test execution with retry mechanisms and self-healing locators
-- **Scalability**: Support for parallel execution and distributed testing
-- **Extensibility**: Modular design that can be customized for specific needs
-
-## Who Is This For?
-
-This framework is designed for:
-
-- **Test Engineers** looking for a robust automation solution
-- **Developers** implementing test-driven development
-- **QA Teams** transitioning to automation
-- **DevOps Engineers** integrating testing into CI/CD pipelines
+- **API testing** support
+- **Performance testing** utilities
+- **Accessibility testing**
 
 ## Getting Started
 
-To get started with the framework, check out the [Installation](installation) and [Quick Start](quick-start) guides.
+Get up and running with Playwright Framework in minutes:
 
-## Contributing
+```bash
+# Install dependencies
+npm install
 
-We welcome contributions to the framework! Please see our [Contributing Guide](../contributing) for more information.
+# Install Playwright browsers
+npx playwright install
+```
+
+Then run your first test:
+
+```bash
+npm test
+```
+
+## Key Features
+
+### Test Verification
+
+Verify your tests follow best practices:
+
+```bash
+npm run verify
+```
+
+### Test Linting
+
+Lint your test files and automatically fix issues:
+
+```bash
+npm run lint
+npm run lint:fix
+```
+
+### Test Coverage Analysis
+
+Analyze test coverage without instrumentation:
+
+```bash
+npm run coverage
+```
+
+### Test Quality Dashboard
+
+Generate a dashboard with test quality metrics:
+
+```bash
+npm run dashboard
+```
+
+### CI/CD Integration
+
+Set up CI/CD integration with popular systems:
+
+```bash
+npm run ci:setup
+```
+
+## Why Playwright Framework?
+
+- **Productivity**: Accelerate test development with built-in utilities and helpers
+- **Reliability**: Self-healing locators and robust error handling
+- **Maintainability**: Enforce best practices through linting and verification
+- **Visibility**: Comprehensive reporting and dashboards
+- **Scalability**: Designed for enterprise-scale test automation
+
+## Framework Architecture
+
+The Playwright Framework follows a modular architecture:
+
+![Framework Architecture](../assets/framework-architecture.png)
+
+- **Core Layer**: Built on Playwright with extended capabilities
+- **Utilities Layer**: Common utilities for web, API, and data handling
+- **Page Objects Layer**: Reusable page objects and components
+- **Test Layer**: Test files organized by type and functionality
+- **Reporting Layer**: Comprehensive reporting and dashboards
+
+## Next Steps
+
+- [Installation](installation): Install and set up the framework
+- [Quick Start](quick-start): Write your first test
+- [Configuration](configuration): Configure the framework for your project
+- [API Reference](../api/cli): Explore the framework's API

@@ -1,0 +1,19 @@
+{
+  "input-password": "[name=\"password\"]",
+  "h1-signin-header": "#signin-header",
+  "input-user-email": "#user-email",
+  "input-user-password": "#user-password",
+  "button-signin-button": "#signin-button",
+  "a-reset-password": "#reset-password",
+  "a-register": "#register",
+  "input-email-input": "[data-testid=\"email-input\"]",
+  "input-password-input": "[data-testid=\"password-input\"]",
+  "input-email": "[name=\"email\"]",
+  "div-class-auth-container": ".auth-container",
+  "form-class-signin-form": ".signin-form",
+  "div-class-input-group": ".input-group",
+  "button-class-btn-submit": ".btn-submit",
+  "div-class-links": ".links",
+  "input-placeholder-Enter-your-email": "[placeholder=\"Enter your email\"]",
+  "input-placeholder-Enter-your-password": "[placeholder=\"Enter your password\"]"
+}

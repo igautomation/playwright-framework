@@ -1,0 +1,8 @@
+{
+  "input-placeholder-Password": "[placeholder=\"Password\"]",
+  "h1-page-title": "#page-title",
+  "button-signin-btn": "#signin-btn",
+  "input-user-email": "#user-email",
+  "input-user-password": "#user-password",
+  "input-placeholder-Email": "[placeholder=\"Email\"]"
+}

@@ -1,3 +1,4 @@
+
 /**
  * Test data factory for generating test data
  */
@@ -102,6 +103,173 @@ class TestDataFactory {
       total: options.total || total,
       status: options.status || faker.helpers.arrayElement(['pending', 'processing', 'shipped', 'delivered'])
     };
+  }
+
+  /**
+   * Generate payload from JSON schema
+   * @param {Object} schema - JSON schema
+   * @param {Object} overrides - Property overrides
+   * @returns {Object} Generated payload
+   */
+  static generatePayloadFromSchema(schema, overrides = {}) {
+    const payload = {};
+    
+    // Process properties from schema
+    if (schema.properties) {
+      for (const [propName, propSchema] of Object.entries(schema.properties)) {
+        // If override exists, use it
+        if (overrides[propName] !== undefined) {
+          payload[propName] = overrides[propName];
+          continue;
+        }
+        
+        // Generate value based on type
+        switch (propSchema.type) {
+          case 'string':
+            if (propSchema.format === 'email') {
+              payload[propName] = faker.internet.email();
+            } else if (propSchema.format === 'date-time') {
+              payload[propName] = faker.date.recent().toISOString();
+            } else if (propSchema.format === 'uri') {
+              payload[propName] = faker.internet.url();
+            } else if (propSchema.enum) {
+              payload[propName] = faker.helpers.arrayElement(propSchema.enum);
+            } else {
+              payload[propName] = faker.lorem.word();
+            }
+            break;
+            
+          case 'number':
+          case 'integer':
+            if (propSchema.enum) {
+              payload[propName] = faker.helpers.arrayElement(propSchema.enum);
+            } else {
+              const min = propSchema.minimum || 0;
+              const max = propSchema.maximum || 1000;
+              payload[propName] = propSchema.type === 'integer' 
+                ? faker.number.int({ min, max })
+                : faker.number.float({ min, max, precision: 0.01 });
+            }
+            break;
+            
+          case 'boolean':
+            payload[propName] = faker.datatype.boolean();
+            break;
+            
+          case 'array':
+            const minItems = propSchema.minItems || 1;
+            const maxItems = propSchema.maxItems || 5;
+            const itemCount = faker.number.int({ min: minItems, max: maxItems });
+            payload[propName] = [];
+            
+            for (let i = 0; i < itemCount; i++) {
+              if (propSchema.items && propSchema.items.type) {
+                payload[propName].push(
+                  this.generateValueForType(propSchema.items.type, propSchema.items)
+                );
+              } else {
+                payload[propName].push(faker.lorem.word());
+              }
+            }
+            break;
+            
+          case 'object':
+            if (propSchema.properties) {
+              payload[propName] = this.generatePayloadFromSchema(propSchema);
+            } else {
+              payload[propName] = {
+                id: faker.number.int({ min: 1, max: 1000 }),
+                name: faker.lorem.word()
+              };
+            }
+            break;
+            
+          default:
+            payload[propName] = null;
+        }
+      }
+    }
+    
+    // Ensure all required fields are present
+    if (schema.required) {
+      for (const requiredProp of schema.required) {
+        if (payload[requiredProp] === undefined) {
+          // If a required property wasn't set, generate a value for it
+          const propSchema = schema.properties[requiredProp];
+          if (propSchema) {
+            payload[requiredProp] = this.generateValueForType(propSchema.type, propSchema);
+          } else {
+            // Default to string if no schema is defined
+            payload[requiredProp] = faker.lorem.word();
+          }
+        }
+      }
+    }
+    
+    return payload;
+  }
+  
+  /**
+   * Generate a value for a specific type
+   * @param {string} type - Data type
+   * @param {Object} schema - Property schema
+   * @returns {any} Generated value
+   */
+  static generateValueForType(type, schema = {}) {
+    switch (type) {
+      case 'string':
+        if (schema.format === 'email') {
+          return faker.internet.email();
+        } else if (schema.format === 'date-time') {
+          return faker.date.recent().toISOString();
+        } else if (schema.format === 'uri') {
+          return faker.internet.url();
+        } else if (schema.enum) {
+          return faker.helpers.arrayElement(schema.enum);
+        }
+        return faker.lorem.word();
+        
+      case 'number':
+      case 'integer':
+        if (schema.enum) {
+          return faker.helpers.arrayElement(schema.enum);
+        }
+        const min = schema.minimum || 0;
+        const max = schema.maximum || 1000;
+        return type === 'integer' 
+          ? faker.number.int({ min, max })
+          : faker.number.float({ min, max, precision: 0.01 });
+        
+      case 'boolean':
+        return faker.datatype.boolean();
+        
+      case 'array':
+        const minItems = schema.minItems || 1;
+        const maxItems = schema.maxItems || 3;
+        const itemCount = faker.number.int({ min: minItems, max: maxItems });
+        const array = [];
+        
+        for (let i = 0; i < itemCount; i++) {
+          if (schema.items && schema.items.type) {
+            array.push(this.generateValueForType(schema.items.type, schema.items));
+          } else {
+            array.push(faker.lorem.word());
+          }
+        }
+        return array;
+        
+      case 'object':
+        if (schema.properties) {
+          return this.generatePayloadFromSchema(schema);
+        }
+        return {
+          id: faker.number.int({ min: 1, max: 1000 }),
+          name: faker.lorem.word()
+        };
+        
+      default:
+        return null;
+    }
   }
 
   /**

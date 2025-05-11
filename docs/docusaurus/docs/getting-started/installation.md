@@ -4,114 +4,141 @@ sidebar_position: 2
 
 # Installation
 
-This guide will walk you through the process of installing and setting up the Playwright Framework in your project.
+This guide will help you install and set up the Playwright Framework.
 
 ## Prerequisites
 
-Before you begin, make sure you have the following installed:
+Before installing the framework, make sure you have the following prerequisites:
 
 - **Node.js** (version 14 or higher)
-- **npm** (version 6 or higher) or **yarn** (version 1.22 or higher)
-- **Git** (optional, for version control)
+- **npm** (version 6 or higher)
+- **Git** (for version control)
 
-## Installation Options
+## Installation Steps
 
-There are two ways to install the Playwright Framework:
+### 1. Install Dependencies
 
-1. **As a dependency in an existing project**
-2. **Creating a new project with the framework**
-
-### Option 1: Install as a Dependency
-
-To add the Playwright Framework to an existing project, run:
+First, install all the required dependencies:
 
 ```bash
-# Using npm
-npm install @your-org/playwright-framework --save-dev
-
-# Using yarn
-yarn add @your-org/playwright-framework --dev
+npm install
 ```
 
-After installation, initialize the framework in your project:
+This will install:
+- Core Playwright libraries
+- Test verification tools
+- Reporting utilities
+- Other framework dependencies
+
+### 2. Install Browsers
+
+Install the Playwright browsers:
 
 ```bash
-npx framework init
+npx playwright install
 ```
 
-This will create the necessary directory structure and configuration files in your project.
+This installs Chromium, Firefox, and WebKit browsers.
 
-### Option 2: Create a New Project
-
-To create a new project with the Playwright Framework:
+If you need only specific browsers:
 
 ```bash
-# Create a new directory
-mkdir my-test-project
-cd my-test-project
+# Install only Chromium
+npx playwright install chromium
 
-# Initialize a new npm project
-npm init -y
+# Install only Firefox
+npx playwright install firefox
 
-# Install the framework
-npm install @your-org/playwright-framework --save-dev
-
-# Initialize the framework
-npx framework init
+# Install only WebKit
+npx playwright install webkit
 ```
 
-## Installing Playwright Browsers
+### 3. Verify Installation
 
-After installing the framework, you need to install the Playwright browsers:
+Verify that the browsers are installed correctly:
 
 ```bash
-npx playwright install --with-deps
+node scripts/verify-browsers.js
 ```
 
-This command installs the Chromium, Firefox, and WebKit browsers that Playwright will use for testing.
+Run a framework health check:
+
+```bash
+node scripts/framework-health-check.js
+```
+
+### 4. Install Additional Dependencies
+
+If you encounter any missing dependencies when running tests, install them:
+
+```bash
+# Data handling dependencies
+npm install --save fast-xml-parser node-fetch @faker-js/faker exceljs js-yaml
+
+# Visual testing dependencies
+npm install --save pixelmatch pngjs
+
+# Reporting dependencies
+npm install --save allure-playwright
+```
+
+## Project Structure
+
+After installation, your project structure should look like this:
+
+```
+playwright-framework/
+├── src/
+│   ├── cli/            # CLI commands
+│   ├── config/         # Configuration files
+│   ├── data/           # Test data
+│   ├── pages/          # Page objects
+│   ├── tests/          # Test files
+│   └── utils/          # Utility functions
+├── reports/            # Test reports
+├── playwright.config.js # Playwright configuration
+└── package.json
+```
 
 ## Configuration
 
-The framework uses a `.env` file for configuration. Create this file based on the provided example:
+The framework can be configured through:
 
-```bash
-cp .env.example .env
-```
+1. **Environment Variables**: Set in `.env` file or directly in the environment
+2. **Configuration Files**: Modify `playwright.config.js` for test-specific settings
+3. **CLI Options**: Pass options when running commands
 
-Edit the `.env` file to configure your environment:
+See the [Configuration](configuration) section for more details.
 
-```
-# Base URLs for different environments
-BASE_URL=https://your-application-url.com
-API_URL=https://your-api-url.com
+## Troubleshooting
 
-# Test credentials
-USERNAME=your-username
-PASSWORD=your-password
+### Common Installation Issues
 
-# Browser configuration
-BROWSER=chromium
-HEADLESS=true
+1. **Browser installation fails**
 
-# Test configuration
-RETRIES=1
-WORKERS=50%
-```
+   Try running with administrator privileges or check your network connection:
+   ```bash
+   sudo npx playwright install
+   ```
 
-## Verify Installation
+2. **Missing dependencies**
 
-To verify that the framework is installed correctly, run:
+   If you see errors about missing modules, install them:
+   ```bash
+   npm install --save <module-name>
+   ```
 
-```bash
-npx framework test --list
-```
+3. **Permission issues**
 
-This should list all the available tests in your project.
+   Ensure you have write permissions to the installation directory:
+   ```bash
+   chmod -R 755 ./node_modules
+   ```
 
 ## Next Steps
 
 Now that you have installed the Playwright Framework, you can:
 
-1. Check out the [Quick Start](quick-start) guide to write your first test
-2. Learn about the [Configuration](configuration) options
-3. Explore the [API Reference](../api/cli) for more details on the available commands and utilities
+- [Write your first test](quick-start)
+- [Configure the framework](configuration)
+- [Explore the CLI commands](../api/cli)

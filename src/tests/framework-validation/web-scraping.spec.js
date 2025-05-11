@@ -2,33 +2,18 @@ const { test, expect } = require('@playwright/test');
 const WebScrapingUtils = require('../../utils/web/webScrapingUtils');
 const fs = require('fs');
 const path = require('path');
+const {
+  tableFixture,
+  linksFixture,
+  textContentFixture,
+  structuredDataFixture,
+  domSnapshotFixture
+} = require('../fixtures/web-scraping-fixtures');
 
 test.describe('Web Scraping Utils @validation', () => {
   test('should extract table data', async ({ page }) => {
-    // Set up test page with a table
-    await page.setContent(`
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Doe</td>
-            <td>30</td>
-            <td>john@example.com</td>
-          </tr>
-          <tr>
-            <td>Jane Smith</td>
-            <td>25</td>
-            <td>jane@example.com</td>
-          </tr>
-        </tbody>
-      </table>
-    `);
+    // Set up test page with a table using fixture
+    await page.setContent(tableFixture);
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const tableData = await webScrapingUtils.extractTableData('table');
@@ -47,13 +32,8 @@ test.describe('Web Scraping Utils @validation', () => {
   });
 
   test('should extract links', async ({ page }) => {
-    // Set up test page with links
-    await page.setContent(`
-      <div>
-        <a href="https://example.com" id="link1">Example Link</a>
-        <a href="https://test.com" id="link2">Test Link</a>
-      </div>
-    `);
+    // Set up test page with links using fixture
+    await page.setContent(linksFixture);
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const links = await webScrapingUtils.extractLinks();
@@ -66,14 +46,8 @@ test.describe('Web Scraping Utils @validation', () => {
   });
 
   test('should extract text content', async ({ page }) => {
-    // Set up test page with text elements
-    await page.setContent(`
-      <div>
-        <p>First paragraph</p>
-        <p>Second paragraph</p>
-        <p>Third paragraph</p>
-      </div>
-    `);
+    // Set up test page with text elements using fixture
+    await page.setContent(textContentFixture);
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const texts = await webScrapingUtils.extractText('p');
@@ -85,14 +59,8 @@ test.describe('Web Scraping Utils @validation', () => {
   });
 
   test('should extract structured data', async ({ page }) => {
-    // Set up test page with structured data
-    await page.setContent(`
-      <div>
-        <h1 id="title">Page Title</h1>
-        <p id="description">Page description</p>
-        <span id="author">John Doe</span>
-      </div>
-    `);
+    // Set up test page with structured data using fixture
+    await page.setContent(structuredDataFixture);
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const data = await webScrapingUtils.extractStructuredData({
@@ -109,13 +77,8 @@ test.describe('Web Scraping Utils @validation', () => {
   });
 
   test('should save DOM snapshot', async ({ page }) => {
-    // Set up test page
-    await page.setContent(`
-      <div>
-        <h1>Test Page</h1>
-        <p>This is a test page</p>
-      </div>
-    `);
+    // Set up test page using fixture
+    await page.setContent(domSnapshotFixture);
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const snapshotPath = await webScrapingUtils.saveDOMSnapshot('test-page');

@@ -1,0 +1,97 @@
+{
+  "login": {
+    "success": {
+      "token": "QpwL5tke4Pnpja7X4",
+      "userId": "4",
+      "expiresIn": 3600
+    },
+    "error": {
+      "error": "Missing email or username",
+      "code": 400
+    },
+    "invalidCredentials": {
+      "error": "user not found",
+      "code": 404
+    }
+  },
+  "register": {
+    "success": {
+      "id": 4,
+      "token": "QpwL5tke4Pnpja7X4"
+    },
+    "error": {
+      "error": "Missing email or username",
+      "code": 400
+    }
+  },
+  "users": {
+    "single": {
+      "data": {
+        "id": 2,
+        "email": "janet.weaver@reqres.in",
+        "first_name": "Janet",
+        "last_name": "Weaver",
+        "avatar": "https://reqres.in/img/faces/2-image.jpg"
+      },
+      "support": {
+        "url": "https://reqres.in/#support-heading",
+        "text": "To keep ReqRes free, contributions towards server costs are appreciated!"
+      }
+    },
+    "list": {
+      "page": 1,
+      "per_page": 6,
+      "total": 12,
+      "total_pages": 2,
+      "data": [
+        {
+          "id": 1,
+          "email": "george.bluth@reqres.in",
+          "first_name": "George",
+          "last_name": "Bluth",
+          "avatar": "https://reqres.in/img/faces/1-image.jpg"
+        },
+        {
+          "id": 2,
+          "email": "janet.weaver@reqres.in",
+          "first_name": "Janet",
+          "last_name": "Weaver",
+          "avatar": "https://reqres.in/img/faces/2-image.jpg"
+        },
+        {
+          "id": 3,
+          "email": "emma.wong@reqres.in",
+          "first_name": "Emma",
+          "last_name": "Wong",
+          "avatar": "https://reqres.in/img/faces/3-image.jpg"
+        }
+      ],
+      "support": {
+        "url": "https://reqres.in/#support-heading",
+        "text": "To keep ReqRes free, contributions towards server costs are appreciated!"
+      }
+    },
+    "notFound": {
+      "error": "User not found",
+      "code": 404
+    }
+  },
+  "create": {
+    "success": {
+      "name": "morpheus",
+      "job": "leader",
+      "id": "123",
+      "createdAt": "2023-10-15T16:18:56.245Z"
+    }
+  },
+  "update": {
+    "success": {
+      "name": "morpheus",
+      "job": "zion resident",
+      "updatedAt": "2023-10-15T16:19:34.123Z"
+    }
+  },
+  "delete": {
+    "success": {}
+  }
+}

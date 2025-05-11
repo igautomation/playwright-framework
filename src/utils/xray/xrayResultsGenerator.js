@@ -1,87 +1,3 @@
-<<<<<<< HEAD
-// src/utils/xray/xrayResultsGenerator.js
-
-import fs from 'fs-extra';
-import logger from '../common/logger.js';
-
-// Load paths and config from environment variables or fallback to default
-const resultsPath = process.env.PW_RESULTS_PATH || 'playwright-report/results.json';
-const mappingPath = process.env.TEST_MAPPING_PATH || 'src/config/test-mapping.json';
-const outputPath = process.env.XRAY_OUTPUT_PATH || 'reports/xray-results.json';
-
-// Converts Playwright status to Xray-compatible status
-function convertStatus(status) {
-  if (status === 'passed') {
-    return 'PASSED';
-  } else if (status === 'failed') {
-    return 'FAILED';
-  } else {
-    return 'SKIPPED';
-  }
-}
-
-// Main function to generate Xray results file
-export async function generateXrayResults() {
-  try {
-    // Check if the Playwright test results file exists
-    if (!fs.existsSync(resultsPath)) {
-      throw new Error('Missing Playwright results file: ' + resultsPath);
-    }
-
-    // Check if the test mapping file exists
-    if (!fs.existsSync(mappingPath)) {
-      throw new Error('Missing test mapping file: ' + mappingPath);
-    }
-
-    // Load test result and mapping content
-    const resultsData = await fs.readJson(resultsPath);
-    const testMapping = await fs.readJson(mappingPath);
-
-    const tests = [];
-
-    // Traverse test results and apply mapping dynamically
-    resultsData.suites.forEach((suite) => {
-      suite.specs.forEach((spec) => {
-        const fullTitle = spec.title;
-
-        // Match the title to a Jira testKey in mapping
-        const testKey = testMapping[fullTitle];
-
-        if (!testKey) {
-          logger.warn(`Unmapped test skipped: "${fullTitle}"`);
-          return;
-        }
-
-        tests.push({
-          testKey: testKey,
-          status: convertStatus(spec.status),
-          start: new Date(spec.startTime).toISOString(),
-          finish: new Date(spec.endTime).toISOString(),
-          comment: spec.error ? spec.error.message : 'Test completed'
-        });
-      });
-    });
-
-    const payload = {
-      info: {
-        summary: process.env.XRAY_SUMMARY || 'Playwright execution results',
-        description: process.env.XRAY_DESCRIPTION || 'Framework auto-generated Xray payload',
-        user: process.env.XRAY_USER || 'automation-bot',
-        startDate: new Date().toISOString(),
-        finishDate: new Date().toISOString()
-      },
-      tests: tests
-    };
-
-    await fs.outputJson(outputPath, payload, { spaces: 2 });
-
-    logger.info('Xray results written to: ' + outputPath);
-  } catch (error) {
-    logger.error('Error generating Xray results: ' + error.message);
-    process.exit(1);
-  }
-}
-=======
 const fs = require('fs');
 const path = require('path');
 const logger = require('../common/logger');
@@ -100,6 +16,9 @@ class XrayResultsGenerator {
       projectKey: process.env.JIRA_PROJECT_KEY || 'TEST',
       testPlanKey: process.env.XRAY_TEST_PLAN_KEY || '',
       testEnvironments: process.env.XRAY_TEST_ENVIRONMENTS?.split(',') || [],
+      resultsPath: process.env.PW_RESULTS_PATH || 'playwright-report/results.json',
+      mappingPath: process.env.TEST_MAPPING_PATH || 'src/config/test-mapping.json',
+      outputPath: process.env.XRAY_OUTPUT_PATH || 'reports/xray-results.json',
       ...config,
     };
 
@@ -383,7 +302,77 @@ class XrayResultsGenerator {
       throw error;
     }
   }
+
+  /**
+   * Generate Xray results from Playwright test results
+   * @returns {Promise<void>}
+   */
+  async generateXrayResults() {
+    try {
+      // Check if the Playwright test results file exists
+      if (!fs.existsSync(this.config.resultsPath)) {
+        throw new Error('Missing Playwright results file: ' + this.config.resultsPath);
+      }
+
+      // Check if the test mapping file exists
+      if (!fs.existsSync(this.config.mappingPath)) {
+        throw new Error('Missing test mapping file: ' + this.config.mappingPath);
+      }
+
+      // Load test result and mapping content
+      const resultsData = JSON.parse(fs.readFileSync(this.config.resultsPath, 'utf8'));
+      const testMapping = JSON.parse(fs.readFileSync(this.config.mappingPath, 'utf8'));
+
+      const tests = [];
+
+      // Traverse test results and apply mapping dynamically
+      resultsData.suites.forEach((suite) => {
+        suite.specs.forEach((spec) => {
+          const fullTitle = spec.title;
+
+          // Match the title to a Jira testKey in mapping
+          const testKey = testMapping[fullTitle];
+
+          if (!testKey) {
+            logger.warn(`Unmapped test skipped: "${fullTitle}"`);
+            return;
+          }
+
+          tests.push({
+            testKey: testKey,
+            status: this.mapStatus(spec.status),
+            start: new Date(spec.startTime).toISOString(),
+            finish: new Date(spec.endTime).toISOString(),
+            comment: spec.error ? spec.error.message : 'Test completed'
+          });
+        });
+      });
+
+      const payload = {
+        info: {
+          summary: process.env.XRAY_SUMMARY || 'Playwright execution results',
+          description: process.env.XRAY_DESCRIPTION || 'Framework auto-generated Xray payload',
+          user: process.env.XRAY_USER || 'automation-bot',
+          startDate: new Date().toISOString(),
+          finishDate: new Date().toISOString()
+        },
+        tests: tests
+      };
+
+      // Ensure directory exists
+      const outputDir = path.dirname(this.config.outputPath);
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      fs.writeFileSync(this.config.outputPath, JSON.stringify(payload, null, 2));
+
+      logger.info('Xray results written to: ' + this.config.outputPath);
+    } catch (error) {
+      logger.error('Error generating Xray results: ' + error.message);
+      throw error;
+    }
+  }
 }
 
 module.exports = XrayResultsGenerator;
->>>>>>> 51948a2 (Main v1.0)

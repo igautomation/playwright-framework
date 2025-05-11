@@ -1,0 +1,11 @@
+id,name,category,price,stock,rating,featured
+prod-001,Smartphone X,Electronics,999.99,150,4.8,true
+prod-002,Laptop Pro,Electronics,1499.99,75,4.7,true
+prod-003,Wireless Earbuds,Audio,199.99,200,4.5,false
+prod-004,Smart Watch,Wearables,299.99,120,4.6,true
+prod-005,Bluetooth Speaker,Audio,129.99,180,4.4,false
+prod-006,Tablet Ultra,Electronics,699.99,90,4.3,true
+prod-007,Fitness Tracker,Wearables,149.99,210,4.2,false
+prod-008,Wireless Charger,Accessories,59.99,300,4.0,false
+prod-009,Noise-Cancelling Headphones,Audio,349.99,85,4.7,true
+prod-010,Smart Home Hub,Smart Home,199.99,110,4.1,true

@@ -107,12 +107,12 @@ const customTest = baseTest.extend({
     };
 
     const credentials = {
-      username: process.env.LOGIN_USERNAME,
-      password: process.env.LOGIN_PASSWORD
+      username: process.env.LOGIN_USERNAME || process.env.USERNAME || 'Admin',
+      password: process.env.LOGIN_PASSWORD || process.env.PASSWORD || 'admin123'
     };
 
     if (!credentials.username || !credentials.password) {
-      throw new Error('LOGIN_USERNAME and LOGIN_PASSWORD must be set in .env');
+      throw new Error('USERNAME and PASSWORD must be set in .env');
     }
 
     try {

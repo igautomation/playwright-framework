@@ -47,6 +47,16 @@ class LoginPage extends BasePage {
     }
     return '';
   }
+  
+  /**
+   * Verify login error message
+   * @param {string} expectedMessage - Expected error message
+   * @returns {Promise<boolean>} True if error message matches
+   */
+  async verifyLoginError(expectedMessage) {
+    const actualMessage = await this.getErrorMessage();
+    return actualMessage.includes(expectedMessage);
+  }
 
   /**
    * Check if login was successful

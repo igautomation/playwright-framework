@@ -6,333 +6,406 @@ sidebar_position: 4
 
 This guide explains how to configure the Playwright Framework for your specific needs.
 
-## Configuration Files
+## Configuration Methods
 
-The framework uses several configuration files:
+The framework can be configured through:
 
-1. **`.env`**: Environment variables for runtime configuration
-2. **`playwright.config.js`**: Playwright-specific configuration
-3. **`package.json`**: NPM scripts and dependencies
+1. **Environment Variables**: Set in `.env` file or directly in the environment
+2. **Configuration Files**: Modify `playwright.config.js` for test-specific settings
+3. **CLI Options**: Pass options when running commands
 
-### Environment Variables (`.env`)
+## Environment Variables
 
-The `.env` file contains environment-specific configuration. Here's an example:
+The framework supports the following environment variables:
+
+### URLs
 
 ```
-# Base URLs for different environments
-BASE_URL=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
-API_URL=https://petstore.swagger.io/v2
+BASE_URL=https://example.com
+API_URL=https://api.example.com
+```
 
-# Test credentials
-USERNAME=Admin
-PASSWORD=admin123
+### Authentication
 
-# Browser configuration
-BROWSER=chromium
+```
+USERNAME=testuser
+PASSWORD=testpass
+API_KEY=your-api-key
+AUTH_TOKEN=your-auth-token
+```
+
+### Timeouts (in milliseconds)
+
+```
+DEFAULT_TIMEOUT=30000
+SHORT_TIMEOUT=5000
+LONG_TIMEOUT=60000
+PAGE_LOAD_TIMEOUT=30000
+ANIMATION_TIMEOUT=1000
+```
+
+### Test Data
+
+```
+TEST_DATA_PATH=src/data
+```
+
+### Visual Testing
+
+```
+VISUAL_BASELINE_DIR=visual-baselines
+VISUAL_DIFF_DIR=visual-diffs
+VISUAL_THRESHOLD=0.1
+```
+
+### Browser Configuration
+
+```
 HEADLESS=true
+SLOW_MO=0
+DEFAULT_BROWSER=chromium
+```
 
-# Test configuration
-RETRIES=1
-WORKERS=50%
-TIMEOUT=30000
-EXPECT_TIMEOUT=10000
+### Reporting
 
-# Reporting configuration
+```
 SCREENSHOT_ON_FAILURE=true
 VIDEO_ON_FAILURE=true
-TRACE_ON_FAILURE=true
-
-# CI/CD configuration
-CI=false
-
-# Jira/Xray configuration
-JIRA_BASE_URL=https://your-jira-instance.atlassian.net
-JIRA_API_TOKEN=your-jira-api-token
-JIRA_USERNAME=your-jira-username
-JIRA_PROJECT_KEY=TEST
+ALLURE_RESULTS_DIR=allure-results
 ```
 
-You can create different `.env` files for different environments:
+### Feature Flags
 
-- `.env.dev`
-- `.env.qa`
-- `.env.staging`
-- `.env.prod`
+```
+SELF_HEALING=true
+RETRY_ON_FAILURE=true
+PARALLEL_EXECUTION=true
+```
 
-To use a specific environment file:
+### Using Environment Variables
+
+You can set environment variables in a `.env` file:
+
+```
+# .env
+BASE_URL=https://example.com
+HEADLESS=true
+```
+
+Or directly when running commands:
 
 ```bash
-cp .env.qa .env
-npx framework test
+BASE_URL=https://example.com HEADLESS=false npm test
 ```
 
-### Playwright Configuration (`playwright.config.js`)
+## Playwright Configuration
 
-The `playwright.config.js` file contains Playwright-specific configuration:
+The main Playwright configuration is in `playwright.config.js`:
 
 ```javascript
-const { devices } = require('@playwright/test');
-const path = require('path');
-require('dotenv-safe').config({
-  path: path.resolve(__dirname, '../../.env'),
-  example: path.resolve(__dirname, '../../.env.example'),
-  allowEmptyValues: true,
-  silent: true,
-});
+// playwright.config.js
+const { defineConfig } = require('@playwright/test');
 
-module.exports = {
-  testDir: '../tests',
-  timeout: parseInt(process.env.TIMEOUT) || 30000,
+module.exports = defineConfig({
+  testDir: './src/tests',
+  timeout: 30000,
   expect: {
-    timeout: parseInt(process.env.EXPECT_TIMEOUT) || 10000,
+    timeout: 5000
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : parseInt(process.env.RETRIES) || 1,
-  workers: process.env.CI ? 4 : process.env.WORKERS || '50%',
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
   reporter: [
-    ['list'],
-    ['html', { outputFolder: '../../reports/html' }],
-    ['allure-playwright', { outputFolder: '../../allure-results' }],
-    ['json', { outputFile: '../../reports/test-results.json' }],
+    ['html', { outputFolder: 'reports/html' }],
+    ['json', { outputFile: 'reports/results.json' }]
   ],
   use: {
-    baseURL: process.env.BASE_URL,
-    trace: process.env.TRACE_ON_FAILURE === 'true' ? 'on-first-retry' : 'off',
-    screenshot:
-      process.env.SCREENSHOT_ON_FAILURE === 'true' ? 'only-on-failure' : 'off',
-    video: process.env.VIDEO_ON_FAILURE === 'true' ? 'on-first-retry' : 'off',
-    headless: process.env.HEADLESS === 'true',
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
-    viewport: { width: 1280, height: 720 },
+    baseURL: process.env.BASE_URL || 'https://example.com',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
   },
   projects: [
     {
       name: 'chromium',
       use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 },
-      },
+        browserName: 'chromium',
+        viewport: { width: 1280, height: 720 }
+      }
     },
     {
       name: 'firefox',
       use: {
-        ...devices['Desktop Firefox'],
-        viewport: { width: 1280, height: 720 },
-      },
+        browserName: 'firefox',
+        viewport: { width: 1280, height: 720 }
+      }
     },
     {
       name: 'webkit',
       use: {
-        ...devices['Desktop Safari'],
-        viewport: { width: 1280, height: 720 },
-      },
+        browserName: 'webkit',
+        viewport: { width: 1280, height: 720 }
+      }
     },
     {
-      name: 'mobile-chrome',
+      name: 'Mobile Chrome',
       use: {
-        ...devices['Pixel 5'],
-      },
+        browserName: 'chromium',
+        ...devices['Pixel 5']
+      }
     },
     {
-      name: 'mobile-safari',
+      name: 'Mobile Safari',
       use: {
-        ...devices['iPhone 13'],
-      },
-    },
-  ],
-  globalSetup: '../utils/setup/globalSetup.js',
-  globalTeardown: '../utils/setup/globalTeardown.js',
-  outputDir: '../../test-results',
-};
+        browserName: 'webkit',
+        ...devices['iPhone 12']
+      }
+    }
+  ]
+});
 ```
 
-### NPM Scripts (`package.json`)
+### Common Configuration Options
 
-The `package.json` file contains NPM scripts for common tasks:
-
-```json
-{
-  "scripts": {
-    "test": "node src/cli/index.js test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "node src/cli/index.js test --headed",
-    "test:visual": "node src/cli/index.js test --tags @visual",
-    "test:smoke": "node src/cli/index.js test --tags @smoke",
-    "test:regression": "node src/cli/index.js test --tags @regression",
-    "test:api": "node src/cli/index.js test --tags @api",
-    "test:list": "node src/cli/index.js test --list",
-    "report": "playwright show-report",
-    "report:allure": "allure generate ./allure-results --clean && allure open",
-    "lint": "eslint .",
-    "format": "prettier --write ."
-  }
-}
-```
-
-## Configuration Options
-
-### Browser Configuration
-
-You can configure which browsers to use for testing:
+#### Timeouts
 
 ```javascript
-// In playwright.config.js
-projects: [
-  {
-    name: 'chromium',
-    use: { ...devices['Desktop Chrome'] },
-  },
-  {
-    name: 'firefox',
-    use: { ...devices['Desktop Firefox'] },
-  },
-  {
-    name: 'webkit',
-    use: { ...devices['Desktop Safari'] },
-  },
-];
-```
+// Global timeout for each test
+timeout: 30000,
 
-To run tests in a specific browser:
-
-```bash
-npx framework test --project=firefox
-```
-
-### Parallel Execution
-
-You can configure the number of parallel workers:
-
-```javascript
-// In playwright.config.js
-workers: process.env.CI ? 4 : process.env.WORKERS || '50%',
-```
-
-Or via the command line:
-
-```bash
-npx framework test --workers=4
-```
-
-### Retries
-
-You can configure the number of retries for failed tests:
-
-```javascript
-// In playwright.config.js
-retries: process.env.CI ? 2 : parseInt(process.env.RETRIES) || 1,
-```
-
-Or via the command line:
-
-```bash
-npx framework test --retries=2
-```
-
-### Timeouts
-
-You can configure various timeouts:
-
-```javascript
-// In playwright.config.js
-timeout: parseInt(process.env.TIMEOUT) || 30000,
+// Timeout for expect assertions
 expect: {
-  timeout: parseInt(process.env.EXPECT_TIMEOUT) || 10000
+  timeout: 5000
 },
+
+// Timeout for specific actions
 use: {
-  actionTimeout: 15000,
-  navigationTimeout: 30000,
+  actionTimeout: 10000,
+  navigationTimeout: 30000
 }
 ```
 
-### Reporting
-
-You can configure the reporters:
+#### Retries
 
 ```javascript
-// In playwright.config.js
+// Retry failed tests
+retries: process.env.CI ? 2 : 0,
+```
+
+#### Parallelization
+
+```javascript
+// Run tests in parallel
+fullyParallel: true,
+
+// Number of parallel workers
+workers: process.env.CI ? 1 : undefined,
+```
+
+#### Reporters
+
+```javascript
+// Configure reporters
 reporter: [
-  ['list'],
-  ['html', { outputFolder: '../../reports/html' }],
-  ['allure-playwright', { outputFolder: '../../allure-results' }],
-  ['json', { outputFile: '../../reports/test-results.json' }]
+  ['html', { outputFolder: 'reports/html' }],
+  ['json', { outputFile: 'reports/results.json' }],
+  ['allure-playwright', { outputFolder: 'allure-results' }]
 ],
 ```
 
-## Advanced Configuration
-
-### Custom Fixtures
-
-You can create custom fixtures for your tests:
+#### Browser Options
 
 ```javascript
-// In src/tests/fixtures/customFixtures.js
-const { test: base } = require('@playwright/test');
+// Configure browser options
+use: {
+  baseURL: process.env.BASE_URL || 'https://example.com',
+  headless: process.env.HEADLESS !== 'false',
+  viewport: { width: 1280, height: 720 },
+  ignoreHTTPSErrors: true,
+  screenshot: 'only-on-failure',
+  video: 'retain-on-failure',
+  trace: 'on-first-retry'
+},
+```
 
-const test = base.extend({
-  myFixture: async ({ page }, use) => {
-    // Set up fixture
-    const myFixture = {
-      // Custom functionality
-    };
+#### Projects
 
-    await use(myFixture);
-
-    // Clean up fixture
+```javascript
+// Configure multiple browser projects
+projects: [
+  {
+    name: 'chromium',
+    use: {
+      browserName: 'chromium'
+    }
   },
-});
-
-module.exports = { test };
+  {
+    name: 'firefox',
+    use: {
+      browserName: 'firefox'
+    }
+  },
+  {
+    name: 'webkit',
+    use: {
+      browserName: 'webkit'
+    }
+  }
+]
 ```
 
-### Global Setup and Teardown
+## CLI Options
 
-You can configure global setup and teardown scripts:
+You can pass options when running commands:
+
+### Test Execution Options
+
+```bash
+# Run tests in headed mode
+npx playwright test --headed
+
+# Run tests with debug mode
+npx playwright test --debug
+
+# Run tests with specific browser
+npx playwright test --project=chromium
+
+# Run tests with specific reporter
+npx playwright test --reporter=html
+
+# Run tests with specific timeout
+npx playwright test --timeout=60000
+
+# Run tests with retries
+npx playwright test --retries=3
+
+# Run tests with specific workers
+npx playwright test --workers=4
+```
+
+### Test Selection Options
+
+```bash
+# Run specific test file
+npx playwright test path/to/test.spec.js
+
+# Run tests with specific tag
+npx playwright test --grep @smoke
+
+# Run tests but exclude specific tag
+npx playwright test --grep-invert @slow
+
+# List all available tests
+npx playwright test --list
+```
+
+### Framework CLI Options
+
+```bash
+# Verify tests with specific directory
+npx playwright-framework verify-tests --dir src/tests
+
+# Lint tests with specific pattern
+npx playwright-framework test-lint --pattern "**/*.spec.js"
+
+# Analyze coverage with specific threshold
+npx playwright-framework test-coverage-analyze --threshold 80
+
+# Generate reports with specific types
+npx playwright-framework test-report --types html,json,markdown
+
+# Set up CI/CD for specific system
+npx playwright-framework ci-setup --system github
+```
+
+## Custom Configuration
+
+### Custom Test Data Configuration
+
+You can configure test data sources:
 
 ```javascript
-// In playwright.config.js
-globalSetup: '../utils/setup/globalSetup.js',
-globalTeardown: '../utils/setup/globalTeardown.js',
+// src/config/testData.config.js
+module.exports = {
+  csvPath: process.env.CSV_PATH || 'src/data/csv',
+  jsonPath: process.env.JSON_PATH || 'src/data/json',
+  yamlPath: process.env.YAML_PATH || 'src/data/yaml',
+  excelPath: process.env.EXCEL_PATH || 'src/data/excel'
+};
 ```
 
-These scripts run once before and after all tests.
+### Custom Reporting Configuration
+
+You can configure reporting options:
+
+```javascript
+// src/config/reporting.config.js
+module.exports = {
+  htmlReportDir: process.env.HTML_REPORT_DIR || 'reports/html',
+  jsonReportDir: process.env.JSON_REPORT_DIR || 'reports/json',
+  allureResultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
+  screenshotDir: process.env.SCREENSHOT_DIR || 'reports/screenshots',
+  videoDir: process.env.VIDEO_DIR || 'reports/videos'
+};
+```
+
+### Custom Visual Testing Configuration
+
+You can configure visual testing options:
+
+```javascript
+// src/config/visual.config.js
+module.exports = {
+  baselineDir: process.env.VISUAL_BASELINE_DIR || 'visual-baselines',
+  diffDir: process.env.VISUAL_DIFF_DIR || 'visual-diffs',
+  threshold: parseFloat(process.env.VISUAL_THRESHOLD || '0.1'),
+  maxDiffPixels: parseInt(process.env.MAX_DIFF_PIXELS || '100'),
+  maxDiffPixelRatio: parseFloat(process.env.MAX_DIFF_PIXEL_RATIO || '0.05')
+};
+```
 
 ## Environment-Specific Configuration
 
 You can create environment-specific configurations:
 
 ```javascript
-// In src/config/env/qa.js
+// src/config/env/dev.js
 module.exports = {
-  baseUrl: 'https://qa.example.com',
-  apiUrl: 'https://api.qa.example.com',
+  baseUrl: 'https://dev.example.com',
+  apiUrl: 'https://api.dev.example.com',
   credentials: {
-    username: 'qa-user',
-    password: 'qa-password',
-  },
+    username: 'devuser',
+    password: 'devpass'
+  }
+};
+
+// src/config/env/prod.js
+module.exports = {
+  baseUrl: 'https://example.com',
+  apiUrl: 'https://api.example.com',
+  credentials: {
+    username: 'produser',
+    password: 'prodpass'
+  }
 };
 ```
 
-Then use them in your tests:
+Load the appropriate configuration based on the environment:
 
 ```javascript
-const env = process.env.NODE_ENV || 'qa';
-const config = require(`../../config/env/${env}`);
+// src/config/environment.js
+const env = process.env.NODE_ENV || 'dev';
+const config = require(`./env/${env}.js`);
 
-test('Login with environment-specific credentials', async ({ loginPage }) => {
-  await loginPage.login(
-    config.credentials.username,
-    config.credentials.password
-  );
-});
+module.exports = config;
 ```
 
 ## Next Steps
 
 Now that you've configured the framework, you can:
 
-1. Learn about [UI Testing](../guides/ui-testing)
-2. Explore [API Testing](../guides/api-testing)
-3. Set up [CI/CD Integration](../guides/ci-cd-integration)
+- [Write your first test](quick-start)
+- [Learn about UI testing](../guides/ui-testing)
+- [Explore API testing](../guides/api-testing)
+- [Set up CI/CD integration](../guides/ci-cd-integration)

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<apiResponses>
+  <response id="getUserSuccess">
+    <status>200</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+      <header name="Cache-Control">no-cache</header>
+    </headers>
+    <body>
+      <user>
+        <id>1</id>
+        <firstName>John</firstName>
+        <lastName>Doe</lastName>
+        <email>john.doe@example.com</email>
+        <role>admin</role>
+        <createdAt>2023-01-15T08:30:00Z</createdAt>
+      </user>
+    </body>
+  </response>
+  
+  <response id="getUserNotFound">
+    <status>404</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <error>
+        <code>404</code>
+        <message>User not found</message>
+      </error>
+    </body>
+  </response>
+  
+  <response id="createUserSuccess">
+    <status>201</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+      <header name="Location">/api/users/123</header>
+    </headers>
+    <body>
+      <user>
+        <id>123</id>
+        <firstName>Jane</firstName>
+        <lastName>Smith</lastName>
+        <email>jane.smith@example.com</email>
+        <role>user</role>
+        <createdAt>2023-06-15T14:22:10Z</createdAt>
+      </user>
+    </body>
+  </response>
+  
+  <response id="createUserError">
+    <status>400</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <error>
+        <code>400</code>
+        <message>Invalid user data</message>
+        <details>
+          <field name="email">Invalid email format</field>
+          <field name="password">Password too short</field>
+        </details>
+      </error>
+    </body>
+  </response>
+  
+  <response id="updateUserSuccess">
+    <status>200</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <user>
+        <id>123</id>
+        <firstName>Jane</firstName>
+        <lastName>Smith-Updated</lastName>
+        <email>jane.updated@example.com</email>
+        <role>manager</role>
+        <updatedAt>2023-06-16T09:45:30Z</updatedAt>
+      </user>
+    </body>
+  </response>
+  
+  <response id="deleteUserSuccess">
+    <status>204</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body></body>
+  </response>
+  
+  <response id="getUserListSuccess">
+    <status>200</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <users>
+        <page>1</page>
+        <perPage>10</perPage>
+        <total>25</total>
+        <totalPages>3</totalPages>
+        <user>
+          <id>1</id>
+          <firstName>John</firstName>
+          <lastName>Doe</lastName>
+          <email>john.doe@example.com</email>
+        </user>
+        <user>
+          <id>2</id>
+          <firstName>Jane</firstName>
+          <lastName>Smith</lastName>
+          <email>jane.smith@example.com</email>
+        </user>
+        <user>
+          <id>3</id>
+          <firstName>Robert</firstName>
+          <lastName>Johnson</lastName>
+          <email>robert.johnson@example.com</email>
+        </user>
+      </users>
+    </body>
+  </response>
+  
+  <response id="loginSuccess">
+    <status>200</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <auth>
+        <token>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</token>
+        <expiresIn>3600</expiresIn>
+        <userId>123</userId>
+      </auth>
+    </body>
+  </response>
+  
+  <response id="loginFailure">
+    <status>401</status>
+    <headers>
+      <header name="Content-Type">application/xml</header>
+    </headers>
+    <body>
+      <error>
+        <code>401</code>
+        <message>Invalid credentials</message>
+      </error>
+    </body>
+  </response>
+</apiResponses>

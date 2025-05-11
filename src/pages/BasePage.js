@@ -18,14 +18,26 @@ class BasePage {
    * @param {string} url - URL to navigate to (optional, uses this.url by default)
    * @returns {Promise<void>}
    */
-  async navigate(url = '') {
+  async navigate(url = '', options = {}) {
     const pageUrl = url || this.url;
     if (!pageUrl) {
       throw new Error('URL is not defined. Please provide a URL or set this.url');
     }
     
     logger.info(`Navigating to ${pageUrl}`);
-    await this.page.goto(pageUrl);
+    
+    // Use the BASE_URL from environment if the URL is relative
+    const fullUrl = pageUrl.startsWith('http') ? pageUrl : `${process.env.BASE_URL || 'https://opensource-demo.orangehrmlive.com/web/index.php'}${pageUrl}`;
+    
+    try {
+      await this.page.goto(fullUrl, {
+        timeout: options.timeout || 30000,
+        waitUntil: options.waitUntil || 'networkidle'
+      });
+    } catch (error) {
+      logger.error(`Navigation failed to ${fullUrl}: ${error.message}`);
+      throw error;
+    }
   }
 
   /**

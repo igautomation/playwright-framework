@@ -1,39 +1,3 @@
-<<<<<<< HEAD
-// src/utils/api/graphqlUtils.js
-
-/**
- * GraphQL Utilities for Playwright Framework (ESM Compliant).
- *
- * Responsibilities:
- * - Send GraphQL queries and mutations
- * - Subscribe to GraphQL subscriptions
- * - Introspect GraphQL schema
- */
-
-class GraphQLUtils {
-  constructor(baseUrl, options) {
-    this.baseUrl = baseUrl;
-    this.options = options;
-  }
-
-  async request(query, variables) {
-    // TODO: Implement actual GraphQL query request using fetch or GraphQL client
-    return {}; // Dummy return for now
-  }
-
-  async subscribe(subscription, callback, variables) {
-    // TODO: Implement subscription logic (e.g., using WebSocket client)
-    return {}; // Dummy return for now
-  }
-
-  async introspectSchema() {
-    // TODO: Implement schema introspection logic
-    return {}; // Dummy return for now
-  }
-}
-
-export default GraphQLUtils;
-=======
 const { request, gql } = require('graphql-request');
 const logger = require('../common/logger');
 
@@ -339,7 +303,32 @@ class GraphQLUtils {
       throw error;
     }
   }
+
+  /**
+   * Subscribe to a GraphQL subscription
+   * @param {string} subscription - GraphQL subscription
+   * @param {Function} callback - Callback function for subscription events
+   * @param {Object} variables - Subscription variables
+   * @returns {Promise<Object>} Subscription object with unsubscribe method
+   */
+  async subscribe(subscription, callback, variables = {}) {
+    try {
+      logger.debug('Setting up GraphQL subscription', { subscription, variables });
+      
+      // This is a placeholder for actual subscription implementation
+      // In a real implementation, you would use a WebSocket client or similar
+      logger.warn('GraphQL subscriptions are not fully implemented');
+      
+      return {
+        unsubscribe: () => {
+          logger.debug('Unsubscribing from GraphQL subscription');
+        }
+      };
+    } catch (error) {
+      logger.error('GraphQL subscription failed', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = GraphQLUtils;
->>>>>>> 51948a2 (Main v1.0)

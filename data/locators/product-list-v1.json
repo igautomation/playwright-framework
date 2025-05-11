@@ -1,0 +1,18 @@
+{
+  "h1-catalog-heading": "#catalog-heading",
+  "input-product-search": "#product-search",
+  "select-product-category": "#product-category",
+  "div-product-item-1": "#product-item-1",
+  "div-product-item-2": "#product-item-2",
+  "input-search-input": "[data-testid=\"search-input\"]",
+  "select-category-select": "[data-testid=\"category-select\"]",
+  "div-class-product-catalog": ".product-catalog",
+  "div-class-search-container": ".search-container",
+  "div-class-dropdown": ".dropdown",
+  "div-class-product-grid": ".product-grid",
+  "div-class-product-card": ".product-card",
+  "h3-class-product-name": ".product-name",
+  "p-class-product-price": ".product-price",
+  "button-class-btn-add-cart": ".btn-add-cart",
+  "input-placeholder-Find-products": "[placeholder=\"Find products\"]"
+}

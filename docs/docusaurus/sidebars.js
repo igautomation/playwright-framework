@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-module.exports = {
-  docs: [
-=======
 /**
  * Creating a sidebar enables you to:
  - create an ordered group of docs
@@ -19,48 +15,20 @@ module.exports = {
 const sidebars = {
   // By default, Docusaurus generates a sidebar from the docs folder structure
   tutorialSidebar: [
->>>>>>> 51948a2 (Main v1.0)
     {
       type: 'category',
       label: 'Getting Started',
       items: [
-<<<<<<< HEAD
-        'docusaurus/docs/intro',
-        'docusaurus/docs/installation',
-        'docusaurus/docs/configuration'
-      ]
-=======
         'getting-started/introduction',
         'getting-started/installation',
         'getting-started/quick-start',
         'getting-started/configuration',
       ],
->>>>>>> 51948a2 (Main v1.0)
     },
     {
       type: 'category',
       label: 'Guides',
       items: [
-<<<<<<< HEAD
-        'docusaurus/docs/writing-tests',
-        'docusaurus/docs/extending',
-        'docusaurus/docs/ci-cd',
-        'docusaurus/docs/jira-xray'
-      ]
-    },
-    {
-      type: 'category',
-      label: 'API',
-      items: [
-        'docusaurus/docs/cli',
-        'docusaurus/docs/utilities',
-        'docusaurus/docs/page-objects',
-        'docusaurus/docs/pojos'
-      ]
-    }
-  ]
-};
-=======
         'guides/ui-testing',
         'guides/api-testing',
         'guides/e2e-testing',
@@ -117,4 +85,3 @@ const sidebars = {
 };
 
 module.exports = sidebars;
->>>>>>> 51948a2 (Main v1.0)

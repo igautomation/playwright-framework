@@ -40,12 +40,13 @@ test.describe('Visual Regression Tests @visual', () => {
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
     
-    // Compare a specific element
-    const result = await visualUtils.compareElement('header', 'header-element');
+    // Use a selector that actually exists on example.com
+    // The 'body' element is guaranteed to exist on any page
+    const result = await visualUtils.compareElement('body', 'body-element');
     
     // If this is the first run, it will create the baseline
     if (result.baselineCreated) {
-      console.log('Baseline created for header element');
+      console.log('Baseline created for body element');
     } else {
       // Check if the screenshots match
       expect(result.match).toBe(true, `Visual difference detected: ${result.diffPercentage.toFixed(2)}% different`);

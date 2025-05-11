@@ -1,0 +1,60 @@
+admin:
+  username: admin_user
+  password: Admin@123
+  email: eve.holt@reqres.in  # Use reqres.in supported email
+  role: administrator
+  permissions:
+    - create_users
+    - delete_users
+    - manage_settings
+    - view_reports
+  
+manager:
+  username: manager_user
+  password: Manager@123
+  email: eve.holt@reqres.in  # Use reqres.in supported email
+  role: manager
+  permissions:
+    - view_users
+    - edit_users
+    - view_reports
+    
+standard:
+  username: standard_user
+  password: Standard@123
+  email: eve.holt@reqres.in  # Use reqres.in supported email
+  role: user
+  permissions:
+    - view_profile
+    - edit_profile
+    
+guest:
+  username: guest_user
+  password: Guest@123
+  email: eve.holt@reqres.in  # Use reqres.in supported email
+  role: guest
+  permissions:
+    - view_public_content
+    
+test_accounts:
+  - username: test_user_1
+    password: Test@123
+    email: eve.holt@reqres.in  # Use reqres.in supported email
+    role: tester
+    
+  - username: test_user_2
+    password: Test@456
+    email: eve.holt@reqres.in  # Use reqres.in supported email
+    role: tester
+    
+  - username: test_user_3
+    password: Test@789
+    email: eve.holt@reqres.in  # Use reqres.in supported email
+    role: tester
+    
+locked_account:
+  username: locked_user
+  password: Locked@123
+  email: eve.holt@reqres.in  # Use reqres.in supported email
+  role: user
+  status: locked

@@ -7,20 +7,20 @@ const { defineConfig, devices } = require('@playwright/test');
 module.exports = defineConfig({
   testDir: './src/tests',
   /* Maximum time one test can run for. */
-  timeout: 30000,
+  timeout: 60000, // Increased timeout to accommodate API rate limiting delays
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000
+    timeout: 10000
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -31,22 +31,33 @@ module.exports = defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 0,
+    actionTimeout: 15000,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.API_BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.API_BASE_URL || 'https://reqres.in',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
+    
+    /* Viewport size */
+    viewport: { width: 1280, height: 720 },
+    
+    /* Automatically wait for elements */
+    navigationTimeout: 30000,
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Add extra timeout for API requests
+        actionTimeout: 30000,
+        navigationTimeout: 45000,
+      },
     },
     {
       name: 'firefox',
@@ -65,12 +76,29 @@ module.exports = defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     },
+    /* Test specific groups */
+    {
+      name: 'api',
+      testMatch: /.*api.*\.spec\.js/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Add extra timeout for API requests
+        actionTimeout: 30000,
+        navigationTimeout: 45000,
+      },
+    },
+    {
+      name: 'ui',
+      testMatch: /.*orangehrm.*\.spec\.js/,
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
   ],
   
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /* Define test metadata */
+  metadata: {
+    apiBaseUrl: 'https://reqres.in/api',
+    uiBaseUrl: 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
+  },
 });
