@@ -3,7 +3,7 @@
  * 
  * This test suite demonstrates API testing best practices using the Reqres.in API
  */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../fixtures/api-fixtures');
 
 /**
  * Repository pattern for API interactions
@@ -15,6 +15,12 @@ class ReqresApiRepository {
   constructor(request) {
     this.request = request;
     this.baseUrl = 'https://reqres.in/api';
+    
+    // Define headers directly to ensure they're always included
+    this.headers = {
+      'Content-Type': 'application/json'
+      // Note: x-api-key is not actually required by reqres.in
+    };
   }
 
   /**
@@ -23,7 +29,9 @@ class ReqresApiRepository {
    * @returns {Promise<Object>} - Response data
    */
   async getUsers(page = 1) {
-    const response = await this.request.get(`${this.baseUrl}/users?page=${page}`);
+    const response = await this.request.get(`${this.baseUrl}/users?page=${page}`, {
+      headers: this.headers
+    });
     if (!response.ok()) {
       throw new Error(`Failed to get users: ${response.statusText()}`);
     }
@@ -36,7 +44,9 @@ class ReqresApiRepository {
    * @returns {Promise<Object>} - Response data
    */
   async getUser(id) {
-    const response = await this.request.get(`${this.baseUrl}/users/${id}`);
+    const response = await this.request.get(`${this.baseUrl}/users/${id}`, {
+      headers: this.headers
+    });
     if (!response.ok()) {
       throw new Error(`Failed to get user ${id}: ${response.statusText()}`);
     }
@@ -51,9 +61,7 @@ class ReqresApiRepository {
   async createUser(userData) {
     const response = await this.request.post(`${this.baseUrl}/users`, {
       data: userData,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: this.headers
     });
     if (!response.ok()) {
       throw new Error(`Failed to create user: ${response.statusText()}`);
@@ -70,9 +78,7 @@ class ReqresApiRepository {
   async updateUser(id, userData) {
     const response = await this.request.put(`${this.baseUrl}/users/${id}`, {
       data: userData,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: this.headers
     });
     if (!response.ok()) {
       throw new Error(`Failed to update user ${id}: ${response.statusText()}`);
@@ -86,22 +92,41 @@ class ReqresApiRepository {
    * @returns {Promise<boolean>} - Success status
    */
   async deleteUser(id) {
-    const response = await this.request.delete(`${this.baseUrl}/users/${id}`);
+    const response = await this.request.delete(`${this.baseUrl}/users/${id}`, {
+      headers: this.headers
+    });
     return response.ok();
   }
 }
 
-// Test data
-const testData = {
-  newUser: {
-    name: 'John Doe',
-    job: 'QA Engineer'
-  },
-  updatedUser: {
-    name: 'John Updated',
-    job: 'Senior QA Engineer'
-  }
-};
+// Import data provider
+const { readYaml } = require('../../utils/common/dataOrchestrator');
+
+// Load test data from data provider
+let testData;
+try {
+  const yamlData = readYaml('src/data/testData.yaml');
+  testData = {
+    newUser: yamlData.user,
+    updatedUser: {
+      name: yamlData.user.name + ' Updated',
+      job: 'Senior ' + yamlData.user.job
+    }
+  };
+} catch (error) {
+  console.warn('Failed to load test data from YAML:', error.message);
+  // Fallback to default test data if data provider fails
+  testData = {
+    newUser: {
+      name: 'John Doe',
+      job: 'QA Engineer'
+    },
+    updatedUser: {
+      name: 'John Updated',
+      job: 'Senior QA Engineer'
+    }
+  };
+}
 
 test.describe('Reqres.in API Tests', () => {
   let apiRepo;

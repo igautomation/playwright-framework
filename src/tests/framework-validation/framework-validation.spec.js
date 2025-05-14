@@ -52,7 +52,7 @@ test.describe('Framework Validation @validation', () => {
     const packageJson = require('../../../package.json');
     
     // Check for essential dependencies
-    const essentialDeps = ['@playwright/test', 'dotenv'];
+    const essentialDeps = ['@playwright/test', 'dotenv-safe'];
     
     for (const dep of essentialDeps) {
       expect(

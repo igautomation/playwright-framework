@@ -11,6 +11,17 @@ test.describe('CLI Scraper @validation', () => {
   const testDataDir = path.resolve(process.cwd(), 'data/extracted/test-cli');
   const testSnapshotDir = path.resolve(process.cwd(), 'snapshots/test-cli');
   
+  // Ensure directories exist
+  if (!fs.existsSync(testDataDir)) {
+    fs.mkdirSync(testDataDir, { recursive: true });
+  }
+  if (!fs.existsSync(path.join(testDataDir, 'json'))) {
+    fs.mkdirSync(path.join(testDataDir, 'json'), { recursive: true });
+  }
+  if (!fs.existsSync(testSnapshotDir)) {
+    fs.mkdirSync(testSnapshotDir, { recursive: true });
+  }
+  
   // Create test server for consistent testing
   let server;
   let baseUrl;

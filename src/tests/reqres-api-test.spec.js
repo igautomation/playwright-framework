@@ -15,8 +15,11 @@ class ApiUtils {
     this.request = request;
     this.baseUrl = 'https://reqres.in/api';
     
-    // API key for Reqres.in
-    this.apiKey = 'reqres-free-v1';
+    // Headers for API requests
+    this.headers = {
+      'Content-Type': 'application/json'
+      // Note: x-api-key is not actually required by reqres.in
+    };
   }
 
   /**
@@ -31,11 +34,7 @@ class ApiUtils {
     
     while (retries > 0) {
       response = await this.request.get(`${this.baseUrl}${endpoint}`, {
-        // Add API key header for authentication
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
-        }
+        headers: this.headers
       });
       const status = response.status();
       
@@ -72,10 +71,7 @@ class ApiUtils {
     while (retries > 0) {
       response = await this.request.post(`${this.baseUrl}${endpoint}`, {
         data: data,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
-        }
+        headers: this.headers
       });
       const status = response.status();
       
@@ -112,10 +108,7 @@ class ApiUtils {
     while (retries > 0) {
       response = await this.request.put(`${this.baseUrl}${endpoint}`, {
         data: data,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
-        }
+        headers: this.headers
       });
       const status = response.status();
       
@@ -152,10 +145,7 @@ class ApiUtils {
     while (retries > 0) {
       response = await this.request.patch(`${this.baseUrl}${endpoint}`, {
         data: data,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
-        }
+        headers: this.headers
       });
       const status = response.status();
       
@@ -190,10 +180,7 @@ class ApiUtils {
     
     while (retries > 0) {
       response = await this.request.delete(`${this.baseUrl}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey
-        }
+        headers: this.headers
       });
       const status = response.status();
       
@@ -223,36 +210,17 @@ test.describe('Reqres.in API Tests', () => {
     // Add delay to avoid rate limiting (2 seconds)
     await new Promise(resolve => setTimeout(resolve, 2000));
     apiUtils = new ApiUtils(request);
-    
-    // Verify API key works by making a test request
-    try {
-      const testResponse = await request.get('https://reqres.in/api/users/2', {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiUtils.apiKey
-        }
-      });
-      
-      if (testResponse.ok()) {
-        console.log('API key verification successful. Status:', testResponse.status());
-      } else {
-        console.log('API key verification failed. Status:', testResponse.status());
-      }
-    } catch (error) {
-      console.log('Error verifying API key:', error.message);
-    }
   });
   
   // Configure tests to run serially to avoid rate limiting
   test.describe.configure({ mode: 'serial' });
 
   test('should get list of users', async ({ request }) => {
-    // Try direct request with API key
-    console.log('Attempting direct request with API key...');
+    // Try direct request
+    console.log('Attempting direct request...');
     const directResponse = await request.get('https://reqres.in/api/users?page=1', {
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiUtils.apiKey
+        'Content-Type': 'application/json'
       }
     });
     console.log('Direct request status:', directResponse.status());

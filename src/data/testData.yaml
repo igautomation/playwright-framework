@@ -5,6 +5,9 @@ user:
   
 api:
   baseUrl: https://reqres.in/api
+  headers:
+    x-api-key: reqres-free-v1
+    content-type: application/json
   endpoints:
     users: /users
     login: /login

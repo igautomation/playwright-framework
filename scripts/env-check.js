@@ -2,6 +2,7 @@
 
 // Import dotenv-safe to load environment variables
 const { config: loadEnv } = require('dotenv-safe');
+const path = require('path');
 
 // Load environment variables
 // - Uses `NODE_ENV` to determine which environment file to load
@@ -15,7 +16,7 @@ try {
   loadEnv({
     allowEmptyValues: true,
     example: '.env.example',
-    path: `src/config/env/${envFileName}.env`
+    path: path.resolve(process.cwd(), `src/config/env/${envFileName}.env`)
   });
 
   // Fallback load to revalidate against .env.example even if other file loads
@@ -23,11 +24,23 @@ try {
     allowEmptyValues: true,
     example: '.env.example'
   });
+  
+  console.log(`Environment variables loaded from ${envFileName}.env`);
 } catch (error) {
   // Exit script if validation fails
   console.error(`Failed to load environment variables: ${error.message}`);
   process.exit(1);
 }
 
-// Log all environment variables to verify they are loaded correctly
-console.log('Environment Variables:', process.env);
+// Log environment variables for debugging (excluding sensitive ones)
+const safeEnvVars = { ...process.env };
+// Remove sensitive variables from log
+['PASSWORD', 'SECRET', 'TOKEN', 'KEY', 'AUTH'].forEach(pattern => {
+  Object.keys(safeEnvVars).forEach(key => {
+    if (key.toUpperCase().includes(pattern)) {
+      safeEnvVars[key] = '******';
+    }
+  });
+});
+
+console.log('Environment Variables loaded successfully');

@@ -129,10 +129,10 @@ jobs:
     timeout-minutes: 60
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '${opts.nodeVersion}'
           cache: 'npm'
@@ -152,7 +152,7 @@ jobs:
         
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${opts.artifactName}
           path: ${opts.artifactPath}

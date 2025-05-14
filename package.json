@@ -11,6 +11,12 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
+    "test:ui-only": "node run-ui-tests.js",
+    "test:ui-only:sh": "bash run-ui-tests.sh",
+    "make:ui-tests-executable": "bash make-ui-tests-executable.sh",
+    "test:list": "playwright test --list",
+    "make:list-tests-executable": "bash make-list-tests-executable.sh",
+    "list:tests": "bash list-tests.sh",
     "verify": "node src/cli/index.js verify-tests",
     "lint": "node src/cli/index.js test-lint",
     "lint:fix": "node src/cli/index.js test-lint --fix",
@@ -26,7 +32,17 @@
     "test:all": "bash scripts/run-all-tests.sh",
     "test:all:report": "bash scripts/run-all-tests.sh --generate-report",
     "test:one-by-one": "node scripts/run-tests-one-by-one.js",
-    "test:one-by-one:sh": "bash scripts/run-tests-one-by-one.sh"
+    "test:one-by-one:sh": "bash scripts/run-tests-one-by-one.sh",
+    "test:src-one-by-one": "node scripts/run-src-tests-one-by-one.js",
+    "test:src-one-by-one:sh": "bash scripts/run-src-tests-one-by-one.sh",
+    "verify:framework": "node verify-framework.js",
+    "test:demo-verify": "bash run-demo-verify-tests.sh",
+    "test:framework-validation": "node scripts/run-framework-validation-tests.js",
+    "test:performance": "bash run-performance-tests.sh",
+    "test:advanced": "bash advanced-test-runner.sh",
+    "verify:docker": "bash scripts/verify-docker.sh",
+    "test:docker": "bash run-docker-verify.sh",
+    "make:docker-verify-executable": "bash make-docker-verify-executable.sh"
   },
   "keywords": [
     "playwright",
@@ -49,12 +65,16 @@
     "eslint-plugin-playwright": "^0.12.0",
     "exceljs": "^4.4.0",
     "fast-xml-parser": "^5.2.2",
+    "fs-extra": "^10.1.0",
     "glob": "^10.2.7",
     "js-yaml": "^4.1.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "pixelmatch": "^7.1.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "babel-plugin-module-resolver": "^5.0.0"
   }
 }

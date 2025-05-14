@@ -2,6 +2,49 @@
 
 Enterprise-grade test automation framework built with Playwright.
 
+## Quick Start
+
+To verify that the test framework is working correctly, run:
+
+```bash
+# Install dependencies
+npm install
+
+# Install Playwright browsers
+npx playwright install
+
+# Run the verification test
+npm run verify:framework
+```
+
+### Docker Verification
+
+To verify that Docker is working correctly with this framework, run:
+
+```bash
+# Make the Docker verification script executable
+chmod +x run-docker-verify.sh
+
+# Run the Docker verification
+./run-docker-verify.sh
+```
+
+This will:
+1. Check if Docker is installed and running
+2. Build the Docker image
+3. Run verification tests in Docker
+4. Report the results
+
+For more detailed instructions on verifying the test framework, see [README-VERIFICATION.md](README-VERIFICATION.md).
+
+## Running Tests
+
+To run the tests in this repository, see [HOW-TO-RUN-TESTS.md](HOW-TO-RUN-TESTS.md) for comprehensive instructions.
+
+For running UI tests specifically, see [README-UI-TESTS.md](README-UI-TESTS.md) for detailed instructions on running and fixing UI tests.
+
+For Docker-related instructions and verification, see [README-DOCKER.md](README-DOCKER.md) for detailed information on using Docker with this framework.
+
 ## Features
 
 - Comprehensive CLI for test execution and management
@@ -10,6 +53,7 @@ Enterprise-grade test automation framework built with Playwright.
 - Test linting with best practices enforcement
 - Multiple report formats (HTML, JSON, Markdown)
 - CI/CD integration (GitHub Actions, Jenkins, GitLab)
+- Docker support for containerized test execution
 - Test quality dashboard with historical trends
 - Self-healing locators
 - Visual testing capabilities
@@ -73,6 +117,36 @@ npx playwright test --workers=4
 # Run tests with specific reporter
 npx playwright test --reporter=html
 
+# List all available tests without running them
+npx playwright test --list
+
+# List tests with specific project
+npx playwright test --list --project=chromium
+
+# List tests with specific tag
+npx playwright test --list --grep=@smoke
+
+# List tests using npm script
+npm run test:list
+
+# List tests using CLI command
+npx playwright-framework list-tests
+
+# List tests using CLI command with project filter
+npx playwright-framework list-tests --project=chromium
+
+# List tests using CLI command with tag filter
+npx playwright-framework list-tests --tags=@smoke
+
+# List tests using shell script
+./list-tests.sh
+
+# List tests using shell script with project filter
+./list-tests.sh --project=chromium
+
+# List tests using shell script with tag filter
+./list-tests.sh --tags=@smoke
+
 # Run tests with specific configuration
 npx playwright test --config=custom-config.js
 
@@ -93,6 +167,12 @@ npm run test:one-by-one
 
 # Run all tests one by one using shell script
 npm run test:one-by-one:sh
+
+# Run all src/tests one by one
+npm run test:src-one-by-one
+
+# Run all src/tests one by one using shell script
+npm run test:src-one-by-one:sh
 ```
 
 ### Test Verification

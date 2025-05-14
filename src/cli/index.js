@@ -23,6 +23,7 @@ program
   .option('-d, --debug', 'Run tests in debug mode')
   .option('-r, --reporter <reporter>', 'Specify reporter')
   .option('-e, --env <env>', 'Specify environment')
+  .option('-l, --list', 'List all tests without running them')
   .action(require('./commands/run'));
 
 program
@@ -32,6 +33,13 @@ program
     console.log('Listing tags...');
     // Implementation for listing tags
   });
+
+program
+  .command('list-tests')
+  .description('List all available tests without running them')
+  .option('-p, --project <project>', 'List tests for specific project')
+  .option('-t, --tags <tags>', 'Filter tests by tags')
+  .action(require('./commands/list-tests'));
 
 program
   .command('self-test')

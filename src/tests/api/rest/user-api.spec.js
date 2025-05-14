@@ -1,8 +1,8 @@
 /**
  * User API tests
  */
-const { test, expect } = require('../../fixtures/baseFixtures');
-const User = require('../../../utils/api/models/User').default;
+const { test, expect } = require('@playwright/test');
+const User = require('../../../utils/api/models/User');
 const TestDataFactory = require('../../../utils/common/testDataFactory');
 const schemaValidator = require('../../../utils/api/schemaValidator');
 const fs = require('fs');
@@ -31,7 +31,27 @@ test.describe('User API @api', () => {
     testUser = new User(TestDataFactory.generateUser());
   });
 
-  test('should create a new user @smoke', async ({ apiClient }) => {
+  test('should create a new user @smoke', async ({ request }) => {
+    // Create a simple API client
+    const apiClient = {
+      post: async (url, data) => {
+        const response = await request.post(url, { data });
+        return await response.json();
+      },
+      get: async (url) => {
+        const response = await request.get(url);
+        return await response.json();
+      },
+      put: async (url, data) => {
+        const response = await request.put(url, { data });
+        return await response.json();
+      },
+      delete: async (url) => {
+        const response = await request.delete(url);
+        return await response.json();
+      }
+    };
+    
     // Create user
     const response = await apiClient.post('/user', testUser.toJSON());
 
@@ -47,7 +67,27 @@ test.describe('User API @api', () => {
     }
   });
 
-  test('should get user by username', async ({ apiClient }) => {
+  test('should get user by username', async ({ request }) => {
+    // Create a simple API client
+    const apiClient = {
+      post: async (url, data) => {
+        const response = await request.post(url, { data });
+        return await response.json();
+      },
+      get: async (url) => {
+        const response = await request.get(url);
+        return await response.json();
+      },
+      put: async (url, data) => {
+        const response = await request.put(url, { data });
+        return await response.json();
+      },
+      delete: async (url) => {
+        const response = await request.delete(url);
+        return await response.json();
+      }
+    };
+    
     // Create user first
     await apiClient.post('/user', testUser.toJSON());
 
@@ -66,7 +106,27 @@ test.describe('User API @api', () => {
     }
   });
 
-  test('should update user', async ({ apiClient }) => {
+  test('should update user', async ({ request }) => {
+    // Create a simple API client
+    const apiClient = {
+      post: async (url, data) => {
+        const response = await request.post(url, { data });
+        return await response.json();
+      },
+      get: async (url) => {
+        const response = await request.get(url);
+        return await response.json();
+      },
+      put: async (url, data) => {
+        const response = await request.put(url, { data });
+        return await response.json();
+      },
+      delete: async (url) => {
+        const response = await request.delete(url);
+        return await response.json();
+      }
+    };
+    
     // Create user first
     await apiClient.post('/user', testUser.toJSON());
 
@@ -85,7 +145,32 @@ test.describe('User API @api', () => {
     expect(updatedUser.email).toBe(testUser.email);
   });
 
-  test('should delete user', async ({ apiClient }) => {
+  test('should delete user', async ({ request }) => {
+    // Create a simple API client
+    const apiClient = {
+      post: async (url, data) => {
+        const response = await request.post(url, { data });
+        return await response.json();
+      },
+      get: async (url) => {
+        const response = await request.get(url);
+        if (!response.ok()) {
+          const error = new Error('API request failed');
+          error.response = response;
+          throw error;
+        }
+        return await response.json();
+      },
+      put: async (url, data) => {
+        const response = await request.put(url, { data });
+        return await response.json();
+      },
+      delete: async (url) => {
+        const response = await request.delete(url);
+        return await response.json();
+      }
+    };
+    
     // Create user first
     await apiClient.post('/user', testUser.toJSON());
 
@@ -102,7 +187,7 @@ test.describe('User API @api', () => {
       expect(false).toBeTruthy();
     } catch (error) {
       // Expected error
-      expect(error.response.status).toBe(404);
+      expect(error.response.status()).toBe(404);
     }
   });
 });

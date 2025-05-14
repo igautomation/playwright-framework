@@ -1,0 +1,12 @@
+{
+  "name": "Test Product",
+  "price": 99.99,
+  "features": [
+    "Feature 1",
+    "Feature 2"
+  ],
+  "details": {
+    "sku": "SKU123",
+    "weight": "2kg"
+  }
+}

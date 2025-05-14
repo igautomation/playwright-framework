@@ -1,6 +1,6 @@
 // src/tests/ui/smoke/xpath-practice.spec.js
 
-import { test, expect } from '@fixtures/combined.js';
+const { test, expect } = require('../../../fixtures/combined.js');
 
 test.describe('@ui @smoke XPath Practice Page UI Tests', () => {
   // Smoke Test: Validate error shown for invalid email submission

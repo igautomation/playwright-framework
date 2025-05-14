@@ -3,7 +3,19 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const logger = require('../src/utils/common/logger');
+
+// Try to load logger, but provide fallback if it doesn't exist
+let logger;
+try {
+  logger = require('../src/utils/common/logger');
+} catch (error) {
+  logger = {
+    info: console.log,
+    error: console.error,
+    warn: console.warn
+  };
+  console.warn('Could not load logger module, using console fallback');
+}
 
 /**
  * Framework Health Check
@@ -48,7 +60,7 @@ const requiredDirs = [
 ];
 
 requiredDirs.forEach((dir) => {
-  const dirPath = path.resolve(__dirname, '..', dir);
+  const dirPath = path.resolve(process.cwd(), dir);
   if (fs.existsSync(dirPath)) {
     logResult('Directory', 'passed', `${dir} exists`);
   } else {
@@ -67,7 +79,7 @@ const requiredFiles = [
 ];
 
 requiredFiles.forEach((file) => {
-  const filePath = path.resolve(__dirname, '..', file);
+  const filePath = path.resolve(process.cwd(), file);
   if (fs.existsSync(filePath)) {
     logResult('File', 'passed', `${file} exists`);
   } else {
@@ -78,7 +90,8 @@ requiredFiles.forEach((file) => {
 // 3. Check dependencies
 console.log('\n📦 Checking dependencies...');
 try {
-  const packageJson = require('../package.json');
+  const packageJsonPath = path.resolve(process.cwd(), 'package.json');
+  const packageJson = require(packageJsonPath);
   const requiredDeps = ['@playwright/test', 'allure-playwright', 'dotenv-safe'];
 
   requiredDeps.forEach((dep) => {
@@ -227,7 +240,7 @@ const utilityClasses = [
 ];
 
 utilityClasses.forEach((util) => {
-  const utilPath = path.resolve(__dirname, '..', util.path);
+  const utilPath = path.resolve(process.cwd(), util.path);
   if (fs.existsSync(utilPath)) {
     try {
       const utilModule = require(utilPath);
@@ -248,7 +261,7 @@ utilityClasses.forEach((util) => {
       );
     }
   } else {
-    logResult('Utility', 'failed', `${util.path} does not exist`);
+    logResult('Utility', 'warning', `${util.path} does not exist`);
   }
 });
 

@@ -13,17 +13,21 @@ const DOMComparisonUtils = require('../../utils/web/domComparisonUtils');
 const path = require('path');
 
 // Load environment variables
-require('dotenv').config({
-  path: path.resolve(__dirname, '../../../.env'),
-  override: true,
-  debug: false
-});
+try {
+  require('dotenv-safe').config({
+    path: path.resolve(__dirname, '../../../.env'),
+    example: path.resolve(__dirname, '../../../.env.example'),
+    allowEmptyValues: true
+  });
+} catch (error) {
+  console.warn('Failed to load environment variables:', error.message);
+}
 
 // Extend base test with custom fixtures
 const test = base.test.extend({
   // API client fixture
   apiClient: async ({}, use) => {
-    const apiClient = new ApiUtils(process.env.API_URL);
+    const apiClient = new ApiUtils(process.env.API_URL || 'https://reqres.in/api');
     await use(apiClient);
   },
 

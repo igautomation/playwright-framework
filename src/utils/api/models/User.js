@@ -340,3 +340,4 @@ class User {
 }
 
 module.exports = User;
+module.exports.default = User;

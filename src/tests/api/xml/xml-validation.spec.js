@@ -2,7 +2,7 @@
  * XML API testing and validation
  */
 const { test, expect } = require('@playwright/test');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const { XMLParser, XMLBuilder } = require('fast-xml-parser');
 
@@ -127,13 +127,13 @@ test.describe('XML API Tests @xml', () => {
     );
     
     // Extract error data
-    const errorData = errorResponse.body.error;
+    const errorData = errorResponse.body.e;
     
     // Set up mock API endpoint on the page
     await page.route('**/api/users/999', route => {
       // Convert the XML response to a string
       const xmlResponse = jsonToXml({
-        error: errorData
+        e: errorData
       });
       
       // Send the mocked XML response

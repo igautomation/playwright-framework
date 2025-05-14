@@ -48,6 +48,9 @@ module.exports = defineConfig({
     navigationTimeout: 30000,
   },
 
+  /* Global setup and teardown */
+  globalSetup: './global-setup.js',
+  
   /* Configure projects for major browsers */
   projects: [
     {
@@ -85,6 +88,11 @@ module.exports = defineConfig({
         // Add extra timeout for API requests
         actionTimeout: 30000,
         navigationTimeout: 45000,
+        // Add extra HTTP headers for API requests
+        extraHTTPHeaders: {
+          'x-api-key': 'reqres-free-v1',
+          'Content-Type': 'application/json'
+        }
       },
     },
     {
@@ -92,6 +100,35 @@ module.exports = defineConfig({
       testMatch: /.*orangehrm.*\.spec\.js/,
       use: {
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'e2e',
+      testMatch: /.*e2e.*\.spec\.js/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Add extra timeout for API requests
+        actionTimeout: 30000,
+        navigationTimeout: 45000,
+        // Add extra HTTP headers for API requests
+        extraHTTPHeaders: {
+          'x-api-key': 'reqres-free-v1',
+          'Content-Type': 'application/json'
+        }
+      },
+    },
+    {
+      name: 'visual',
+      testMatch: /.*visual.*\.spec\.js/,
+      testDir: './src/tests',
+      use: {
+        ...devices['Desktop Chrome'],
+        // Specific settings for visual tests
+        screenshot: 'on',
+        viewport: { width: 1280, height: 720 },
+        // Increase timeouts for visual comparison
+        actionTimeout: 45000,
+        navigationTimeout: 60000,
       },
     },
   ],

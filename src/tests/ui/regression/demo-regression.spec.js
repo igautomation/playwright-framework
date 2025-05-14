@@ -1,6 +1,6 @@
 // src/tests/ui/regression/demo-regression.spec.js
 
-import { test, expect } from '@fixtures/combined.js';
+const { test, expect } = require('../../../fixtures/combined.js');
 
 // UI Regression Tests: Simulates a basic product search flow
 test.describe('@ui @regression Product Search Regression Suite', () => {

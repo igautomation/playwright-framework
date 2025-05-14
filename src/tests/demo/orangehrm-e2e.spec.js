@@ -200,41 +200,5 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
     );
   });
 
-  test('Performance testing @performance', async ({ page }) => {
-    // Skip if PerformanceUtils is not available
-    test.skip(!global.PerformanceUtils, 'PerformanceUtils not available');
-
-    // Create page objects
-    const loginPage = new LoginPage(page);
-    const dashboardPage = new DashboardPage(page);
-
-    // Create performance utils (if available)
-    let performanceUtils;
-    try {
-      performanceUtils = new PerformanceUtils(page);
-    } catch (error) {
-      console.log('PerformanceUtils not available, using dashboard metrics');
-    }
-
-    // Measure login page load time
-    const startTime = Date.now();
-    await loginPage.navigate();
-    const loginLoadTime = Date.now() - startTime;
-    console.log(`Login page load time: ${loginLoadTime}ms`);
-
-    // Login with valid credentials
-    await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
-    );
-
-    // Measure dashboard page performance
-    const dashboardMetrics = await dashboardPage.getPerformanceMetrics();
-    console.log('Dashboard performance metrics:', dashboardMetrics);
-
-    if (performanceUtils) {
-      // Generate performance report
-      await performanceUtils.generatePerformanceReport();
-    }
-  });
+  // Performance test moved to dedicated performance test file
 });

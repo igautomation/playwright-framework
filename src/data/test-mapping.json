@@ -13,7 +13,7 @@
     "regression": {
       "description": "Full regression test suite",
       "tests": [
-        "src/tests/api/rest/reqres-crud.api.spec.js",
+        "src/tests/api/rest/fixed-reqres-api.spec.js",
         "src/tests/ui/regression/product-catalog.spec.js",
         "src/tests/ui/regression/user-profile.spec.js",
         "src/tests/ui/regression/shopping-cart.spec.js"
@@ -72,7 +72,7 @@
     "apiResponses": {
       "source": "src/data/json/api-responses.json",
       "tests": [
-        "src/tests/api/rest/reqres-crud.api.spec.js"
+        "src/tests/api/rest/fixed-reqres-api.spec.js"
       ]
     },
     "testUsers": {

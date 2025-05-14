@@ -1,6 +1,6 @@
 // src/tests/ui/retry-timeout.spec.js
 
-import { test, expect } from '@fixtures/combined.js';
+const { test, expect } = require('../../../fixtures/combined.js');
 
 // Configure test suite-level timeout for all tests (30s)
 test.describe.configure({ timeout: 30000 });

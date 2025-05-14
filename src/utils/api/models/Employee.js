@@ -1,159 +1,125 @@
 /**
- * Employee POJO model for API testing
+ * Employee model
  */
 class Employee {
-  // Private properties using # prefix
-  #id;
-  #firstName;
-  #middleName;
-  #lastName;
-  #employeeId;
-  #jobTitle;
-  #status;
-  #subUnit;
-  #supervisor;
-
   /**
    * Constructor
-   * @param {Object} employeeData - Employee data
+   * @param {Object} data - Employee data
    */
-  constructor(employeeData = {}) {
-    this.#id = employeeData.id || 0;
-    this.#firstName = employeeData.firstName || '';
-    this.#middleName = employeeData.middleName || '';
-    this.#lastName = employeeData.lastName || '';
-    this.#employeeId = employeeData.employeeId || '';
-    this.#jobTitle = employeeData.jobTitle || '';
-    this.#status = employeeData.status || '';
-    this.#subUnit = employeeData.subUnit || '';
-    this.#supervisor = employeeData.supervisor || '';
-  }
-
-  // Getters and setters
-  get id() {
-    return this.#id;
-  }
-
-  set id(value) {
-    this.#id = value;
-  }
-
-  get firstName() {
-    return this.#firstName;
-  }
-
-  set firstName(value) {
-    this.#firstName = value;
-  }
-
-  get middleName() {
-    return this.#middleName;
-  }
-
-  set middleName(value) {
-    this.#middleName = value;
-  }
-
-  get lastName() {
-    return this.#lastName;
-  }
-
-  set lastName(value) {
-    this.#lastName = value;
-  }
-
-  get employeeId() {
-    return this.#employeeId;
-  }
-
-  set employeeId(value) {
-    this.#employeeId = value;
-  }
-
-  get jobTitle() {
-    return this.#jobTitle;
-  }
-
-  set jobTitle(value) {
-    this.#jobTitle = value;
-  }
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-  }
-
-  get subUnit() {
-    return this.#subUnit;
-  }
-
-  set subUnit(value) {
-    this.#subUnit = value;
-  }
-
-  get supervisor() {
-    return this.#supervisor;
-  }
-
-  set supervisor(value) {
-    this.#supervisor = value;
-  }
-
-  // Get full name
-  get fullName() {
-    return [this.#firstName, this.#middleName, this.#lastName]
-      .filter(Boolean)
-      .join(' ');
+  constructor(data = {}) {
+    this.id = data.id || null;
+    this.firstName = data.firstName || '';
+    this.lastName = data.lastName || '';
+    this.email = data.email || '';
+    this.employeeId = data.employeeId || '';
+    this.joinDate = data.joinDate || new Date();
+    this.department = data.department || '';
+    this.position = data.position || '';
+    this.salary = data.salary || 0;
+    this.status = data.status || 'Active';
   }
 
   /**
-   * Serialize to JSON
-   * @returns {Object} JSON representation
+   * Get full name
+   * @returns {string} Full name
    */
-  toJSON() {
+  getFullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+
+  /**
+   * Get formatted join date
+   * @returns {string} Formatted date
+   */
+  getFormattedJoinDate() {
+    return this.joinDate instanceof Date 
+      ? this.joinDate.toISOString().split('T')[0]
+      : this.joinDate;
+  }
+
+  /**
+   * Convert to API payload
+   * @returns {Object} API payload
+   */
+  toApiPayload() {
     return {
-      id: this.#id,
-      firstName: this.#firstName,
-      middleName: this.#middleName,
-      lastName: this.#lastName,
-      employeeId: this.#employeeId,
-      jobTitle: this.#jobTitle,
-      status: this.#status,
-      subUnit: this.#subUnit,
-      supervisor: this.#supervisor,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      employeeId: this.employeeId,
+      joinDate: this.getFormattedJoinDate(),
+      department: this.department,
+      position: this.position,
+      status: this.status
     };
   }
 
   /**
-   * Deserialize from JSON
-   * @param {Object} json - JSON object
-   * @returns {Employee} Employee instance
+   * Convert to UI form data
+   * @returns {Object} UI form data
    */
-  static fromJSON(json) {
-    return new Employee(json);
+  toFormData() {
+    return {
+      firstName: this.firstName,
+      lastName: this.lastName,
+      employeeId: this.employeeId,
+      joinDate: this.getFormattedJoinDate()
+    };
   }
-
+  
   /**
-   * Validate employee data
+   * Convert to JSON object
+   * @returns {Object} JSON representation of the employee
+   */
+  toJSON() {
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      employeeId: this.employeeId,
+      joinDate: this.getFormattedJoinDate(),
+      department: this.department,
+      position: this.position,
+      salary: this.salary,
+      status: this.status
+    };
+  }
+  
+  /**
+   * Validate employee data against business rules
    * @returns {Object} Validation result
    */
   validate() {
     const errors = [];
-
-    if (!this.#firstName) {
+    
+    // Check required fields
+    if (!this.firstName) {
       errors.push('First name is required');
     }
-
-    if (!this.#lastName) {
+    
+    if (!this.lastName) {
       errors.push('Last name is required');
     }
-
+    
+    if (!this.employeeId) {
+      errors.push('Employee ID is required');
+    }
+    
+    // Check email format if provided
+    if (this.email && !this.email.includes('@')) {
+      errors.push('Invalid email format');
+    }
+    
+    // Check status is valid
+    const validStatuses = ['Active', 'On Leave', 'Terminated'];
+    if (this.status && !validStatuses.includes(this.status)) {
+      errors.push(`Status must be one of: ${validStatuses.join(', ')}`);
+    }
+    
     return {
       valid: errors.length === 0,
-      errors,
+      errors: errors.length > 0 ? errors : null
     };
   }
 }

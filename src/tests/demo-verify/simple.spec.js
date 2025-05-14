@@ -5,8 +5,19 @@ const { test, expect } = require('@playwright/test');
  */
 test.describe('Simple test suite', () => {
   test.beforeEach(async ({ page }) => {
-    // Go to the starting url before each test
-    await page.goto('https://example.com/');
+    // Instead of navigating to example.com, set the content directly
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Example Domain</title>
+      </head>
+      <body>
+        <h1>Example Domain</h1>
+        <p>This is a mock of example.com for testing purposes.</p>
+      </body>
+      </html>
+    `);
   });
 
   test('has title', async ({ page }) => {

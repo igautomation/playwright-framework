@@ -4,14 +4,14 @@
 const fs = require('fs');
 const path = require('path');
 // Ensure pixelmatch is properly imported
-// Ensure pixelmatch is properly imported
+const { PNG } = require('pngjs');
 let pixelmatch;
 try {
   pixelmatch = require('pixelmatch');
 } catch (e) {
   console.error('Failed to load pixelmatch:', e.message);
   // Provide a fallback implementation if the module is not available
-  pixelmatch = (img1, img2, output, width, height, options) => {
+  pixelmatch = function(img1, img2, output, width, height, options) {
     // Simple implementation that just counts different pixels
     let diffCount = 0;
     for (let i = 0; i < img1.length; i += 4) {
@@ -37,9 +37,30 @@ try {
     return diffCount;
   };
 }
-const { PNG } = require('pngjs');
 const logger = require('../common/logger');
 const PlaywrightErrorHandler = require('../common/errorHandler');
+
+// Check if we should update baselines automatically
+const shouldUpdateBaselines = () => {
+  // Check environment variable first
+  if (process.env.PLAYWRIGHT_VISUAL_UPDATE_BASELINES === '1') {
+    return true;
+  }
+  
+  // Check YAML config if available
+  try {
+    const yaml = require('js-yaml');
+    const configPath = path.join(process.cwd(), 'src/data/yaml/visual-test-config.yaml');
+    if (fs.existsSync(configPath)) {
+      const config = yaml.load(fs.readFileSync(configPath, 'utf8'));
+      return config.visual_testing.updateBaselines === true;
+    }
+  } catch (error) {
+    logger.warn('Failed to read YAML config for updateBaselines setting:', error.message);
+  }
+  
+  return false;
+};
 
 /**
  * Utilities for visual comparison testing
@@ -56,6 +77,7 @@ class VisualComparisonUtils {
     this.diffDir = options.diffDir || path.join(process.cwd(), 'visual-diffs');
     this.threshold = options.threshold || 0.1;
     this.matchThreshold = options.matchThreshold || 0.1;
+    this.updateBaselines = options.updateBaselines || shouldUpdateBaselines();
     
     // Create directories if they don't exist
     if (!fs.existsSync(this.baselineDir)) {
@@ -109,6 +131,29 @@ class VisualComparisonUtils {
       if (baseline.width !== actual.width || baseline.height !== actual.height) {
         logger.warn(`Screenshot dimensions mismatch for ${name}: baseline (${baseline.width}x${baseline.height}) vs actual (${actual.width}x${actual.height})`);
         
+        // If auto-update is enabled, update the baseline with the new dimensions
+        if (this.updateBaselines) {
+          logger.info(`Updating baseline due to dimension mismatch for ${name}`);
+          fs.copyFileSync(actualPath, baselinePath);
+          
+          return {
+            name,
+            baselineUpdated: true,
+            match: true,
+            dimensionMismatch: true,
+            baselineDimensions: {
+              width: baseline.width,
+              height: baseline.height
+            },
+            actualDimensions: {
+              width: actual.width,
+              height: actual.height
+            },
+            baselinePath,
+            actualPath
+          };
+        }
+        
         return {
           name,
           match: false,
@@ -146,6 +191,24 @@ class VisualComparisonUtils {
       const diffPercentage = (diffPixels / (width * height)) * 100;
       const matchThreshold = options.matchThreshold || this.matchThreshold;
       const match = diffPercentage <= matchThreshold;
+      
+      // If there are differences and auto-update is enabled, update the baseline
+      if (!match && this.updateBaselines) {
+        logger.info(`Updating baseline for ${name} due to visual differences (${diffPercentage.toFixed(2)}%)`);
+        fs.copyFileSync(actualPath, baselinePath);
+        
+        return {
+          name,
+          baselineUpdated: true,
+          match: true,
+          diffPixels,
+          diffPercentage,
+          width,
+          height,
+          baselinePath,
+          actualPath
+        };
+      }
       
       // Save diff image if there are differences
       if (!match) {
@@ -222,6 +285,30 @@ class VisualComparisonUtils {
       if (baseline.width !== actual.width || baseline.height !== actual.height) {
         logger.warn(`Element screenshot dimensions mismatch for ${name}: baseline (${baseline.width}x${baseline.height}) vs actual (${actual.width}x${actual.height})`);
         
+        // If auto-update is enabled, update the baseline with the new dimensions
+        if (this.updateBaselines) {
+          logger.info(`Updating baseline due to dimension mismatch for element ${name}`);
+          fs.copyFileSync(actualPath, baselinePath);
+          
+          return {
+            name,
+            selector,
+            baselineUpdated: true,
+            match: true,
+            dimensionMismatch: true,
+            baselineDimensions: {
+              width: baseline.width,
+              height: baseline.height
+            },
+            actualDimensions: {
+              width: actual.width,
+              height: actual.height
+            },
+            baselinePath,
+            actualPath
+          };
+        }
+        
         return {
           name,
           selector,
@@ -260,6 +347,25 @@ class VisualComparisonUtils {
       const diffPercentage = (diffPixels / (width * height)) * 100;
       const matchThreshold = options.matchThreshold || this.matchThreshold;
       const match = diffPercentage <= matchThreshold;
+      
+      // If there are differences and auto-update is enabled, update the baseline
+      if (!match && this.updateBaselines) {
+        logger.info(`Updating baseline for element ${name} due to visual differences (${diffPercentage.toFixed(2)}%)`);
+        fs.copyFileSync(actualPath, baselinePath);
+        
+        return {
+          name,
+          selector,
+          baselineUpdated: true,
+          match: true,
+          diffPixels,
+          diffPercentage,
+          width,
+          height,
+          baselinePath,
+          actualPath
+        };
+      }
       
       // Save diff image if there are differences
       if (!match) {

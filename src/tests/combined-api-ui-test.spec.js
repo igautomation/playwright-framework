@@ -5,14 +5,12 @@
  * using reqres.in API and OrangeHRM UI
  */
 const { test, expect } = require('@playwright/test');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 // Ensure screenshots directory exists
 const screenshotsDir = path.join(process.cwd(), 'screenshots');
-if (!fs.existsSync(screenshotsDir)) {
-  fs.mkdirSync(screenshotsDir, { recursive: true });
-}
+fs.ensureDirSync(screenshotsDir);
 
 // Page Object for OrangeHRM Login Page
 class OrangeHrmLoginPage {
@@ -31,9 +29,20 @@ class OrangeHrmLoginPage {
    * Navigate to the login page
    */
   async navigate() {
-    await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-    // Wait for the page to load completely
-    await this.page.waitForLoadState('networkidle');
+    try {
+      await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', {
+        timeout: 30000
+      });
+      // Wait for the page to load with a more reliable approach
+      await this.page.waitForSelector('input[name="username"]', { timeout: 30000 });
+    } catch (error) {
+      console.error('Error navigating to login page:', error);
+      // Try again with a different approach if the first one fails
+      await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', {
+        waitUntil: 'domcontentloaded',
+        timeout: 45000
+      });
+    }
   }
 
   /**
@@ -42,9 +51,19 @@ class OrangeHrmLoginPage {
    * @param {string} password 
    */
   async login(username, password) {
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
-    await this.loginButton.click();
+    try {
+      await this.usernameInput.waitFor({ state: 'visible', timeout: 10000 });
+      await this.usernameInput.fill(username);
+      await this.passwordInput.fill(password);
+      await this.loginButton.click();
+    } catch (error) {
+      console.error('Error during login:', error);
+      // Try again with a different approach
+      await this.page.waitForTimeout(2000);
+      await this.page.fill('input[name="username"]', username);
+      await this.page.fill('input[name="password"]', password);
+      await this.page.click('button[type="submit"]');
+    }
   }
 }
 

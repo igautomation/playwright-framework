@@ -1,11 +1,6 @@
-id,firstName,lastName,email,phone,role,department,active
-1,John,Doe,john.doe@example.com,555-123-4567,admin,Engineering,true
-2,Jane,Smith,jane.smith@example.com,555-987-6543,user,Marketing,true
-3,Robert,Johnson,robert.johnson@example.com,555-456-7890,manager,Product,true
-4,Emily,Davis,emily.davis@example.com,555-789-0123,user,Sales,false
-5,Michael,Wilson,michael.wilson@example.com,555-321-6547,user,Support,true
-6,Sarah,Brown,sarah.brown@example.com,555-654-3210,manager,HR,true
-7,David,Miller,david.miller@example.com,555-987-1234,user,Finance,true
-8,Lisa,Taylor,lisa.taylor@example.com,555-456-7891,admin,IT,true
-9,James,Anderson,james.anderson@example.com,555-123-7890,user,Customer Service,false
-10,Jennifer,Thomas,jennifer.thomas@example.com,555-789-4561,user,Research,true
+id,name,email,role,active
+1,John Doe,john.doe@example.com,admin,true
+2,Jane Smith,jane.smith@example.com,user,true
+3,Robert Johnson,robert.johnson@example.com,manager,true
+4,Emily Davis,emily.davis@example.com,user,false
+5,Michael Wilson,michael.wilson@example.com,user,true

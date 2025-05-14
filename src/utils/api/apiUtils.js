@@ -13,6 +13,64 @@ class ApiUtils {
     this.headers = {
       'Content-Type': 'application/json'
     };
+    this.defaultHeaders = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Try to load API headers from data provider
+    try {
+      const { readYaml } = require('../common/dataOrchestrator');
+      const apiConfig = readYaml('src/data/testData.yaml').api;
+      if (apiConfig && apiConfig.headers) {
+        Object.assign(this.headers, apiConfig.headers);
+        Object.assign(this.defaultHeaders, apiConfig.headers);
+      }
+    } catch (error) {
+      logger.warn('Failed to load API headers from data provider:', error.message);
+    }
+  }
+  
+  /**
+   * Send API request
+   * @param {string} method - HTTP method
+   * @param {string} endpoint - API endpoint
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response object
+   */
+  async sendRequest(method, endpoint, options = {}) {
+    const url = this._buildUrl(endpoint);
+    
+    // Ensure we always have the API key header
+    try {
+      // Try to load API headers dynamically if not already in defaultHeaders
+      if (!this.defaultHeaders['x-api-key']) {
+        const { getApiHeaders } = require('./apiHeaderProvider');
+        const apiHeaders = getApiHeaders();
+        Object.assign(this.defaultHeaders, apiHeaders);
+      }
+    } catch (error) {
+      console.warn('Failed to load API headers dynamically:', error.message);
+      // Fallback to hardcoded API key if needed
+      if (!this.defaultHeaders['x-api-key']) {
+        this.defaultHeaders['x-api-key'] = 'reqres-free-v1';
+      }
+    }
+    
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: options.data ? JSON.stringify(options.data) : undefined,
+        ...options
+      });
+      
+      return await this._processResponse(response);
+    } catch (error) {
+      console.error(`API request failed: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -23,6 +81,26 @@ class ApiUtils {
    */
   setAuth(token, type = 'Bearer') {
     this.headers['Authorization'] = `${type} ${token}`;
+    return this;
+  }
+  
+  /**
+   * Set auth token
+   * @param {string} token - Authorization token
+   * @returns {ApiUtils} This instance for chaining
+   */
+  setAuthToken(token) {
+    this.defaultHeaders['Authorization'] = `Bearer ${token}`;
+    return this;
+  }
+  
+  /**
+   * Set API key
+   * @param {string} apiKey - API key
+   * @returns {ApiUtils} This instance for chaining
+   */
+  setApiKey(apiKey) {
+    this.defaultHeaders['X-API-Key'] = apiKey;
     return this;
   }
 

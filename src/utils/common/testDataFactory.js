@@ -29,6 +29,30 @@ class TestDataFactory {
       userStatus: options.userStatus || faker.number.int({ min: 0, max: 1 })
     };
   }
+  
+  /**
+   * Generate employee data
+   * @param {Object} options - Employee data options
+   * @returns {Object} Employee data
+   */
+  static generateEmployee(options = {}) {
+    const firstName = options.firstName || faker.person.firstName();
+    const lastName = options.lastName || faker.person.lastName();
+    const email = options.email || faker.internet.email({ firstName, lastName });
+    
+    return {
+      id: options.id || faker.number.int({ min: 1, max: 10000 }),
+      firstName,
+      lastName,
+      email,
+      employeeId: options.employeeId || `EMP-${faker.number.int({ min: 10000, max: 99999 })}`,
+      joinDate: options.joinDate || faker.date.past(),
+      department: options.department || faker.helpers.arrayElement(['HR', 'IT', 'Finance', 'Marketing', 'Operations']),
+      position: options.position || faker.person.jobTitle(),
+      salary: options.salary || faker.number.int({ min: 30000, max: 150000 }),
+      status: options.status || faker.helpers.arrayElement(['Active', 'On Leave', 'Terminated'])
+    };
+  }
 
   /**
    * Generate multiple users

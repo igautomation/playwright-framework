@@ -1,26 +1,6 @@
-# Build stage
-FROM mcr.microsoft.com/playwright:v1.40.0-focal AS builder
+# Validation Dockerfile
+# Used for framework validation tests
 
-WORKDIR /app
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-    build-essential \
-    make \
-    g++ \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY package*.json ./
-RUN npm ci
-
-# Runtime stage
 FROM mcr.microsoft.com/playwright:v1.40.0-focal
 
 WORKDIR /app
@@ -36,13 +16,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only runtime dependencies
-COPY --from=builder /app/node_modules /app/node_modules
+# Copy package.json and install dependencies
+COPY package.json ./
+RUN npm install
+
+# Copy the rest of the application
 COPY . .
 
-# Set environment variables for validation
-ENV NODE_ENV=test
-ENV CI=true
+# Set environment variables
+ENV NODE_ENV=production
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV API_URL=https://reqres.in
+ENV DOCKER_VALIDATION=true
 
-# Default command to run framework validation
-CMD ["node", "scripts/framework-health-check.js"]
+# Default command to run validation tests
+CMD ["npx", "playwright", "test", "--grep", "@validation"]

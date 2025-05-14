@@ -23,6 +23,11 @@ module.exports = (options) => {
       command += ` ${options.testFiles}`;
     }
 
+    // Add list flag if specified
+    if (options.list) {
+      command += ' --list';
+    }
+
     // Add tags if specified (using grep for filtering by tag)
     if (options.tags) {
       // Escape any quotes in the tags to prevent command injection

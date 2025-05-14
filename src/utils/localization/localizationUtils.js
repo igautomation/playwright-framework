@@ -39,8 +39,12 @@ class LocalizationUtils {
    */
   async setLocale(locale, options = {}) {
     try {
+      // Store the current page and context for proper cleanup
+      const oldPage = this.page;
+      const oldContext = oldPage.context();
+      
       // Create a new browser context with the specified locale
-      const context = await this.page.context().browser().newContext({
+      const context = await oldPage.context().browser().newContext({
         locale,
         ...options
       });
@@ -49,7 +53,7 @@ class LocalizationUtils {
       const newPage = await context.newPage();
       
       // Navigate to the same URL as the current page
-      const url = this.page.url();
+      const url = oldPage.url();
       if (url && url !== 'about:blank') {
         await newPage.goto(url, { 
           waitUntil: options.waitUntil || 'networkidle'
@@ -59,7 +63,18 @@ class LocalizationUtils {
       // Replace the current page with the new one
       this.page = newPage;
       
+      // Close the old page if it's still open
+      try {
+        if (oldPage && !oldPage.isClosed()) {
+          await oldPage.close();
+        }
+      } catch (e) {
+        // Ignore errors when closing the old page
+        logger.warn(`Error closing old page: ${e.message}`);
+      }
+      
       logger.info(`Set locale to ${locale}`);
+      return context; // Return the new context for proper management
     } catch (error) {
       throw PlaywrightErrorHandler.handleError(error, {
         action: 'setting locale',
@@ -89,7 +104,7 @@ class LocalizationUtils {
           let selector = element.tagName.toLowerCase();
           
           if (element.className && typeof element.className === 'string') {
-            const classes = element.className.trim().split(/\\s+/);
+            const classes = element.className.trim().split(/\s+/);
             if (classes.length > 0 && classes[0]) {
               selector += `.${classes[0]}`;
             }
@@ -232,7 +247,7 @@ class LocalizationUtils {
             let selector = element.tagName.toLowerCase();
             
             if (element.className && typeof element.className === 'string') {
-              const classes = element.className.trim().split(/\\s+/);
+              const classes = element.className.trim().split(/\s+/);
               if (classes.length > 0 && classes[0]) {
                 selector += `.${classes[0]}`;
               }

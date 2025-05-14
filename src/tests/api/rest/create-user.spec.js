@@ -1,7 +1,7 @@
 // Import directly from @playwright/test
 const { test, expect } = require('@playwright/test');
 const ApiRequest = require('../../../utils/api/apiRequest');
-const User = require('../../../utils/api/models/User').default;
+const User = require('../../../utils/api/models/User');
 
 // Load environment variables
 require('dotenv').config();
