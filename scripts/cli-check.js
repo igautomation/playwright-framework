@@ -1,11 +1,16 @@
 #!/usr/bin/env node
-import { spawn } from 'child_process';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { getXrayTestCases, saveTestCasesToFile } from './utils/xray-integration.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { spawn } = require('child_process');
+const fs = require('fs').promises;
+const path = require('path');
+
+// Check if xray-integration.js exists and try to import it
+let xrayIntegration = null;
+try {
+  xrayIntegration = require('./utils/xray-integration');
+} catch (error) {
+  // Silently handle the error if the file doesn't exist
+}
 
 function runCommand(command, args) {
   return new Promise((resolve) => {
@@ -16,7 +21,7 @@ function runCommand(command, args) {
 
 function showHelp() {
   console.log(`
-Salesforce Playwright Test Framework CLI
+Playwright Test Framework CLI
 
 Usage:
   node cli.js [command] [options]
@@ -34,8 +39,8 @@ Commands:
   report                  Generate Allure report
 
 Options:
-  --browser=<name>        Specify browser (chromium, firefox, webkit)
-  --env=<name>            Specify environment (development, qa, uat, production)
+  --browser=<n>           Specify browser (chromium, firefox, webkit)
+  --env=<n>               Specify environment (development, qa, uat, production)
   --workers=<number>      Number of parallel workers
   --tags=<pattern>        Test tag grep pattern
   --debug                 Run in debug mode
@@ -59,7 +64,7 @@ async function initializeProject() {
   ];
 
   for (const folder of folders) {
-    const folderPath = path.join(__dirname, folder);
+    const folderPath = path.join(__dirname, '..', folder);
     await fs.mkdir(folderPath, { recursive: true });
     console.log(`Created ${folder}`);
   }
@@ -78,7 +83,7 @@ async function cleanArtifacts() {
 
   for (const folder of folders) {
     try {
-      const folderPath = path.join(__dirname, folder);
+      const folderPath = path.join(__dirname, '..', folder);
       await fs.rm(folderPath, { recursive: true, force: true });
       console.log(`Cleaned ${folder}`);
     } catch (error) {
@@ -140,20 +145,24 @@ async function main() {
       break;
     case 'xray:fetch':
       try {
+        if (!xrayIntegration) {
+          console.error('Xray integration module not found');
+          process.exit(1);
+        }
         const jql = options.jql || '';
         console.log('Fetching test cases from Xray...');
-        const testCases = await getXrayTestCases(jql);
-        await saveTestCasesToFile(testCases);
+        const testCases = await xrayIntegration.getXrayTestCases(jql);
+        await xrayIntegration.saveTestCasesToFile(testCases);
       } catch (error) {
         console.error('Failed to fetch test cases:', error);
         process.exit(1);
       }
       break;
     case 'xray:report':
-      await runCommand('npx', ['framework', 'push-to-xray']);
+      await runCommand('npx', ['pw-framework', 'push-to-xray']);
       break;
     case 'report':
-      await runCommand('npx', ['framework', 'generate-report']);
+      await runCommand('npx', ['pw-framework', 'generate-report']);
       break;
     case 'clean':
       await cleanArtifacts();
