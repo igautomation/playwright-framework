@@ -1,216 +1,118 @@
 /**
- * Screenshot utilities for Playwright
+ * Screenshot Utilities
+ * 
+ * Provides helper functions for taking and comparing screenshots
  */
 const fs = require('fs');
 const path = require('path');
-const logger = require('../common/logger');
+const { PNG } = require('pngjs');
+const pixelmatch = require('pixelmatch');
 
+/**
+ * Screenshot Utilities class
+ */
 class ScreenshotUtils {
   /**
-   * Constructor
-   * @param {Object} page - Playwright page object
-   * @param {Object} options - Configuration options
+   * @param {import('@playwright/test').Page} page - Playwright page object
+   * @param {string} baseDir - Base directory for screenshots
    */
-  constructor(page, options = {}) {
+  constructor(page, baseDir = 'screenshots') {
     this.page = page;
-    this.screenshotDir = options.screenshotDir || path.join(process.cwd(), 'screenshots');
+    this.baseDir = baseDir;
     
-    // Create screenshot directory if it doesn't exist
-    if (!fs.existsSync(this.screenshotDir)) {
-      fs.mkdirSync(this.screenshotDir, { recursive: true });
+    // Create base directory if it doesn't exist
+    if (!fs.existsSync(baseDir)) {
+      fs.mkdirSync(baseDir, { recursive: true });
     }
   }
-
+  
   /**
    * Take a screenshot
    * @param {string} name - Screenshot name
    * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Screenshot path
+   * @returns {Promise<Buffer>} Screenshot buffer
    */
   async takeScreenshot(name, options = {}) {
-    const screenshotPath = options.path || path.join(
-      this.screenshotDir,
-      `${name}-${Date.now()}.png`
-    );
-    
-    logger.info(`Taking screenshot: ${screenshotPath}`);
-    
-    await this.page.screenshot({
+    const screenshotPath = path.join(this.baseDir, `${name}.png`);
+    const screenshotBuffer = await this.page.screenshot({
       path: screenshotPath,
-      fullPage: options.fullPage !== false,
       ...options
     });
     
-    return screenshotPath;
+    return screenshotBuffer;
   }
-
+  
   /**
    * Take a screenshot of an element
    * @param {string} selector - Element selector
    * @param {string} name - Screenshot name
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Screenshot path
+   * @returns {Promise<Buffer>} Screenshot buffer
    */
-  async takeElementScreenshot(selector, name, options = {}) {
-    // Wait for element to be visible
-    await this.page.waitForSelector(selector, { 
-      state: 'visible',
-      timeout: options.timeout || 10000
-    });
-    
+  async takeElementScreenshot(selector, name) {
     const element = await this.page.$(selector);
-    
     if (!element) {
       throw new Error(`Element not found: ${selector}`);
     }
     
-    const screenshotPath = options.path || path.join(
-      this.screenshotDir,
-      `${name}-${Date.now()}.png`
-    );
-    
-    logger.info(`Taking element screenshot: ${screenshotPath}`);
-    
-    await element.screenshot({
-      path: screenshotPath,
-      ...options
+    const screenshotPath = path.join(this.baseDir, `${name}.png`);
+    const screenshotBuffer = await element.screenshot({
+      path: screenshotPath
     });
     
-    return screenshotPath;
+    return screenshotBuffer;
   }
-
+  
   /**
-   * Take screenshots of multiple elements
-   * @param {Array<string>} selectors - Element selectors
-   * @param {string} namePrefix - Screenshot name prefix
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<Array<string>>} Screenshot paths
+   * Compare two screenshots
+   * @param {string} screenshot1Path - Path to first screenshot
+   * @param {string} screenshot2Path - Path to second screenshot
+   * @param {string} diffPath - Path to save diff image
+   * @param {Object} options - Comparison options
+   * @returns {Promise<number>} Number of different pixels
    */
-  async takeMultipleElementScreenshots(selectors, namePrefix, options = {}) {
-    const screenshotPaths = [];
+  async compareScreenshots(screenshot1Path, screenshot2Path, diffPath, options = {}) {
+    const img1 = PNG.sync.read(fs.readFileSync(screenshot1Path));
+    const img2 = PNG.sync.read(fs.readFileSync(screenshot2Path));
     
-    for (let i = 0; i < selectors.length; i++) {
-      const selector = selectors[i];
-      const name = `${namePrefix}-${i + 1}`;
-      
-      try {
-        const screenshotPath = await this.takeElementScreenshot(selector, name, options);
-        screenshotPaths.push(screenshotPath);
-      } catch (error) {
-        logger.error(`Failed to take screenshot of element ${selector}:`, error);
-      }
-    }
+    const { width, height } = img1;
+    const diff = new PNG({ width, height });
     
-    return screenshotPaths;
-  }
-
-  /**
-   * Take a screenshot on failure
-   * @param {string} testName - Test name
-   * @param {Error} error - Error object
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Screenshot path
-   */
-  async takeScreenshotOnFailure(testName, error, options = {}) {
-    const screenshotPath = options.path || path.join(
-      this.screenshotDir,
-      'failures',
-      `${testName}-failure-${Date.now()}.png`
+    const defaultOptions = {
+      threshold: 0.1,
+      includeAA: false
+    };
+    
+    const diffPixels = pixelmatch(
+      img1.data,
+      img2.data,
+      diff.data,
+      width,
+      height,
+      { ...defaultOptions, ...options }
     );
     
-    // Create directory if it doesn't exist
-    const screenshotDir = path.dirname(screenshotPath);
-    if (!fs.existsSync(screenshotDir)) {
-      fs.mkdirSync(screenshotDir, { recursive: true });
-    }
+    fs.writeFileSync(diffPath, PNG.sync.write(diff));
     
-    logger.error(`Test failed: ${testName}`, error);
-    logger.info(`Taking failure screenshot: ${screenshotPath}`);
-    
-    await this.page.screenshot({
-      path: screenshotPath,
-      fullPage: options.fullPage !== false,
-      ...options
-    });
-    
-    return screenshotPath;
+    return diffPixels;
   }
-
+  
   /**
-   * Take a screenshot of the viewport
+   * Check if screenshot exists
    * @param {string} name - Screenshot name
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<string>} Screenshot path
+   * @returns {boolean} True if screenshot exists
    */
-  async takeViewportScreenshot(name, options = {}) {
-    const screenshotPath = options.path || path.join(
-      this.screenshotDir,
-      `${name}-viewport-${Date.now()}.png`
-    );
-    
-    logger.info(`Taking viewport screenshot: ${screenshotPath}`);
-    
-    await this.page.screenshot({
-      path: screenshotPath,
-      fullPage: false,
-      ...options
-    });
-    
-    return screenshotPath;
+  screenshotExists(name) {
+    const screenshotPath = path.join(this.baseDir, `${name}.png`);
+    return fs.existsSync(screenshotPath);
   }
-
+  
   /**
-   * Take screenshots at different viewport sizes
+   * Get screenshot path
    * @param {string} name - Screenshot name
-   * @param {Array<Object>} viewports - Viewport sizes
-   * @param {Object} options - Screenshot options
-   * @returns {Promise<Array<Object>>} Screenshot results
+   * @returns {string} Screenshot path
    */
-  async takeResponsiveScreenshots(name, viewports, options = {}) {
-    const results = [];
-    const originalViewport = await this.page.viewportSize();
-    
-    for (const viewport of viewports) {
-      // Set viewport size
-      await this.page.setViewportSize({
-        width: viewport.width,
-        height: viewport.height
-      });
-      
-      // Wait for layout to stabilize
-      await this.page.waitForTimeout(500);
-      
-      // Take screenshot
-      const screenshotPath = options.path || path.join(
-        this.screenshotDir,
-        'responsive',
-        `${name}-${viewport.width}x${viewport.height}-${Date.now()}.png`
-      );
-      
-      // Create directory if it doesn't exist
-      const screenshotDir = path.dirname(screenshotPath);
-      if (!fs.existsSync(screenshotDir)) {
-        fs.mkdirSync(screenshotDir, { recursive: true });
-      }
-      
-      logger.info(`Taking responsive screenshot at ${viewport.width}x${viewport.height}: ${screenshotPath}`);
-      
-      await this.page.screenshot({
-        path: screenshotPath,
-        fullPage: options.fullPage !== false,
-        ...options
-      });
-      
-      results.push({
-        viewport,
-        screenshotPath
-      });
-    }
-    
-    // Restore original viewport
-    await this.page.setViewportSize(originalViewport);
-    
-    return results;
+  getScreenshotPath(name) {
+    return path.join(this.baseDir, `${name}.png`);
   }
 }
 

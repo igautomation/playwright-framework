@@ -1,56 +1,32 @@
 /**
- * Base page object for all page objects
+ * Base Page Object
+ * 
+ * Provides common functionality for all page objects
  */
-const logger = require('../utils/common/logger');
-
 class BasePage {
   /**
-   * Constructor
-   * @param {Object} page - Playwright page object
+   * @param {import('@playwright/test').Page} page - Playwright page object
    */
   constructor(page) {
     this.page = page;
-    this.url = '';
+    this.baseUrl = process.env.BASE_URL || 'https://demo.playwright.dev';
   }
-
+  
   /**
-   * Navigate to page URL
-   * @param {string} url - URL to navigate to (optional, uses this.url by default)
-   * @returns {Promise<void>}
+   * Navigate to a specific path
+   * @param {string} path - Path to navigate to
    */
-  async navigate(url = '', options = {}) {
-    const pageUrl = url || this.url;
-    if (!pageUrl) {
-      throw new Error('URL is not defined. Please provide a URL or set this.url');
-    }
-    
-    logger.info(`Navigating to ${pageUrl}`);
-    
-    // Use the BASE_URL from environment if the URL is relative
-    const fullUrl = pageUrl.startsWith('http') ? pageUrl : `${process.env.BASE_URL || 'https://opensource-demo.orangehrmlive.com/web/index.php'}${pageUrl}`;
-    
-    try {
-      await this.page.goto(fullUrl, {
-        timeout: options.timeout || 30000,
-        waitUntil: options.waitUntil || 'networkidle'
-      });
-    } catch (error) {
-      logger.error(`Navigation failed to ${fullUrl}: ${error.message}`);
-      throw error;
-    }
+  async goto(path = '') {
+    await this.page.goto(`${this.baseUrl}${path}`);
   }
-
+  
   /**
-   * Wait for page to load
-   * @param {Object} options - Wait options
-   * @returns {Promise<void>}
+   * Wait for page to be loaded
    */
-  async waitForPageLoad(options = {}) {
-    await this.page.waitForLoadState(options.state || 'networkidle', {
-      timeout: options.timeout || 30000
-    });
+  async waitForPageLoad() {
+    await this.page.waitForLoadState('networkidle');
   }
-
+  
   /**
    * Get page title
    * @returns {Promise<string>} Page title
@@ -58,69 +34,40 @@ class BasePage {
   async getTitle() {
     return await this.page.title();
   }
-
+  
   /**
-   * Check if element exists
-   * @param {string} selector - Element selector
-   * @returns {Promise<boolean>} True if element exists
+   * Take a screenshot
+   * @param {string} name - Screenshot name
    */
-  async hasElement(selector) {
-    const element = await this.page.$(selector);
-    return !!element;
+  async takeScreenshot(name) {
+    await this.page.screenshot({ path: `screenshots/${name}.png` });
   }
-
+  
   /**
-   * Wait for element to be visible
+   * Check if element is visible
    * @param {string} selector - Element selector
-   * @param {Object} options - Wait options
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} True if element is visible
    */
-  async waitForElement(selector, options = {}) {
-    await this.page.waitForSelector(selector, {
-      state: 'visible',
-      timeout: options.timeout || 10000
-    });
+  async isVisible(selector) {
+    const element = this.page.locator(selector);
+    return await element.isVisible();
   }
-
-  /**
-   * Click element
-   * @param {string} selector - Element selector
-   * @returns {Promise<void>}
-   */
-  async click(selector) {
-    await this.waitForElement(selector);
-    await this.page.click(selector);
-  }
-
+  
   /**
    * Fill input field
    * @param {string} selector - Input selector
    * @param {string} value - Value to fill
-   * @returns {Promise<void>}
    */
   async fill(selector, value) {
-    await this.waitForElement(selector);
     await this.page.fill(selector, value);
   }
-
+  
   /**
-   * Get text content
+   * Click element
    * @param {string} selector - Element selector
-   * @returns {Promise<string>} Text content
    */
-  async getText(selector) {
-    await this.waitForElement(selector);
-    return await this.page.textContent(selector);
-  }
-
-  /**
-   * Take screenshot
-   * @param {string} name - Screenshot name
-   * @returns {Promise<Buffer>} Screenshot buffer
-   */
-  async takeScreenshot(name) {
-    const screenshotPath = `./screenshots/${name}-${Date.now()}.png`;
-    return await this.page.screenshot({ path: screenshotPath });
+  async click(selector) {
+    await this.page.click(selector);
   }
 }
 

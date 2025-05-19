@@ -2,58 +2,67 @@
 
 This directory contains utility scripts for the Playwright test framework.
 
-## Recent Changes
+## Directory Structure
 
-The following improvements have been made to the scripts in this directory:
+The scripts are organized into the following subdirectories:
 
-1. **Added Missing Utilities**
-   - Created a `utils` directory within the scripts folder
-   - Implemented `xray-integration.js` with proper ES module exports
-   - Added functions for Xray test case management: `getXrayTestCases`, `saveTestCasesToFile`, and `generateTestFiles`
+- **runners/**: Test runner scripts for executing different types of tests
+- **setup/**: Scripts for setting up and configuring the environment
+- **utils/**: Utility scripts for framework management and validation
+- **make-executable/**: Scripts for making other scripts executable
 
-2. **Fixed Path Handling**
-   - Updated all scripts to use `path.resolve(process.cwd(), ...)` instead of relative paths
-   - This ensures scripts work correctly regardless of where they are executed from
+## Main Scripts
 
-3. **Improved Error Handling**
-   - Added fallback for logger in framework-health-check.js
-   - Added better error messages and handling for missing files
-   - Changed utility class checks to show warnings instead of errors for missing files
+- `index.js`: Lists all available scripts with descriptions
+- `test-all-scripts.sh`: Tests all scripts for syntax errors
+- `verify-organization.js`: Verifies the script organization structure
+- `symlinks.js`: Creates symlinks for backward compatibility
 
-4. **Enhanced Security**
-   - Modified env-check.js to mask sensitive environment variables in logs
-   - Added proper validation for environment variables
+## Backward Compatibility
 
-5. **Made Scripts More Robust**
-   - Updated make-scripts-executable.sh to use `find` for more reliable script discovery
-   - Made both .sh and .js files executable
-
-## Available Scripts
-
-- **cli-check.js**: Command-line interface for the test framework
-- **env-check.js**: Validates and loads environment variables
-- **framework-health-check.js**: Comprehensive check of framework components
-- **make-scripts-executable.sh**: Makes all scripts executable
-- **utils/xray-integration.js**: Utilities for Xray test management integration
+For backward compatibility, symlinks have been created in the root scripts directory that point to the most commonly used scripts in the subdirectories. This ensures that existing references to scripts will continue to work.
 
 ## Usage
 
-Most scripts can be run directly:
+### Listing Available Scripts
 
 ```bash
-# Make scripts executable first
-./scripts/make-scripts-executable.sh
-
-# Run framework health check
-./scripts/framework-health-check.js
-
-# Check environment variables
-node ./scripts/env-check.js
-
-# Use CLI
-node ./scripts/cli-check.js --help
+# List all available scripts with descriptions
+npm run scripts:list
+# or
+node ./scripts/index.js
 ```
 
-## Testing
+### Testing Scripts
 
-Tests for these scripts are available in `/tests/scripts/utils-test.js`.
+```bash
+# Test all scripts for syntax errors
+npm run scripts:test
+# or
+bash ./scripts/test-all-scripts.sh
+```
+
+### Verifying Organization
+
+```bash
+# Verify the script organization structure
+node ./scripts/verify-organization.js
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+./scripts/runners/run-tests.sh
+# or use the symlink
+./scripts/run-tests.sh
+```
+
+## Adding New Scripts
+
+When adding new scripts:
+
+1. Place them in the appropriate subdirectory
+2. Add a descriptive comment at the top of the file
+3. Make them executable with `chmod +x`
+4. Update this README if necessary

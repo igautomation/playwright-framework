@@ -1,100 +1,120 @@
 /**
- * Simple logger utility
+ * Logger
+ * 
+ * Provides logging functionality for tests
+ */
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Logger class
  */
 class Logger {
-  constructor() {
-    this.logLevels = {
-      DEBUG: 0,
-      INFO: 1,
-      WARN: 2,
-      ERROR: 3,
-    };
-
-    // Set default log level from environment variable or default to INFO
-    this.logLevel = process.env.LOG_LEVEL
-      ? this.logLevels[process.env.LOG_LEVEL.toUpperCase()]
-      : this.logLevels.INFO;
-  }
-
   /**
-   * Set log level
-   * @param {string} level - Log level (DEBUG, INFO, WARN, ERROR)
+   * @param {Object} options - Logger options
+   * @param {string} options.logDir - Directory for log files
+   * @param {boolean} options.console - Whether to log to console
+   * @param {boolean} options.file - Whether to log to file
+   * @param {string} options.level - Minimum log level
    */
-  setLogLevel(level) {
-    if (this.logLevels[level.toUpperCase()] !== undefined) {
-      this.logLevel = this.logLevels[level.toUpperCase()];
+  constructor(options = {}) {
+    this.options = {
+      logDir: 'logs',
+      console: true,
+      file: true,
+      level: 'info',
+      ...options
+    };
+    
+    this.levels = {
+      debug: 0,
+      info: 1,
+      warn: 2,
+      error: 3
+    };
+    
+    // Create log directory if it doesn't exist
+    if (this.options.file && !fs.existsSync(this.options.logDir)) {
+      fs.mkdirSync(this.options.logDir, { recursive: true });
     }
+    
+    this.logFile = path.join(this.options.logDir, `test-${new Date().toISOString().split('T')[0]}.log`);
   }
-
+  
   /**
    * Format log message
    * @param {string} level - Log level
    * @param {string} message - Log message
-   * @param {Object} data - Additional data
    * @returns {string} Formatted log message
    */
-  formatLog(level, message, data) {
+  formatMessage(level, message) {
     const timestamp = new Date().toISOString();
-    let logMessage = `[${timestamp}] [${level}] ${message}`;
-
-    if (data) {
-      if (typeof data === 'object') {
-        try {
-          logMessage += ` ${JSON.stringify(data)}`;
-        } catch (error) {
-          logMessage += ` [Object]`;
-        }
+    return `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+  }
+  
+  /**
+   * Write log message
+   * @param {string} level - Log level
+   * @param {string} message - Log message
+   */
+  log(level, message) {
+    if (this.levels[level] < this.levels[this.options.level]) {
+      return;
+    }
+    
+    const formattedMessage = this.formatMessage(level, message);
+    
+    // Log to console
+    if (this.options.console) {
+      if (level === 'error') {
+        console.error(formattedMessage);
+      } else if (level === 'warn') {
+        console.warn(formattedMessage);
       } else {
-        logMessage += ` ${data}`;
+        console.log(formattedMessage);
       }
     }
-
-    return logMessage;
+    
+    // Log to file
+    if (this.options.file) {
+      fs.appendFileSync(this.logFile, formattedMessage + '\n');
+    }
   }
-
+  
   /**
    * Log debug message
    * @param {string} message - Log message
-   * @param {Object} data - Additional data
    */
-  debug(message, data) {
-    if (this.logLevel <= this.logLevels.DEBUG) {
-      console.debug(this.formatLog('DEBUG', message, data));
-    }
+  debug(message) {
+    this.log('debug', message);
   }
-
+  
   /**
    * Log info message
    * @param {string} message - Log message
-   * @param {Object} data - Additional data
    */
-  info(message, data) {
-    if (this.logLevel <= this.logLevels.INFO) {
-      console.info(this.formatLog('INFO', message, data));
-    }
+  info(message) {
+    this.log('info', message);
   }
-
+  
   /**
    * Log warning message
    * @param {string} message - Log message
-   * @param {Object} data - Additional data
    */
-  warn(message, data) {
-    if (this.logLevel <= this.logLevels.WARN) {
-      console.warn(this.formatLog('WARN', message, data));
-    }
+  warn(message) {
+    this.log('warn', message);
   }
-
+  
   /**
    * Log error message
    * @param {string} message - Log message
-   * @param {Object} data - Additional data
    */
-  error(message, data) {
-    if (this.logLevel <= this.logLevels.ERROR) {
-      console.error(this.formatLog('ERROR', message, data));
-    }
+  error(message) {
+    this.log('error', message);
   }
 }
 
-module.exports = new Logger();
+// Create default logger instance
+const logger = new Logger();
+
+module.exports = logger;
