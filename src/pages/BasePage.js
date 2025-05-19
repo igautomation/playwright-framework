@@ -40,7 +40,7 @@ class BasePage {
    * @param {string} name - Screenshot name
    */
   async takeScreenshot(name) {
-    await this.page.screenshot({ path: `screenshots/${name}.png` });
+    await this.page.screenshot({ path: `reports/screenshots/${name}.png` });
   }
   
   /**

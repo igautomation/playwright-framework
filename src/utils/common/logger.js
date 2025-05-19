@@ -19,7 +19,7 @@ class Logger {
    */
   constructor(options = {}) {
     this.options = {
-      logDir: 'logs',
+      logDir: 'reports/logs',
       console: true,
       file: true,
       level: 'info',

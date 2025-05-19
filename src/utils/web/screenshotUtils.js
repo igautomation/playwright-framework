@@ -16,7 +16,7 @@ class ScreenshotUtils {
    * @param {import('@playwright/test').Page} page - Playwright page object
    * @param {string} baseDir - Base directory for screenshots
    */
-  constructor(page, baseDir = 'screenshots') {
+  constructor(page, baseDir = 'reports/screenshots') {
     this.page = page;
     this.baseDir = baseDir;
     

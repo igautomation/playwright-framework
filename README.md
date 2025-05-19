@@ -25,20 +25,36 @@ playwright-framework/
 │   └── make-executable/   # Scripts to make other scripts executable
 ├── src/
 │   ├── config/            # Configuration files
+│   │   └── playwright.config.js  # Playwright configuration
 │   ├── data/              # Test data
-│   │   ├── json/          # JSON test data
-│   │   └── csv/           # CSV test data
+│   │   ├── csv/           # CSV test data
+│   │   └── json/          # JSON test data
+│   ├── fixtures/          # Test fixtures
+│   │   └── base-fixtures.js  # Base fixtures for tests
 │   ├── pages/             # Page objects
+│   │   ├── BasePage.js    # Base page object
+│   │   └── components/    # Reusable page components
 │   ├── tests/             # Test files
-│   │   ├── core/          # Core functionality tests
-│   │   ├── examples/      # Example tests
-│   │   └── validation/    # Framework validation tests
+│   │   ├── accessibility/ # Accessibility tests
+│   │   ├── api/           # API tests
+│   │   ├── e2e/           # End-to-end tests
+│   │   ├── integration/   # Integration tests
+│   │   ├── performance/   # Performance tests
+│   │   ├── unit/          # Unit tests
+│   │   └── visual/        # Visual regression tests
 │   └── utils/             # Utility functions
 │       ├── accessibility/ # Accessibility testing utilities
 │       ├── api/           # API testing utilities
+│       ├── common/        # Common utilities
 │       └── web/           # Web testing utilities
-├── playwright.config.js   # Playwright configuration
-└── package.json           # Project dependencies
+├── reports/               # Test reports
+│   ├── allure/            # Allure reports
+│   ├── html/              # HTML reports
+│   └── screenshots/       # Test screenshots
+└── docs/                  # Documentation
+    ├── api/               # API documentation
+    ├── guides/            # User guides
+    └── examples/          # Example code
 ```
 
 ## Getting Started
@@ -63,54 +79,99 @@ npx playwright install
 # Run all tests
 npm test
 
-# Run specific test categories
-npm run test:core
-npm run test:examples
-npm run test:validation
+# Run specific test types
+npm run test:api
+npm run test:e2e
+npm run test:visual
+npm run test:accessibility
+npm run test:performance
+npm run test:unit
+npm run test:integration
 
-# Run tests with specific configurations
+# Run tests with specific browsers
 npm run test:chromium
 npm run test:firefox
 npm run test:webkit
 npm run test:mobile
 
-# Run optimized tests
-npm run test:optimized
-npm run test:fast
-npm run test:parallel
+# Run tests with UI mode
+npm run test:ui
 ```
 
-## Core Tests
+## Test Types
 
-The framework includes essential tests that demonstrate key functionality:
+### API Tests
 
-- **Navigation**: Basic page navigation and assertions
-- **Authentication**: Login flows and session management
-- **API Integration**: API request and response validation
-- **Visual Regression**: Screenshot comparison
-- **Accessibility**: WCAG compliance testing
-- **Mobile Responsiveness**: Testing on different viewport sizes
-- **Form Validation**: Input validation and form submission
-- **Error Handling**: Testing error states and recovery
-- **Performance**: Load time and resource usage testing
+Tests for API endpoints using the API client:
 
-## Example Tests
+```javascript
+const { test, expect } = require('@playwright/test');
+const { ApiClient } = require('../../utils/api/apiUtils');
 
-Example tests demonstrate how to use specific framework features:
+test('GET users endpoint returns correct data', async () => {
+  const apiClient = new ApiClient('https://api.example.com');
+  const response = await apiClient.get('/users');
+  expect(response.data).toBeDefined();
+});
+```
 
-- **Data-Driven Testing**: Running tests with different data sets
-- **API Mocking**: Mocking API responses for testing
-- **Custom Fixtures**: Creating and using custom test fixtures
-- **Cross-Browser Testing**: Handling browser-specific behavior
-- **Reporting Integration**: Generating custom test reports
+### E2E Tests
 
-## Validation Tests
+End-to-end tests using page objects:
 
-Validation tests ensure the framework itself is working correctly:
+```javascript
+const { test, expect } = require('@playwright/test');
+const { TodoPage } = require('../../pages/TodoPage');
 
-- **Framework Components**: Validating core framework components
-- **Configuration**: Verifying configuration settings
-- **Plugin System**: Testing the plugin system functionality
+test('should allow adding new todos', async ({ page }) => {
+  const todoPage = new TodoPage(page);
+  await todoPage.goto();
+  await todoPage.addTodo('Buy groceries');
+  const todos = await todoPage.getTodos();
+  expect(todos).toContain('Buy groceries');
+});
+```
+
+### Visual Tests
+
+Visual regression tests using screenshot comparison:
+
+```javascript
+const { test, expect } = require('@playwright/test');
+const ScreenshotUtils = require('../../utils/web/screenshotUtils');
+
+test('homepage visual regression test', async ({ page }) => {
+  const screenshotUtils = new ScreenshotUtils(page);
+  await page.goto('https://example.com');
+  await screenshotUtils.takeScreenshot('homepage');
+  // Compare with baseline
+});
+```
+
+### Accessibility Tests
+
+Tests for accessibility compliance:
+
+```javascript
+const { test, expect } = require('@playwright/test');
+const { checkAccessibility } = require('../../utils/accessibility/accessibilityUtils');
+
+test('homepage should not have critical accessibility violations', async ({ page }) => {
+  await page.goto('https://example.com');
+  const result = await checkAccessibility(page);
+  expect(result.passes).toBeTruthy();
+});
+```
+
+## Utilities
+
+The framework provides several utility classes to help with testing:
+
+- **ApiClient**: Helper methods for API testing
+- **WebInteractions**: Helper methods for web interactions
+- **ScreenshotUtils**: Utilities for taking and comparing screenshots
+- **TestDataFactory**: Generate test data for tests
+- **Logger**: Logging utilities for tests
 
 ## Contributing
 
@@ -122,4 +183,4 @@ Validation tests ensure the framework itself is working correctly:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
