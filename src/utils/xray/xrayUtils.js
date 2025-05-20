@@ -1,25 +1,50 @@
 /**
- * Xray integration utilities
+ * Xray Integration Utilities
+ * 
+ * Provides utilities for integrating with Xray test management
  */
-const fs = require('fs');
-const path = require('path');
+const externalResources = require('../../config/external-resources');
 const logger = require('../common/logger');
-const fetch = require('node-fetch');
 
 class XrayUtils {
   /**
-   * Constructor
-   * @param {Object} options - Configuration options
+   * Create a new XrayUtils instance
+   * @param {Object} options - Options
+   * @param {string} options.baseUrl - Xray API base URL
+   * @param {string} options.clientId - Xray client ID
+   * @param {string} options.clientSecret - Xray client secret
+   * @param {string} options.projectKey - Jira project key
    */
   constructor(options = {}) {
-    this.baseUrl = options.baseUrl || 'https://xray.cloud.getxray.app/api/v2';
-    this.projectKey = options.projectKey || 'TEST';
-    this.clientId = options.clientId || process.env.XRAY_CLIENT_ID;
-    this.clientSecret = options.clientSecret || process.env.XRAY_CLIENT_SECRET;
+    this.baseUrl = options.baseUrl || externalResources.apis.xray || '';
+    this.clientId = options.clientId || process.env.XRAY_CLIENT_ID || '';
+    this.clientSecret = options.clientSecret || process.env.XRAY_CLIENT_SECRET || '';
+    this.projectKey = options.projectKey || process.env.XRAY_PROJECT_KEY || '';
     this.token = null;
     this.tokenExpiry = null;
+    
+    // Validate required configuration
+    if (!this.baseUrl) {
+      logger.warn('Xray API URL not configured. Set XRAY_API_URL environment variable or provide in options.');
+    }
+    
+    if (!this.clientId || !this.clientSecret) {
+      logger.warn('Xray credentials not configured. Set XRAY_CLIENT_ID and XRAY_CLIENT_SECRET environment variables or provide in options.');
+    }
+    
+    if (!this.projectKey) {
+      logger.warn('Xray project key not configured. Set XRAY_PROJECT_KEY environment variable or provide in options.');
+    }
   }
-
+  
+  /**
+   * Check if Xray integration is configured
+   * @returns {boolean} True if configured
+   */
+  isConfigured() {
+    return !!(this.baseUrl && this.clientId && this.clientSecret && this.projectKey);
+  }
+  
   /**
    * Get authentication token
    * @returns {Promise<string>} Authentication token
@@ -31,6 +56,10 @@ class XrayUtils {
     }
     
     try {
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
+      
       const response = await fetch(`${this.baseUrl}/authenticate`, {
         method: 'POST',
         headers: {
@@ -58,30 +87,29 @@ class XrayUtils {
       throw error;
     }
   }
-
+  
   /**
    * Upload test results to Xray
    * @param {string} resultsFile - Path to test results file
    * @param {Object} options - Upload options
-   * @returns {Promise<Object>} Upload response
+   * @returns {Promise<Object>} Upload result
    */
   async uploadResults(resultsFile, options = {}) {
     try {
-      const token = await this.getToken();
-      
-      if (!fs.existsSync(resultsFile)) {
-        throw new Error(`Results file not found: ${resultsFile}`);
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
       }
       
-      const fileContent = fs.readFileSync(resultsFile, 'utf8');
+      const token = await this.getToken();
+      const formData = new FormData();
+      formData.append('file', require('fs').createReadStream(resultsFile));
       
       const response = await fetch(`${this.baseUrl}/import/execution`, {
         method: 'POST',
         headers: {
-          'Content-Type': options.format === 'cucumber' ? 'application/json' : 'application/xml',
           'Authorization': `Bearer ${token}`
         },
-        body: fileContent
+        body: formData
       });
       
       if (!response.ok) {
@@ -97,16 +125,19 @@ class XrayUtils {
       throw error;
     }
   }
-
+  
   /**
-   * Create test execution in Xray
+   * Create a test execution in Xray
    * @param {Object} options - Execution options
-   * @returns {Promise<Object>} Execution response
+   * @returns {Promise<Object>} Execution result
    */
   async createExecution(options = {}) {
     try {
-      const token = await this.getToken();
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
       
+      const token = await this.getToken();
       const execution = {
         fields: {
           project: {
@@ -142,17 +173,20 @@ class XrayUtils {
       throw error;
     }
   }
-
+  
   /**
-   * Get test runs for execution
+   * Get test execution details
    * @param {string} executionKey - Execution key
-   * @returns {Promise<Array>} Test runs
+   * @returns {Promise<Object>} Execution details
    */
-  async getTestRuns(executionKey) {
+  async getExecution(executionKey) {
     try {
-      const token = await this.getToken();
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
       
-      const response = await fetch(`${this.baseUrl}/api/testrun?testExecKey=${executionKey}`, {
+      const token = await this.getToken();
+      const response = await fetch(`${this.baseUrl}/api/v1/executions/${executionKey}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -161,92 +195,84 @@ class XrayUtils {
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to get test runs: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to get execution: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
-      logger.info(`Retrieved ${data.length} test runs for execution ${executionKey}`);
-      
-      return data;
+      return await response.json();
     } catch (error) {
-      logger.error('Failed to get test runs from Xray:', error);
+      logger.error(`Failed to get test execution ${executionKey}:`, error);
       throw error;
     }
   }
-
+  
   /**
-   * Update test run status
-   * @param {string} testRunId - Test run ID
+   * Update test result in Xray
+   * @param {string} testKey - Test key
    * @param {string} status - Test status (PASS, FAIL, TODO, etc.)
-   * @returns {Promise<Object>} Update response
+   * @param {Object} options - Update options
+   * @returns {Promise<Object>} Update result
    */
-  async updateTestRunStatus(testRunId, status) {
+  async updateTestResult(testKey, status, options = {}) {
     try {
-      const token = await this.getToken();
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
       
-      const response = await fetch(`${this.baseUrl}/api/testrun/${testRunId}/status`, {
-        method: 'PUT',
+      const token = await this.getToken();
+      const result = {
+        testKey,
+        status,
+        comment: options.comment || '',
+        executionDate: options.executionDate || new Date().toISOString()
+      };
+      
+      const response = await fetch(`${this.baseUrl}/api/v1/import/execution/test`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          status
-        })
+        body: JSON.stringify(result)
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to update test run status: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to update test result: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
-      logger.info(`Updated test run ${testRunId} status to ${status}`);
-      
-      return data;
+      return await response.json();
     } catch (error) {
-      logger.error('Failed to update test run status in Xray:', error);
+      logger.error(`Failed to update test result for ${testKey}:`, error);
       throw error;
     }
   }
-
+  
   /**
-   * Generate test execution report
+   * Get test details
    * @param {string} executionKey - Execution key
-   * @param {Object} options - Report options
-   * @returns {Promise<Buffer>} Report buffer
+   * @returns {Promise<Object>} Test details
    */
-  async generateReport(executionKey, options = {}) {
+  async getTest(testKey) {
     try {
-      const token = await this.getToken();
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
       
-      const response = await fetch(`${this.baseUrl}/api/reports/testexec/${executionKey}`, {
+      const token = await this.getToken();
+      const response = await fetch(`${this.baseUrl}/api/v1/tests/${testKey}`, {
         method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to generate report: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to get test: ${response.status} ${response.statusText}`);
       }
       
-      const buffer = await response.arrayBuffer();
-      
-      // Save report if path provided
-      if (options.outputPath) {
-        const outputDir = path.dirname(options.outputPath);
-        
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true });
-        }
-        
-        fs.writeFileSync(options.outputPath, Buffer.from(buffer));
-        logger.info(`Report saved to ${options.outputPath}`);
-      }
-      
-      return Buffer.from(buffer);
+      return await response.json();
     } catch (error) {
-      logger.error('Failed to generate report from Xray:', error);
+      logger.error(`Failed to get test ${testKey}:`, error);
       throw error;
     }
   }

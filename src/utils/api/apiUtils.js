@@ -3,6 +3,7 @@
  * 
  * Provides helper functions for API testing
  */
+const externalResources = require('../../config/external-resources');
 
 /**
  * API Client for making HTTP requests
@@ -13,11 +14,16 @@ class ApiClient {
    * @param {Object} defaultHeaders - Default headers for all requests
    */
   constructor(baseUrl, defaultHeaders = {}) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl || externalResources.apis.default;
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       ...defaultHeaders
     };
+    
+    // Validate that baseUrl is provided
+    if (!this.baseUrl) {
+      throw new Error('API base URL is required. Provide it as a parameter or set DEFAULT_API_URL environment variable.');
+    }
   }
   
   /**

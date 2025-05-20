@@ -1,6 +1,7 @@
 /**
  * Accessibility testing utilities
  */
+const externalResources = require('../../config/external-resources');
 
 /**
  * Get accessibility violations using axe-core
@@ -9,10 +10,10 @@
  */
 async function getViolations(page) {
   // Inject axe-core library if not already present
-  await page.evaluate(async () => {
+  await page.evaluate(async (axeCoreUrl) => {
     if (!window.axe) {
       const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js';
+      script.src = axeCoreUrl;
       script.onload = () => {
         console.log('axe-core loaded');
       };
@@ -28,7 +29,7 @@ async function getViolations(page) {
         }, 100);
       });
     }
-  });
+  }, externalResources.cdn.axeCore);
   
   // Run axe analysis
   const violations = await page.evaluate(async () => {
