@@ -9,7 +9,9 @@ test.describe('@ui @smoke XPath Practice Page UI Tests', () => {
     retryDiagnostics
   }) => {
     try {
-      const baseURL = process.env.BASE_URL || 'https://selectorshub.com/xpath-practice-page/';
+      const baseURL = process.env.BASE_URL || process.env.SELECTORS_HUB_URL;
+});
+
       await authenticatedPage.goto(baseURL);
 
       await authenticatedPage.fill('input[name="name"]', 'John Doe');
@@ -29,12 +31,12 @@ test.describe('@ui @smoke XPath Practice Page UI Tests', () => {
     retryDiagnostics
   }) => {
     try {
-      const baseURL = process.env.BASE_URL || 'https://selectorshub.com/xpath-practice-page/';
+      const baseURL = process.env.BASE_URL || process.env.SELECTORS_HUB_URL;
       await authenticatedPage.goto(baseURL);
 
       await authenticatedPage.fill('input[name="name"]', 'John Test');
       await authenticatedPage.fill('input[name="email"]', 'john@example.com');
-      await authenticatedPage.fill('input[name="password"]', 'Password123');
+      await authenticatedPage.fill('input[name=process.env.PASSWORD]', 'Password123');
       await authenticatedPage.fill('input[name="company"]', 'Test Corp');
       await authenticatedPage.click('#inp_submit');
 

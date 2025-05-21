@@ -10,9 +10,10 @@ test.describe('Performance Tests', () => {
   test('page load performance', async ({ page }) => {
     // Start performance measurement
     await page.evaluate(() => window.performance.mark('start'));
-    
+});
+
     // Navigate to the page
-    await page.goto('https://playwright.dev/');
+    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -56,7 +57,7 @@ test.describe('Performance Tests', () => {
   
   test('interaction performance', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://demo.playwright.dev/todomvc/#/');
+    await page.goto(process.env.TODO_APP_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -86,7 +87,7 @@ test.describe('Performance Tests', () => {
   
   test('resource loading performance', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://playwright.dev/');
+    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');

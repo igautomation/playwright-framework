@@ -1,5 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+
+test.describe('Plugin System', () => {
 const path = require('path');
 const fs = require('fs');
 
@@ -36,7 +38,8 @@ class PluginSystem {
 test('plugin registration and execution', async () => {
   // Create a plugin system
   const pluginSystem = new PluginSystem();
-  
+});
+
   // Create a simple plugin
   const loggerPlugin = {
     execute: (message) => `[LOG] ${message}`
@@ -117,4 +120,5 @@ test('plugin dependencies', async () => {
   // Execute plugin with dependency
   const result = loggerPlugin.execute('test message', pluginSystem);
   expect(result).toBe('[LOG] TEST MESSAGE');
+});
 });

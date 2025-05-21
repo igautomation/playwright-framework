@@ -4,7 +4,9 @@ const WebInteractions = require('../../utils/web/webInteractions');
 test.describe('Web Interactions @validation', () => {
   test('should navigate to a URL', async ({ page }) => {
     const webInteractions = new WebInteractions(page);
-    await page.goto('https://example.com');
+});
+
+    await page.goto(process.env.EXAMPLE_URL);
     const title = await page.title();
     expect(title).toBeDefined();
   });

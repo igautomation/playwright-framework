@@ -39,6 +39,8 @@ test.describe('Product Catalog Tests @ui', () => {
           <style>
             .product-card {
               border: 1px solid #ddd;
+});
+
               margin: 10px;
               padding: 15px;
               border-radius: 5px;

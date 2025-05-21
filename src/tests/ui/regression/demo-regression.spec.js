@@ -10,7 +10,8 @@ test.describe('@ui @regression Product Search Regression Suite', () => {
   }) => {
     try {
       // Resolve base URL from environment or fallback default
-      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      const baseURL = process.env.BASE_URL || process.env.AUTOMATION_EXERCISE_URL;
+});
 
       // Navigate to the product listing page
       await authenticatedPage.goto(`${baseURL}/products`);

@@ -37,6 +37,8 @@ test.describe('Data Provider @validation', () => {
 
   test('should save and load JSON data', async () => {
     const filepath = dataProvider.saveAsJson(testJsonData, 'test-product');
+});
+
     expect(fs.existsSync(filepath)).toBeTruthy();
     
     const loadedData = dataProvider.loadFromJson('test-product');

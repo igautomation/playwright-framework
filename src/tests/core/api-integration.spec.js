@@ -1,14 +1,17 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Api Integration', () => {
+
 /**
  * Core Test: API Integration
  * Demonstrates API testing capabilities
  */
 test('basic API request and response validation', async ({ request }) => {
   // Make API request
-  const response = await request.get('https://reqres.in/api/users?page=2');
-  
+  const response = await request.get(`${process.env.API_URL}/'https:/`users?page=2');
+});
+
   // Verify response status
   expect(response.status()).toBe(200);
   
@@ -26,4 +29,5 @@ test('basic API request and response validation', async ({ request }) => {
   expect(firstUser).toHaveProperty('email');
   expect(firstUser).toHaveProperty('first_name');
   expect(firstUser).toHaveProperty('last_name');
+});
 });

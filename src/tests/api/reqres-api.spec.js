@@ -14,7 +14,7 @@ class ReqresApiRepository {
    */
   constructor(request) {
     this.request = request;
-    this.baseUrl = 'https://reqres.in/api';
+    this.baseUrl = process.env.API_URL;
     
     // Define headers directly to ensure they're always included
     this.headers = {
@@ -138,7 +138,8 @@ test.describe('Reqres.in API Tests', () => {
   test('should get list of users', async () => {
     // When: Getting users from API
     const response = await apiRepo.getUsers();
-    
+});
+
     // Then: Response should have expected structure
     expect(response.page).toBe(1);
     expect(response.data).toBeInstanceOf(Array);

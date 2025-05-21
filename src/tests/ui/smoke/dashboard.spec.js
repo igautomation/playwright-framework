@@ -7,12 +7,12 @@ const { expect } = require('@playwright/test');
 test.describe('Dashboard Functionality @smoke @ui', () => {
   test.beforeEach(async ({ page, loginPage }) => {
     // Navigate to login page
-    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.goto(process.env.ORANGEHRM_URL);
     
     // Login before each test
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
     
     // Wait for dashboard to load
@@ -28,6 +28,7 @@ test.describe('Dashboard Functionality @smoke @ui', () => {
   }) => {
     // Navigate to dashboard
     await dashboardPage.navigate();
+});
 
     // Verify dashboard page is displayed
     await dashboardPage.verifyDashboardPageDisplayed();
@@ -49,16 +50,16 @@ test.describe('Dashboard Functionality @smoke @ui', () => {
     const menuItems = await dashboardPage.getSideMenuItems();
 
     // Verify at least some expected menu items are present
-    expect(menuItems.some((item) => item.includes('Admin'))).toBeTruthy();
+    expect(menuItems.some((item) => item.includes(process.env.USERNAME))).toBeTruthy();
     expect(menuItems.some((item) => item.includes('PIM'))).toBeTruthy();
     expect(menuItems.some((item) => item.includes('Leave'))).toBeTruthy();
 
     // Navigate to a menu item
-    await dashboardPage.navigateToMenuItem('Admin');
+    await dashboardPage.navigateToMenuItem(process.env.USERNAME);
 
     // Verify we're on the Admin page
     const headingText = await dashboardPage.getMainHeadingText();
-    expect(headingText).toContain('Admin');
+    expect(headingText).toContain(process.env.USERNAME);
   });
 
   test('Verify quick launch section @p2', async ({ page, dashboardPage }) => {
@@ -77,7 +78,8 @@ test.describe('Dashboard Functionality @smoke @ui', () => {
     try {
       // Get quick launch items with a timeout
       const quickLaunchItemsPromise = dashboardPage.getQuickLaunchItems();
-      const timeoutPromise = new Promise(resolve => setTimeout(() => resolve([]), 5000));
+      const timeoutPromise = new Promise(resolve => await page.waitForLoadState("networkidle");
+() => resolve([])());
       
       const quickLaunchItems = await Promise.race([quickLaunchItemsPromise, timeoutPromise]);
       

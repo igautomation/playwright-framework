@@ -65,8 +65,9 @@ test.describe('Data-driven API Tests @api', () => {
   // Test using JSON data
   test('Create users from JSON data @json', async ({ request }) => {
     // Use reqres.in directly to avoid configuration issues
-    const baseUrl = 'https://reqres.in';
-    
+    const baseUrl = process.env.API_BASE_URL;
+});
+
     // Load test data from JSON file
     const users = readJson('src/data/json/users.json');
     
@@ -100,7 +101,7 @@ test.describe('Data-driven API Tests @api', () => {
   // Test using YAML data
   test('Login with credentials from YAML @yaml', async ({ request }) => {
     // Use reqres.in directly to avoid configuration issues
-    const baseUrl = 'https://reqres.in';
+    const baseUrl = process.env.API_BASE_URL;
     
     // Load test data from YAML file
     const testUsers = readYaml('src/data/yaml/test-users.yaml');
@@ -128,7 +129,7 @@ test.describe('Data-driven API Tests @api', () => {
   // Test using CSV data
   test('Get users by ID from CSV @csv', async ({ request }) => {
     // Use reqres.in directly to avoid configuration issues
-    const baseUrl = 'https://reqres.in';
+    const baseUrl = process.env.API_BASE_URL;
     
     // Load test data from CSV file
     const users = await readCsv('src/data/csv/users.csv');
@@ -156,7 +157,7 @@ test.describe('Data-driven API Tests @api', () => {
   // Test using XML expected responses
   test('Validate API response against XML expected data @xml', async ({ request }) => {
     // Use reqres.in directly to avoid configuration issues
-    const baseUrl = 'https://reqres.in';
+    const baseUrl = process.env.API_BASE_URL;
     
     // Load expected response data from XML file
     const xmlData = readXml('src/data/xml/api-responses.xml');
@@ -183,7 +184,7 @@ test.describe('Data-driven API Tests @api', () => {
   // Test using JSON schema validation
   test('Validate API response against JSON schema @schema', async ({ request }) => {
     // Use reqres.in directly to avoid configuration issues
-    const baseUrl = 'https://reqres.in';
+    const baseUrl = process.env.API_BASE_URL;
     
     // Load JSON schema
     const schemas = readJson('src/data/json/test-schemas.json');

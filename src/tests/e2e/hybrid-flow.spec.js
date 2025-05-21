@@ -25,15 +25,16 @@ test.describe('Hybrid Flow Tests @e2e', () => {
       job: 'QA Engineer',
       email: testUser.email
     });
-    
+});
+
     console.log('User created via API:', createResponse.data);
     expect(createResponse.status).toBe(201);
 
     // Step 2: Login to the application
     await loginPage.navigate();
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
 
     // Step 3: Navigate to the user management page
@@ -43,7 +44,7 @@ test.describe('Hybrid Flow Tests @e2e', () => {
     // since we can't actually create users in the demo system via API
     await page.fill(
       'input[name="searchSystemUser[userName]"]',
-      'Admin'
+      process.env.USERNAME
     );
     await page.click('button[type="submit"]');
 
@@ -85,8 +86,8 @@ test.describe('Hybrid Flow Tests @e2e', () => {
     // Step 3: Login to the application
     await loginPage.navigate();
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
 
     // Step 4: Navigate to the user management page
@@ -95,7 +96,7 @@ test.describe('Hybrid Flow Tests @e2e', () => {
     // Step 5: Search for an existing user
     await page.fill(
       'input[name="searchSystemUser[userName]"]',
-      'Admin'
+      process.env.USERNAME
     );
     await page.click('button[type="submit"]');
 

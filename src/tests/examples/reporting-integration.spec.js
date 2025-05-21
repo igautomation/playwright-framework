@@ -1,6 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Reporting Integration', () => {
+
 /**
  * Example Test: Reporting Integration
  * Demonstrates integration with reporting tools and custom reporting
@@ -9,11 +11,13 @@ const { test, expect } = require('@playwright/test');
 // Test with custom test info annotations
 test('test with custom annotations for reporting', async ({ page }, testInfo) => {
   // Add custom annotations for reporting
-  testInfo.annotations.push({ type: 'issue', description: 'https://github.com/org/repo/issues/123' });
+  testInfo.annotations.push({ type: 'issue', description: `${process.env.GITHUB_URL}/org/repo/issues/123` });
+});
+
   testInfo.annotations.push({ type: 'feature', description: 'Login' });
   
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Add a todo
   await page.getByPlaceholder('What needs to be done?').fill('Report this task');
@@ -33,7 +37,7 @@ test('test with custom annotations for reporting', async ({ page }, testInfo) =>
 test('test with step reporting', async ({ page }) => {
   // Navigate to the page
   await test.step('Navigate to application', async () => {
-    await page.goto('https://demo.playwright.dev/todomvc/#/');
+    await page.goto(process.env.TODO_APP_URL);
   });
   
   // Add a todo
@@ -60,7 +64,7 @@ test('test with custom reporting data', async ({ page }, testInfo) => {
   const startTime = Date.now();
   
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Add a todo
   await page.getByPlaceholder('What needs to be done?').fill('Custom report task');
@@ -90,4 +94,5 @@ test('test with custom reporting data', async ({ page }, testInfo) => {
       executionTime
     }))
   });
+});
 });

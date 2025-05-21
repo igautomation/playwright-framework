@@ -7,6 +7,8 @@ test.describe('Framework Verification Tests', () => {
   test('should verify the test framework is working', async () => {
     // Simple assertion that will always pass
     expect(true).toBeTruthy();
+});
+
     console.log('Test framework is working correctly!');
   });
 

@@ -1,14 +1,17 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Error Handling', () => {
+
 /**
  * Core Test: Error Handling
  * Demonstrates testing error states and error handling
  */
 test('error state handling', async ({ page }) => {
   // Navigate to a page that will show a 404 error
-  await page.goto('https://playwright.dev/non-existent-page');
-  
+  await page.goto(`${process.env.PLAYWRIGHT_DOCS_URL}/non-existent-page`);
+});
+
   // Verify the page shows a 404 error
   await expect(page.locator('text=Page Not Found')).toBeVisible();
   
@@ -18,7 +21,7 @@ test('error state handling', async ({ page }) => {
 
 test('form validation error handling', async ({ page }) => {
   // Navigate to a form page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Add a todo
   await page.getByPlaceholder('What needs to be done?').fill('Task 1');
@@ -44,4 +47,5 @@ test('form validation error handling', async ({ page }) => {
   // In a real app, we would check for network error messages
   // For this demo, we'll just verify the todo count hasn't changed
   await expect(page.getByTestId('todo-item')).toHaveCount(2);
+});
 });

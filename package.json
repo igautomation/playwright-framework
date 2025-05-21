@@ -1,50 +1,44 @@
 {
   "name": "playwright-framework",
   "version": "1.0.0",
-  "description": "A comprehensive, modular test automation framework built with Playwright",
+  "description": "Advanced Playwright Test Framework",
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
-    "test:api": "playwright test --project=api",
-    "test:e2e": "playwright test src/tests/e2e/",
-    "test:visual": "playwright test --project=visual",
-    "test:accessibility": "playwright test --project=accessibility",
-    "test:performance": "playwright test --project=performance",
-    "test:unit": "playwright test src/tests/unit/",
-    "test:integration": "playwright test src/tests/integration/",
-    "test:chromium": "playwright test --project=chromium",
-    "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit",
-    "test:mobile": "playwright test --project=\"Mobile Chrome,Mobile Safari\"",
-    "test:parallel": "playwright test --workers=8",
-    "report": "playwright show-report reports/html",
-    "report:allure": "allure generate reports/allure --clean && allure open",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "docs": "jsdoc -c jsdoc.json"
+    "test:headed": "playwright test --headed",
+    "test:smoke": "playwright test -g '@smoke'",
+    "test:regression": "playwright test -g '@regression'",
+    "test:api": "playwright test -g '@api'",
+    "test:visual": "playwright test -g '@visual'",
+    "test:accessibility": "playwright test -g '@accessibility'",
+    "test:performance": "playwright test -g '@performance'",
+    "test:e2e": "playwright test -g '@e2e'",
+    "report": "playwright show-report",
+    "validate": "node ./scripts/utils/validate-tests.js",
+    "setup-hooks": "node ./scripts/setup-hooks.js",
+    "postinstall": "npm run setup-hooks"
   },
   "keywords": [
     "playwright",
     "testing",
     "automation",
-    "framework"
+    "e2e",
+    "api",
+    "visual",
+    "accessibility",
+    "performance"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "ISC",
   "dependencies": {
-    "@faker-js/faker": "^9.7.0",
-    "@playwright/test": "^1.35.0",
-    "allure-playwright": "^2.4.0",
-    "dotenv": "^16.0.3",
-    "pngjs": "^7.0.0",
-    "pixelmatch": "^5.3.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.42.0",
-    "eslint-plugin-playwright": "^0.12.0",
-    "jsdoc": "^4.0.2"
+    "@playwright/test": "^1.40.0",
+    "allure-playwright": "^2.9.2",
+    "axe-core": "^4.7.0",
+    "chart.js": "^4.4.0",
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0",
+    "lighthouse": "^11.0.0",
+    "xml2js": "^0.6.2"
   }
 }

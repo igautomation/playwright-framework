@@ -12,7 +12,8 @@ test.describe('List Tests Command', () => {
       encoding: 'utf8',
       cwd: path.resolve(__dirname, '../../../')
     });
-    
+});
+
     // Verify the output contains expected content
     expect(output).toContain('Listing tests with options');
     expect(output).toContain('Executing command: npx playwright test --list');

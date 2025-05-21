@@ -2,7 +2,6 @@
  * Reqres.in API Tests - Fixed Version
  * 
  * This test suite demonstrates API testing best practices using the Reqres.in API
- * https://reqres.in/
  */
 const { test, expect } = require('../../../fixtures/api-fixtures');
 
@@ -202,7 +201,8 @@ test.describe('Reqres.in API Tests', () => {
   test('should get list of users', async () => {
     // When: Getting users from API
     const response = await apiRepo.getUsers();
-    
+});
+
     // Then: Response should have expected structure
     expect(response.page).toBe(1);
     expect(response.data).toBeInstanceOf(Array);
@@ -261,7 +261,7 @@ test.describe('Reqres.in API Tests', () => {
     expect(response.ok).toBeTruthy();
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty('id');
-    expect(response.data).toHaveProperty('token');
+    expect(response.data).toHaveProperty(process.env.API_TOKEN);
   });
 
   test('should login a user successfully', async () => {
@@ -271,7 +271,7 @@ test.describe('Reqres.in API Tests', () => {
     // Then: Response should be successful
     expect(response.ok).toBeTruthy();
     expect(response.status).toBe(200);
-    expect(response.data).toHaveProperty('token');
+    expect(response.data).toHaveProperty(process.env.API_TOKEN);
   });
 
   test('should fail login with invalid credentials', async () => {

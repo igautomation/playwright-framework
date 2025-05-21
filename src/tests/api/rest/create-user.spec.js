@@ -1,23 +1,28 @@
-// Import directly from @playwright/test
+// @ts-check
 const { test, expect } = require('@playwright/test');
-const ApiRequest = require('../../../utils/api/apiRequest');
-const User = require('../../../utils/api/models/User');
 
-// Load environment variables
-require('dotenv').config();
-
-test('Create auth token via Restful Booker API', async () => {
-  const api = new ApiRequest(
-    process.env.API_URL || 'https://restful-booker.herokuapp.com'
-  );
-  
-  // Create user with username and password
-  const user = new User('admin', 'password123');
-  
-  // Send authentication request
-  const response = await api.post('auth', user.toJSON());
-  
-  // Verify response
-  expect(response.status).toBe(200);
-  expect(response.data).toHaveProperty('token');
+test.describe('Create User API', () => {
+  test('should create a user successfully', async () => {
+    const userData = {
+      name: 'John Doe',
+      job: 'Software Engineer'
+    };
+    
+    const response = await fetch(`${process.env.API_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.API_TOKEN}`
+      },
+      body: JSON.stringify(userData)
+    });
+    
+    const data = await response.json();
+    
+    expect(response.status).toBe(201);
+    expect(data).toHaveProperty('id');
+    expect(data).toHaveProperty('name', userData.name);
+    expect(data).toHaveProperty('job', userData.job);
+    expect(data).toHaveProperty('createdAt');
+  });
 });

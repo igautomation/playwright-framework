@@ -12,7 +12,8 @@ test.describe('TestDataFactory @validation', () => {
         name: { type: 'string' }
       }
     };
-    
+});
+
     const payload = TestDataFactory.generatePayloadFromSchema(simpleSchema);
     
     expect(payload).toHaveProperty('id');

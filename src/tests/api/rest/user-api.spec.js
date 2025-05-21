@@ -36,6 +36,8 @@ test.describe('User API @api', () => {
     const apiClient = {
       post: async (url, data) => {
         const response = await request.post(url, { data });
+});
+
         return await response.json();
       },
       get: async (url) => {

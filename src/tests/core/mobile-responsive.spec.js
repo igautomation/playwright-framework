@@ -1,6 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Mobile Responsive', () => {
+
 /**
  * Core Test: Mobile Responsiveness
  * Demonstrates testing responsive design across different device sizes
@@ -10,9 +12,10 @@ const { test, expect } = require('@playwright/test');
 test('responsive design on mobile', async ({ page }) => {
   // Set viewport to mobile size
   await page.setViewportSize({ width: 375, height: 667 });
-  
+});
+
   // Navigate to the page
-  await page.goto('https://playwright.dev/');
+  await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
   
   // Verify mobile navigation is visible (hamburger menu)
   const mobileNav = page.locator('button.navbar__toggle');
@@ -34,7 +37,7 @@ test('responsive design on tablet', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
   
   // Navigate to the page
-  await page.goto('https://playwright.dev/');
+  await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
   
   // Verify tablet-specific elements
   // This will depend on the specific site being tested
@@ -49,7 +52,7 @@ test('responsive design on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   
   // Navigate to the page
-  await page.goto('https://playwright.dev/');
+  await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
   
   // Verify desktop navigation is visible
   const desktopNav = page.locator('nav.navbar');
@@ -60,4 +63,5 @@ test('responsive design on desktop', async ({ page }) => {
   
   // Take a screenshot for visual verification
   await page.screenshot({ path: 'desktop-view.png' });
+});
 });

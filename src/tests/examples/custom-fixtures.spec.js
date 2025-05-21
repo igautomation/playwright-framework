@@ -11,7 +11,7 @@ const test = base.extend({
   // Authenticated page fixture
   authenticatedPage: async ({ page }, use) => {
     // Navigate to login page
-    await page.goto('https://demo.playwright.dev/todomvc/#/');
+    await page.goto(process.env.TODO_APP_URL);
     
     // Add a todo to simulate authentication
     await page.getByPlaceholder('What needs to be done?').fill('Login fixture task');
@@ -25,7 +25,7 @@ const test = base.extend({
   apiClient: async ({}, use) => {
     // Create a simple API client
     const client = {
-      baseUrl: 'https://reqres.in/api',
+      baseUrl: process.env.API_URL,
       
       async get(endpoint) {
         const response = await fetch(`${this.baseUrl}${endpoint}`);
@@ -68,10 +68,13 @@ const test = base.extend({
 });
 
 // Test using the authenticated page fixture
+test.describe('Custom Fixtures', () => {
+
 test('using authenticated page fixture', async ({ authenticatedPage }) => {
   // Verify we're authenticated (todo exists)
   await expect(authenticatedPage.getByTestId('todo-item')).toHaveText('Login fixture task');
-  
+});
+
   // Add another todo
   await authenticatedPage.getByPlaceholder('What needs to be done?').fill('Another task');
   await authenticatedPage.getByPlaceholder('What needs to be done?').press('Enter');
@@ -94,7 +97,7 @@ test('using API client fixture', async ({ apiClient }) => {
 // Test using the test data fixture
 test('using test data fixture', async ({ page, testData }) => {
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Use test data to create todos
   for (const user of testData.users) {
@@ -104,4 +107,5 @@ test('using test data fixture', async ({ page, testData }) => {
   
   // Verify todos were created
   await expect(page.getByTestId('todo-item')).toHaveCount(testData.users.length);
+});
 });

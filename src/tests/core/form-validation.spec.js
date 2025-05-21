@@ -1,14 +1,17 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Form Validation', () => {
+
 /**
  * Core Test: Form Validation
  * Demonstrates form interactions and validation testing
  */
 test('form submission and validation', async ({ page }) => {
   // Navigate to a form page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
-  
+  await page.goto(process.env.TODO_APP_URL);
+});
+
   // Test empty input validation
   await page.getByPlaceholder('What needs to be done?').click();
   await page.getByPlaceholder('What needs to be done?').press('Enter');
@@ -35,4 +38,5 @@ test('form submission and validation', async ({ page }) => {
   
   // Verify todo was removed
   await expect(page.getByTestId('todo-item')).toHaveCount(0);
+});
 });

@@ -11,6 +11,8 @@ test.describe('@ui Shard-based Execution Test', () => {
     try {
       // Log the current shard index and total, if sharding is enabled
       const shardInfo = testInfo.shard;
+});
+
       if (shardInfo) {
         logger.info(`Executing on shard ${shardInfo.current} of ${shardInfo.total}`);
       } else {
@@ -18,7 +20,7 @@ test.describe('@ui Shard-based Execution Test', () => {
       }
 
       // Navigate to the target products page
-      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      const baseURL = process.env.BASE_URL || process.env.AUTOMATION_EXERCISE_URL;
       await authenticatedPage.goto(`${baseURL}/products`);
 
       // Assert expected content is present on the page

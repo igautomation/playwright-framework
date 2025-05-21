@@ -12,7 +12,9 @@ test.describe('@ui Retry and Timeout Demo Tests', () => {
     retryDiagnostics
   }, testInfo) => {
     try {
-      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      const baseURL = process.env.BASE_URL || process.env.AUTOMATION_EXERCISE_URL;
+});
+
       await authenticatedPage.goto(`${baseURL}/products`);
 
       await expect(authenticatedPage.locator('h2.title.text-center')).toHaveText(/all products/i, {
@@ -35,7 +37,7 @@ test.describe('@ui Retry and Timeout Demo Tests', () => {
     try {
       test.slow(); // Marks the test as intentionally slow for reporting
 
-      const baseURL = process.env.BASE_URL || 'https://automationexercise.com';
+      const baseURL = process.env.BASE_URL || process.env.AUTOMATION_EXERCISE_URL;
       await authenticatedPage.goto(`${baseURL}/products`);
 
       // Simulate a slow verification to test extended timeout

@@ -9,6 +9,8 @@ const TestDataFactory = require('../../utils/common/testDataFactory');
 test.describe('Framework Core Components @validation', () => {
   test('BasePage should be instantiable', async ({ page }) => {
     const basePage = new BasePage(page);
+});
+
     expect(basePage).toBeDefined();
     expect(basePage.page).toBe(page);
   });
@@ -32,9 +34,9 @@ test.describe('Framework Core Components @validation', () => {
   });
 
   test('ApiUtils should be instantiable', async () => {
-    const apiUtils = new ApiUtils('https://example.com/api');
+    const apiUtils = new ApiUtils(`${process.env.EXAMPLE_URL}/api`);
     expect(apiUtils).toBeDefined();
-    expect(apiUtils.baseUrl).toBe('https://example.com/api');
+    expect(apiUtils.baseUrl).toBe(`${process.env.EXAMPLE_URL}/api`);
   });
 
   test('TestDataFactory should generate data', async () => {

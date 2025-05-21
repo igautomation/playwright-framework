@@ -82,7 +82,7 @@ test.describe('CLI Scraper @validation', () => {
             <body>
               <form id="test-form" action="/submit" method="post">
                 <input type="text" name="username" value="testuser">
-                <input type="password" name="password">
+                <input type=process.env.PASSWORD name=process.env.PASSWORD>
                 <select name="country">
                   <option value="us">USA</option>
                   <option value="ca" selected>Canada</option>
@@ -146,7 +146,8 @@ test.describe('CLI Scraper @validation', () => {
   
   test('should extract table data', async () => {
     const outputFile = path.join(testDataDir, 'json', 'test-table.json');
-    
+});
+
     const { stdout, stderr } = await execPromise(
       `node ${cliPath} table ${baseUrl}/table "#test-table" -o test-table.json --data-dir ${testDataDir}`
     );

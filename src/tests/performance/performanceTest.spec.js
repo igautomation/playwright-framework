@@ -28,8 +28,9 @@ test.describe('Performance Tests @performance', () => {
   
   test('Page load performance', async ({ page }) => {
     // Use a reliable test site
-    const testUrl = 'https://playwright.dev';
-    
+    const testUrl = process.env.PLAYWRIGHT_DOCS_URL;
+});
+
     // Measure page load performance
     const result = await perfUtils.measurePageLoad(testUrl, {
       screenshot: true,
@@ -50,7 +51,7 @@ test.describe('Performance Tests @performance', () => {
   
   test('User interaction performance', async ({ page }) => {
     // Use a reliable test site
-    const testUrl = 'https://playwright.dev';
+    const testUrl = process.env.PLAYWRIGHT_DOCS_URL;
     
     // Navigate to the page
     await page.goto(testUrl);
@@ -81,7 +82,7 @@ test.describe('Performance Tests @performance', () => {
       {
         name: 'Playwright docs homepage',
         type: 'pageLoad',
-        url: 'https://playwright.dev',
+        url: process.env.PLAYWRIGHT_DOCS_URL,
         options: {
           screenshot: true,
           trace: true
@@ -90,7 +91,7 @@ test.describe('Performance Tests @performance', () => {
       {
         name: 'Playwright API docs',
         type: 'pageLoad',
-        url: 'https://playwright.dev/docs/api/class-playwright',
+        url: `${process.env.PLAYWRIGHT_DOCS_URL}docs'https:/`/api/class-playwright',
         options: {
           screenshot: true
         }
@@ -99,7 +100,7 @@ test.describe('Performance Tests @performance', () => {
         name: 'Navigation interaction',
         type: 'interaction',
         interactionFn: async (page) => {
-          await page.goto('https://playwright.dev');
+          await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
           // Find a reliable element to click
           const docsLink = page.locator('a[href*="docs"]').first();
           await docsLink.waitFor({ state: 'visible' });
@@ -132,7 +133,7 @@ test.describe('Performance Tests @performance', () => {
   
   test('Measure page with code coverage', async ({ page }) => {
     // Use a reliable test site
-    const testUrl = 'https://playwright.dev';
+    const testUrl = process.env.PLAYWRIGHT_DOCS_URL;
     
     // Measure page load with code coverage
     const result = await perfUtils.measurePageLoad(testUrl, {

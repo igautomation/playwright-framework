@@ -25,8 +25,9 @@ test.describe('Localization Tests @localization', () => {
   
   test('Extract text content from page', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://example.com');
-    
+    await page.goto(process.env.EXAMPLE_URL);
+});
+
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
     
@@ -49,7 +50,7 @@ test.describe('Localization Tests @localization', () => {
     const locales = ['en', 'fr', 'es', 'de'];
     
     // Compare locales
-    const result = await localizationUtils.compareLocales('https://example.com', locales, {
+    const result = await localizationUtils.compareLocales(process.env.EXAMPLE_URL, locales, {
       screenshot: true,
       generateReport: true,
       reportPath: './reports/localization/locale-comparison.html'
@@ -76,7 +77,7 @@ test.describe('Localization Tests @localization', () => {
     const newContext = await localizationUtils.setLocale('fr-FR');
     
     // Navigate to the page using the updated page in localizationUtils
-    await localizationUtils.page.goto('https://example.com');
+    await localizationUtils.page.goto(process.env.EXAMPLE_URL);
     
     // Wait for the page to be fully loaded
     await localizationUtils.page.waitForLoadState('networkidle');
@@ -93,7 +94,7 @@ test.describe('Localization Tests @localization', () => {
   
   test('Export translations', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://example.com');
+    await page.goto(process.env.EXAMPLE_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -167,7 +168,7 @@ test.describe('Localization Tests @localization', () => {
       });
       
       // Navigate to the form page
-      await page.goto('https://example.com/contact');
+      await page.goto(`${process.env.EXAMPLE_URL}/contact`);
       
       // Wait for the form to be visible
       await page.waitForSelector('form', { state: 'visible' });

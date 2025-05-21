@@ -1,5 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+
+test.describe('Framework Components', () => {
 const fs = require('fs');
 const path = require('path');
 
@@ -22,7 +24,8 @@ test('core directories exist', async () => {
     'scripts/setup',
     'scripts/make-executable'
   ];
-  
+});
+
   for (const dir of requiredDirs) {
     const dirPath = path.resolve(process.cwd(), dir);
     expect(fs.existsSync(dirPath)).toBeTruthy();
@@ -48,7 +51,7 @@ test('core files exist', async () => {
 test('page object model is working', async ({ page }) => {
   // Create a simple page object inline for testing
   const todoPage = {
-    url: 'https://demo.playwright.dev/todomvc/#/',
+    url: process.env.TODO_APP_URL,
     
     // Locators
     newTodo: page.getByPlaceholder('What needs to be done?'),
@@ -93,4 +96,5 @@ test('utility functions are working', async () => {
   const randomString = generateRandomString(10);
   expect(randomString).toHaveLength(10);
   expect(typeof randomString).toBe('string');
+});
 });

@@ -23,6 +23,8 @@ test.describe('Simple test suite', () => {
   test('has title', async ({ page }) => {
     // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle(/Example Domain/);
+});
+
   });
 
   test('has heading', async ({ page }) => {

@@ -16,7 +16,8 @@ const { execSync } = require('child_process');
 test.describe('Framework Performance @validation', () => {
   test('Framework startup time should be acceptable', async () => {
     const startTime = Date.now();
-    
+});
+
     // Execute a simple test to measure startup time
     const result = execSync('npx playwright test --grep="Framework validation test" --reporter=list', { 
       stdio: 'pipe',
@@ -103,7 +104,8 @@ test.describe('Framework Performance @validation', () => {
         
         test('Parallel test ${i}', async ({ page }) => {
           await page.goto('about:blank');
-          await page.waitForTimeout(500); // Small delay to simulate work
+          // Replaced timeout with proper waiting
+await page.waitForLoadState("networkidle"); // Small delay to simulate work
           expect(true).toBeTruthy();
         });
       `;

@@ -1,6 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Cross Browser', () => {
+
 /**
  * Example Test: Cross-Browser Compatibility
  * Demonstrates testing across different browsers
@@ -10,9 +12,10 @@ const { test, expect } = require('@playwright/test');
 test('basic functionality works across browsers', async ({ page, browserName }) => {
   // Log which browser we're testing on
   console.log(`Running on ${browserName}`);
-  
+});
+
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Add a todo
   await page.getByPlaceholder('What needs to be done?').fill('Cross-browser task');
@@ -31,7 +34,7 @@ test('Chromium-specific feature test', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'This test only runs on Chromium');
   
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Test Chrome-specific feature (for demonstration)
   // In a real test, you would test actual Chrome-specific features
@@ -51,7 +54,7 @@ test('Firefox-specific feature test', async ({ page, browserName }) => {
   test.skip(browserName !== 'firefox', 'This test only runs on Firefox');
   
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Test Firefox-specific feature (for demonstration)
   console.log('Testing Firefox-specific feature');
@@ -63,7 +66,7 @@ test('WebKit-specific feature test', async ({ page, browserName }) => {
   test.skip(browserName !== 'webkit', 'This test only runs on WebKit');
   
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Test WebKit-specific feature (for demonstration)
   console.log('Testing WebKit-specific feature');
@@ -72,7 +75,7 @@ test('WebKit-specific feature test', async ({ page, browserName }) => {
 // Test that handles browser differences
 test('handle browser-specific behavior', async ({ page, browserName }) => {
   // Navigate to the page
-  await page.goto('https://demo.playwright.dev/todomvc/#/');
+  await page.goto(process.env.TODO_APP_URL);
   
   // Add a todo
   await page.getByPlaceholder('What needs to be done?').fill('Browser-specific task');
@@ -92,4 +95,5 @@ test('handle browser-specific behavior', async ({ page, browserName }) => {
   
   // Verify the todo was added (common assertion)
   await expect(page.getByTestId('todo-item')).toHaveText('Browser-specific task');
+});
 });

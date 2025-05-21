@@ -11,6 +11,7 @@ test.describe('Self-Healing Locator @validation', () => {
         <button id="test-button">Click Me</button>
       </div>
     `);
+});
 
     const selfHealingLocator = new SelfHealingLocator(page);
     const locator = await selfHealingLocator.getLocator('#test-button');

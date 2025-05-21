@@ -18,7 +18,8 @@ test.describe('Todo App E2E Tests', () => {
   test('should allow adding new todos', async ({ page }) => {
     // Add a new todo
     await todoPage.addTodo('Buy groceries');
-    
+});
+
     // Verify todo was added
     const todos = await todoPage.getTodos();
     expect(todos).toContain('Buy groceries');

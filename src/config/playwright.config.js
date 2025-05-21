@@ -16,9 +16,9 @@ module.exports = defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
   reporter: [
-    ['html', { outputFolder: '../../reports/html' }],
+    ['html', { outputFolder: './reports/html' }],
     ['list'],
-    ['allure-playwright', { outputFolder: '../../reports/allure' }]
+    ['allure-playwright', { outputFolder: './reports/allure' }]
   ],
   use: {
     actionTimeout: 15000,
@@ -68,7 +68,7 @@ module.exports = defineConfig({
   ],
   
   // Folder for test artifacts (traces, screenshots, videos)
-  outputDir: '../../reports/test-results/',
+  outputDir: './reports/test-results/',
   
   // Shared settings for all projects
   webServer: process.env.CI ? {

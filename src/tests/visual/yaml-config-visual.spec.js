@@ -34,7 +34,8 @@ test.describe('Visual Regression Tests with YAML Config @visual', () => {
     // Test each viewport defined in YAML config
     for (const [viewportName, viewportConfig] of Object.entries(visualConfig.viewports)) {
       console.log(`Testing viewport: ${viewportName}`);
-      
+});
+
       // Create a new context with the viewport size from YAML
       const context = await browser.newContext({
         viewport: {
@@ -55,7 +56,7 @@ test.describe('Visual Regression Tests with YAML Config @visual', () => {
       });
       
       // Navigate to the page
-      await page.goto('https://example.com');
+      await page.goto(process.env.EXAMPLE_URL);
       
       // Wait for the page to be fully loaded
       await page.waitForLoadState('networkidle');
@@ -79,7 +80,7 @@ test.describe('Visual Regression Tests with YAML Config @visual', () => {
   
   test('Element visual comparison with YAML config @yaml', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://example.com');
+    await page.goto(process.env.EXAMPLE_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -116,7 +117,7 @@ test.describe('Visual Regression Tests with YAML Config @visual', () => {
   
   test('Visual comparison with ignore regions from YAML @yaml', async ({ page }) => {
     // Navigate to the page
-    await page.goto('https://example.com');
+    await page.goto(process.env.EXAMPLE_URL);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');

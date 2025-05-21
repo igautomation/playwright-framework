@@ -14,6 +14,7 @@ test.describe('Web Scraping Utils @validation', () => {
   test('should extract table data', async ({ page }) => {
     // Set up test page with a table using fixture
     await page.setContent(tableFixture);
+});
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const tableData = await webScrapingUtils.extractTableData('table');

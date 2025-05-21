@@ -14,7 +14,8 @@ test.describe('Browser Compatibility @validation', () => {
   test('Framework should work in Chromium', async ({ browser }) => {
     // Skip if not running in Chromium
     test.skip(browser.browserType().name() !== 'chromium', 'Test requires Chromium');
-    
+});
+
     const page = await browser.newPage();
     await page.goto('about:blank');
     

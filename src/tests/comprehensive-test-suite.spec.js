@@ -77,7 +77,7 @@ class OrangeHrmLoginPage {
   constructor(page) {
     this.page = page;
     this.usernameInput = page.locator('input[name="username"]');
-    this.passwordInput = page.locator('input[name="password"]');
+    this.passwordInput = page.locator('input[name=process.env.PASSWORD]');
     this.loginButton = page.locator('button[type="submit"]');
     this.errorMessage = page.locator('.oxd-alert');
   }
@@ -86,7 +86,7 @@ class OrangeHrmLoginPage {
    * Navigate to the login page
    */
   async navigate() {
-    await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await this.page.goto(process.env.ORANGEHRM_URL);
   }
 
   /**
@@ -113,6 +113,8 @@ test.describe('Web UI Tests - OrangeHRM', () => {
   test('should display login page correctly', async ({ page }) => {
     // Verify login page elements
     await expect(loginPage.usernameInput).toBeVisible();
+});
+
     await expect(loginPage.passwordInput).toBeVisible();
     await expect(loginPage.loginButton).toBeVisible();
     
@@ -125,7 +127,7 @@ test.describe('Web UI Tests - OrangeHRM', () => {
 
   test('should login with valid credentials', async ({ page }) => {
     // Login with default credentials
-    await loginPage.login('Admin', 'admin123');
+    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
     
     // Verify successful login
     await expect(page.locator('.oxd-topbar-header-title')).toBeVisible();
@@ -157,7 +159,7 @@ test.describe('API Tests - Reqres.in', () => {
 
   test('should get list of users', async () => {
     // Get users from API
-    const apiResponse = await apiUtils.getData('https://reqres.in/api/users?page=1');
+    const apiResponse = await apiUtils.getData(`${process.env.API_URL}/'https:/`users?page=1');
     
     // Verify API response structure
     expect(apiResponse.page).toBe(1);
@@ -169,7 +171,7 @@ test.describe('API Tests - Reqres.in', () => {
 
   test('should get a single user', async () => {
     // Get a single user from API
-    const apiResponse = await apiUtils.getData('https://reqres.in/api/users/2');
+    const apiResponse = await apiUtils.getData(`${process.env.API_URL}/'https:/`users/2');
     
     // Verify API response structure
     expect(apiResponse.data.id).toBe(2);
@@ -188,7 +190,7 @@ test.describe('API Tests - Reqres.in', () => {
     };
     
     // Create user via API
-    const apiResponse = await apiUtils.postData('https://reqres.in/api/users', userData);
+    const apiResponse = await apiUtils.postData(`${process.env.API_URL}/'https:/`users', userData);
     
     // Verify API response
     expect(apiResponse.name).toBe(userData.name);
@@ -210,10 +212,10 @@ test.describe('Combined API and UI Tests', () => {
 
   test('should get users via API and display in UI', async ({ page }) => {
     // Get users from API
-    const apiResponse = await apiUtils.getData('https://reqres.in/api/users?page=1');
+    const apiResponse = await apiUtils.getData(`${process.env.API_URL}/'https:/`users?page=1');
     
     // Navigate to the website
-    await page.goto('https://reqres.in/');
+    await page.goto(process.env.API_BASE_URL);
     
     // Create a custom UI element to display API results
     await page.evaluate((userData) => {

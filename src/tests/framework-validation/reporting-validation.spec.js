@@ -18,6 +18,8 @@ test.describe('Reporting Validation @validation', () => {
   test('Framework should generate HTML reports', async () => {
     // Create a simple test file
     const testFilePath = path.resolve(process.cwd(), 'src/tests/framework-validation/temp-report-test.spec.js');
+});
+
     const testContent = `
       const { test, expect } = require('@playwright/test');
       
@@ -135,7 +137,8 @@ test.describe('Reporting Validation @validation', () => {
         // Perform some actions for the video
         for (let i = 0; i < 5; i++) {
           await page.setContent(\`<div>Count: \${i}</div>\`);
-          await page.waitForTimeout(200);
+          // Replaced timeout with proper waiting
+await page.waitForLoadState("networkidle");
         }
         
         expect(true).toBe(true);

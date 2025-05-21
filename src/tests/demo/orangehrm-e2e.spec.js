@@ -36,7 +36,8 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
     } catch (error) {
       console.log(`Navigation failed on first attempt: ${error.message}`);
       // Wait a moment and retry
-      await page.waitForTimeout(2000);
+      // Replaced timeout with proper waiting
+await page.waitForLoadState("networkidle");
       await loginPage.navigate();
     }
   });
@@ -44,12 +45,14 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
   test('Login and verify dashboard @ui @smoke', async ({ page }) => {
     // Create page objects
     const loginPage = new LoginPage(page);
+});
+
     const dashboardPage = new DashboardPage(page);
 
     // Login with valid credentials
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
 
     // Verify login was successful
@@ -78,24 +81,25 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
     // Create API client
     const apiClient = new ApiUtils(
       process.env.API_URL ||
-        'https://opensource-demo.orangehrmlive.com/web/index.php'
+        process.env.ORANGEHRM_URL
     );
 
     // Login with valid credentials with retry logic
     const loginPage = new LoginPage(page);
     try {
       await loginPage.login(
-        process.env.USERNAME || 'Admin',
-        process.env.PASSWORD || 'admin123'
+        process.env.USERNAME || process.env.USERNAME,
+        process.env.PASSWORD || process.env.PASSWORD
       );
     } catch (error) {
       console.log(`Login failed on first attempt: ${error.message}`);
       // Retry navigation and login
-      await page.waitForTimeout(2000);
+      // Replaced timeout with proper waiting
+await page.waitForLoadState("networkidle");
       await loginPage.navigate();
       await loginPage.login(
-        process.env.USERNAME || 'Admin',
-        process.env.PASSWORD || 'admin123'
+        process.env.USERNAME || process.env.USERNAME,
+        process.env.PASSWORD || process.env.PASSWORD
       );
     }
 
@@ -128,8 +132,8 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
 
     // Login with valid credentials
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
 
     // Verify login was successful
@@ -189,8 +193,8 @@ test.describe('OrangeHRM End-to-End Tests @demo', () => {
 
     // Login with valid credentials
     await loginPage.login(
-      process.env.USERNAME || 'Admin',
-      process.env.PASSWORD || 'admin123'
+      process.env.USERNAME || process.env.USERNAME,
+      process.env.PASSWORD || process.env.PASSWORD
     );
 
     // Check dashboard page accessibility

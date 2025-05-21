@@ -25,8 +25,9 @@ test.describe.parallel('Data-driven login tests', () => {
   for (const user of testData.users) {
     test(`login with user ${user.username}`, async ({ page }) => {
       // Navigate to demo page
-      await page.goto('https://demo.playwright.dev/todomvc/#/');
-      
+      await page.goto(process.env.TODO_APP_URL);
+});
+
       // In a real app, we would log in with the user credentials
       // For this demo, we'll simulate by adding a todo with the user's name
       await page.getByPlaceholder('What needs to be done?').fill(`Task for ${user.fullName}`);
@@ -49,14 +50,15 @@ test.describe('Data-driven search tests', () => {
   for (const { term, expectedTitle } of searchTerms) {
     test(`search for ${term}`, async ({ page }) => {
       // Navigate to search page
-      await page.goto('https://playwright.dev/');
+      await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
       
       // Perform search
       await page.getByRole('button', { name: 'Search' }).click();
       await page.getByPlaceholder('Search docs').fill(term);
       
       // Wait for search results
-      await page.waitForTimeout(500); // Give search time to update
+      // Replaced timeout with proper waiting
+await page.waitForLoadState("networkidle"); // Give search time to update
       
       // Verify search results contain the expected term
       const searchResults = page.locator('.DocSearch-Hits');

@@ -17,6 +17,8 @@ const { execSync } = require('child_process');
 test.describe('Error Handling @validation', () => {
   test('Framework should handle element not found errors gracefully', async ({ page }) => {
     await page.goto('about:blank');
+});
+
     await page.setContent('<div id="existing">Existing Element</div>');
     
     // This should work
@@ -46,12 +48,13 @@ test.describe('Error Handling @validation', () => {
     // Set content with an element that appears after delay
     await page.setContent(`
       <script>
-        setTimeout(() => {
+        // Replaced setTimeout with proper waiting
+await page.waitForLoadState("networkidle");
           const div = document.createElement('div');
           div.id = 'delayed';
           div.textContent = 'Delayed Element';
           document.body.appendChild(div);
-        }, 2000);
+        ;
       </script>
     `);
     
@@ -75,7 +78,7 @@ test.describe('Error Handling @validation', () => {
     // Attempt to navigate to a non-existent domain
     let networkErrorCaught = false;
     try {
-      await page.goto('http://non-existent-domain-123456789.com', { timeout: 5000 });
+      await page.goto(process.env.NON_EXISTENT_URL, { timeout: 5000 });
     } catch (error) {
       networkErrorCaught = true;
       expect(error.message).toMatch(/net::ERR_|NS_ERROR|SSL|CERT|CONN|TIMEOUT/);
@@ -90,7 +93,7 @@ test.describe('Error Handling @validation', () => {
     
     let routeErrorCaught = false;
     try {
-      await page.goto('https://example.com', { timeout: 5000 });
+      await page.goto(process.env.EXAMPLE_URL, { timeout: 5000 });
     } catch (error) {
       routeErrorCaught = true;
     }

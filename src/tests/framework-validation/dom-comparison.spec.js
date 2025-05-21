@@ -13,6 +13,7 @@ test.describe('DOM Comparison Utils @validation', () => {
         <input type="text" name="username" />
       </div>
     `);
+});
 
     const domComparisonUtils = new DOMComparisonUtils(page);
     const snapshotPath = await domComparisonUtils.captureDom('test-page');

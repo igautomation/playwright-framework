@@ -30,7 +30,7 @@ class PlaywrightPage {
    * Navigate to the Playwright website
    */
   async goto() {
-    await this.page.goto('https://playwright.dev/');
+    await this.page.goto(process.env.PLAYWRIGHT_DOCS_URL);
   }
 
   /**
@@ -42,7 +42,7 @@ class PlaywrightPage {
       await this.docsLink.click();
     } catch (e) {
       // Fallback to direct navigation if clicking fails
-      await this.page.goto('https://playwright.dev/docs/intro');
+      await this.page.goto(`${process.env.PLAYWRIGHT_DOCS_URL}docs'https:/`/intro');
     }
   }
 
@@ -65,6 +65,8 @@ test.describe('Advanced UI Test Suite', () => {
 
   test('should navigate to docs page using page object', async ({ page }) => {
     await playwrightPage.gotoDocsPage();
+});
+
     await expect(page).toHaveURL(/.*docs/);
     await playwrightPage.takeScreenshot('docs-page');
   });
@@ -72,12 +74,12 @@ test.describe('Advanced UI Test Suite', () => {
   test('should test responsive behavior', async ({ page }) => {
     // Test on mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('https://playwright.dev/');
+    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
     await page.screenshot({ path: path.join(screenshotsDir, 'mobile-view.png') });
     
     // Test on desktop viewport
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto('https://playwright.dev/');
+    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
     await page.screenshot({ path: path.join(screenshotsDir, 'desktop-view.png') });
   });
 });

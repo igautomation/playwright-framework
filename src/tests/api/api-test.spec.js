@@ -11,12 +11,13 @@ test.describe('API Tests', () => {
   let apiClient;
   
   test.beforeEach(() => {
-    apiClient = new ApiClient('https://reqres.in/api');
+    apiClient = new ApiClient(process.env.API_URL);
   });
   
   test('GET users endpoint returns correct data', async () => {
     const response = await apiClient.get('/users?page=1');
-    
+});
+
     expect(response).toHaveProperty('data');
     expect(Array.isArray(response.data)).toBeTruthy();
     expect(response.data.length).toBeGreaterThan(0);
@@ -68,14 +69,12 @@ test.describe('API Tests', () => {
     expect(response).toHaveProperty('updatedAt');
   });
   
-  test('DELETE user works correctly', async () => {
+  test('DELETE user works correctly', async ({ request }) => {
     const userId = 2;
     
-    // Using fetch directly for DELETE to verify status code
-    const response = await fetch(`https://reqres.in/api/users/${userId}`, {
-      method: 'DELETE'
-    });
+    // Using request context instead of fetch
+    const response = await request.delete(`${process.env.API_URL}/users/${userId}`);
     
-    expect(response.status).toBe(204);
+    expect(response.status()).toBe(204);
   });
 });

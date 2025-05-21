@@ -14,12 +14,14 @@ test.describe('Example test suite', () => {
 
   test.beforeEach(async ({ page }) => {
     // Go to the starting url before each test
-    await page.goto('https://playwright.dev/', { timeout: 60000 });
+    await page.goto(process.env.PLAYWRIGHT_DOCS_URL, { timeout: 60000 });
   });
 
   test('has title', async ({ page }) => {
     // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle(/Playwright/);
+});
+
   });
 
   test('get started link', async ({ page }) => {
@@ -40,7 +42,7 @@ test.describe('Example test suite', () => {
   
   test('has proper documentation structure', async ({ page }) => {
     // Go directly to the docs page instead of clicking
-    await page.goto('https://playwright.dev/docs/intro', { timeout: 60000 });
+    await page.goto(`${process.env.PLAYWRIGHT_DOCS_URL}docs'https:/`/intro', { timeout: 60000 });
     
     // Check that the sidebar is visible - updated selector for new Playwright docs
     await expect(page.locator('.theme-doc-sidebar-container')).toBeVisible();

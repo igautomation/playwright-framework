@@ -13,9 +13,10 @@ test.describe('Auto-Healing and DOM Comparison Demo @demo @auto-heal', () => {
       <div>
         <button data-testid="login-button" id="login-btn">Login</button>
         <input data-testid="username-input" id="username" placeholder="Username" />
-        <input data-testid="password-input" id="password" type="password" placeholder="Password" />
+        <input data-testid="password-input" id=process.env.PASSWORD type=process.env.PASSWORD placeholder="Password" />
       </div>
     `);
+});
 
     // Create self-healing locator
     const selfHealingLocator = new SelfHealingLocator(page);
@@ -65,7 +66,7 @@ test.describe('Auto-Healing and DOM Comparison Demo @demo @auto-heal', () => {
         <h1 id="title">Welcome</h1>
         <button id="login-btn">Login</button>
         <input id="username" placeholder="Username" />
-        <input id="password" type="password" placeholder="Password" />
+        <input id=process.env.PASSWORD type=process.env.PASSWORD placeholder="Password" />
       </div>
     `);
 
@@ -89,7 +90,7 @@ test.describe('Auto-Healing and DOM Comparison Demo @demo @auto-heal', () => {
         <h1 id="page-title">Welcome</h1> <!-- ID changed -->
         <button id="signin-btn">Sign In</button> <!-- ID and text changed -->
         <input id="user-email" placeholder="Email" /> <!-- ID and placeholder changed -->
-        <input id="user-password" type="password" placeholder="Password" /> <!-- ID changed -->
+        <input id="user-password" type=process.env.PASSWORD placeholder="Password" /> <!-- ID changed -->
       </div>
     `);
 

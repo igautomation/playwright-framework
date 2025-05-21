@@ -17,13 +17,14 @@ test.describe('Advanced Web Scraping Utils @validation', () => {
         <meta property="og:title" content="Open Graph Title">
         <meta property="og:description" content="Open Graph Description">
         <title>Test Page Title</title>
-        <link rel="canonical" href="https://example.com/test-page" />
+        <link rel="canonical" href=`${process.env.EXAMPLE_URL}/test-page` />
       </head>
       <body>
         <h1>Test Page</h1>
       </body>
       </html>
     `);
+});
 
     const webScrapingUtils = new WebScrapingUtils(page);
     const metadata = await webScrapingUtils.extractMetadata();
@@ -33,7 +34,7 @@ test.describe('Advanced Web Scraping Utils @validation', () => {
     expect(metadata.keywords).toBe('test, playwright, scraping');
     expect(metadata['og:title']).toBe('Open Graph Title');
     expect(metadata['og:description']).toBe('Open Graph Description');
-    expect(metadata.canonicalUrl).toBe('https://example.com/test-page');
+    expect(metadata.canonicalUrl).toBe(`${process.env.EXAMPLE_URL}/test-page`);
     expect(metadata.language).toBe('en');
   });
 
@@ -41,8 +42,8 @@ test.describe('Advanced Web Scraping Utils @validation', () => {
     // Set up test page with images
     await page.setContent(`
       <div>
-        <img src="https://example.com/image1.jpg" alt="Image 1" id="img1" class="test-img" width="100" height="100">
-        <img src="https://example.com/image2.jpg" alt="Image 2" id="img2" loading="lazy">
+        <img src=`${process.env.EXAMPLE_URL}/image1.jpg` alt="Image 1" id="img1" class="test-img" width="100" height="100">
+        <img src=`${process.env.EXAMPLE_URL}/image2.jpg` alt="Image 2" id="img2" loading="lazy">
       </div>
     `);
 
@@ -66,9 +67,9 @@ test.describe('Advanced Web Scraping Utils @validation', () => {
   test('should extract form data', async ({ page }) => {
     // Set up test page with a form
     await page.setContent(`
-      <form id="test-form" action="https://example.com/submit" method="post" name="testForm">
+      <form id="test-form" action=`${process.env.EXAMPLE_URL}/submit` method="post" name="testForm">
         <input type="text" name="username" id="username" value="testuser" required>
-        <input type="password" name="password" id="password" value="" required>
+        <input type=process.env.PASSWORD name=process.env.PASSWORD id=process.env.PASSWORD value="" required>
         <input type="checkbox" name="remember" id="remember" checked>
         <input type="radio" name="gender" id="male" value="male" checked>
         <input type="radio" name="gender" id="female" value="female">

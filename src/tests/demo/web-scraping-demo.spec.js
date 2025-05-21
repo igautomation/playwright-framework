@@ -38,6 +38,7 @@ test.describe('Web Scraping Demo @demo @scraping', () => {
         </tbody>
       </table>
     `);
+});
 
     // Create web scraping utils
     const webScrapingUtils = new WebScrapingUtils(page);
@@ -51,7 +52,7 @@ test.describe('Web Scraping Demo @demo @scraping', () => {
       ID: '1',
       Name: 'John Doe',
       Email: 'john@example.com',
-      Role: 'Admin',
+      Role: process.env.USERNAME,
     });
 
     console.log('Extracted table data:', tableData);

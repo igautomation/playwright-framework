@@ -1,5 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+
+test.describe('Configuration', () => {
 const fs = require('fs');
 const path = require('path');
 
@@ -11,7 +13,8 @@ const path = require('path');
 // Test that playwright.config.js is valid
 test('playwright.config.js is valid', async () => {
   const configPath = path.resolve(process.cwd(), 'playwright.config.js');
-  
+});
+
   // Check that the config file exists
   expect(fs.existsSync(configPath)).toBeTruthy();
   
@@ -78,4 +81,5 @@ test('environment variables are properly loaded', async () => {
       console.log('dotenv not installed, skipping .env loading check');
     }
   }
+});
 });

@@ -37,7 +37,8 @@ test.describe('XML API Tests @xml', () => {
     const getUserResponse = xmlResponses.apiResponses.response.find(
       r => r['@_id'] === 'getUserSuccess'
     );
-    
+});
+
     // Extract user data
     const userData = getUserResponse.body.user;
     
@@ -223,7 +224,7 @@ test.describe('XML API Tests @xml', () => {
     const expectedUser = createUserResponse.body.user;
     
     // Make a real API request (to reqres.in which returns JSON)
-    const response = await request.post('https://reqres.in/api/users', {
+    const response = await request.post(`${process.env.API_URL}/'https:/`users', {
       data: {
         name: `${expectedUser.firstName} ${expectedUser.lastName}`,
         job: expectedUser.role

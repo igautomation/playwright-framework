@@ -24,6 +24,8 @@ test.describe('Schema Validator @validation', () => {
 
   test('should validate valid data', async () => {
     const result = schemaValidator.validate('user', validUser);
+});
+
     expect(result.valid).toBeTruthy();
     expect(result.errors).toBeNull();
   });

@@ -1,6 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+test.describe('Performance', () => {
+
 /**
  * Core Test: Performance Benchmarking
  * Demonstrates performance testing capabilities
@@ -8,9 +10,10 @@ const { test, expect } = require('@playwright/test');
 test('page load performance', async ({ page }) => {
   // Start performance measurement
   await page.evaluate(() => window.performance.mark('start'));
-  
+});
+
   // Navigate to the page
-  await page.goto('https://playwright.dev/');
+  await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
   
   // Wait for the page to be fully loaded
   await page.waitForLoadState('networkidle');
@@ -50,4 +53,5 @@ test('page load performance', async ({ page }) => {
   
   // Stop tracing and save to file
   await page.context().tracing.stop({ path: 'performance-trace.zip' });
+});
 });

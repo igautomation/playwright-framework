@@ -24,6 +24,7 @@ test.describe('Framework Validation @validation', () => {
       'src/utils/common/logger.js',
       'src/pages/BasePage.js'
     ];
+});
 
     for (const file of essentialFiles) {
       const filePath = path.resolve(process.cwd(), file);

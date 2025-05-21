@@ -8,6 +8,7 @@ test.describe('Fix Verification Tests @validation', () => {
   test('TestDataFactory should generate payload from schema with required fields', async () => {
     // Register the schema
     schemaValidator.addSchema('test', testSchema);
+});
 
     // Generate payload from schema
     const payload = TestDataFactory.generatePayloadFromSchema(testSchema);
@@ -45,7 +46,7 @@ test.describe('Fix Verification Tests @validation', () => {
     // Try to navigate to a non-existent URL
     try {
       // This should not throw an error due to our improved error handling
-      await basePage.navigate('https://non-existent-domain-123456789.com');
+      await basePage.navigate(process.env.NON_EXISTENT_URL);
       // If we get here, the error was handled gracefully
       expect(true).toBeTruthy();
     } catch (error) {

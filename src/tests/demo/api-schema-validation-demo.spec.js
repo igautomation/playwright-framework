@@ -31,6 +31,7 @@ test.describe('API Schema Validation Demo @demo @api', () => {
   test('Validate user data against schema', async () => {
     // Generate user data
     const userData = TestDataFactory.generateUser();
+});
 
     // Validate against schema
     const result = schemaValidator.validate('user', userData);

@@ -9,6 +9,7 @@ test.describe('DOM Comparison and Auto-Correction Demo @demo @dom', () => {
   }) => {
     // Create DOM comparison utils
     const domComparisonUtils = new DOMComparisonUtils(page);
+});
 
     // Set up initial page content (version 1)
     await page.setContent(`
@@ -20,8 +21,8 @@ test.describe('DOM Comparison and Auto-Correction Demo @demo @dom', () => {
             <input type="text" id="username" name="username" placeholder="Enter username" />
           </div>
           <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" />
+            <label for=process.env.PASSWORD>Password</label>
+            <input type=process.env.PASSWORD id=process.env.PASSWORD name=process.env.PASSWORD placeholder="Enter password" />
           </div>
           <button type="submit" id="login-button" class="btn-primary">Login</button>
           <a href="/forgot-password" id="forgot-password">Forgot Password?</a>
@@ -62,7 +63,7 @@ test.describe('DOM Comparison and Auto-Correction Demo @demo @dom', () => {
           </div>
           <div class="input-group">
             <label for="user-password">Password</label>
-            <input type="password" id="user-password" name="password" placeholder="Enter your password" data-testid="password-input" />
+            <input type=process.env.PASSWORD id="user-password" name=process.env.PASSWORD placeholder="Enter your password" data-testid="password-input" />
           </div>
           <button type="submit" id="signin-button" class="btn-submit">Sign In</button>
           <div class="links">
