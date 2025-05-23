@@ -1,8 +1,0 @@
-Fix Docker configuration and test setup
-
-- Created a minimal Docker setup with all required dependencies
-- Added node-fetch, fs-extra, js-yaml, and other missing dependencies
-- Created an isolated test environment that works in Docker
-- Fixed Playwright configuration for Docker tests
-- Added proper volume mounts in docker-compose.yml
-- Updated GitHub workflow for Docker testing
