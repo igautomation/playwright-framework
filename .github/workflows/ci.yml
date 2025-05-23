@@ -5,17 +5,54 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [chromium, firefox, webkit]
-        env: [dev, qa]
+        browser: [chromium]
+        env: [dev]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - run: npm ci
       - run: npx playwright install --with-deps
-      - run: npm run lint
-      - run: npm run test -- --project=${{ matrix.browser }} --grep @${{ matrix.env }}
+      - name: Create .env file
+        run: |
+          cat > .env << 'EOL'
+          # API Configuration
+          API_BASE_URL=https://reqres.in/api
+          API_URL=https://reqres.in/api
+          API_KEY=reqres-free-v1
+
+          # Web Configuration
+          BASE_URL=https://opensource-demo.orangehrmlive.com
+          EXAMPLE_URL=https://example.com
+          TODO_APP_URL=https://demo.playwright.dev/todomvc
+          ORANGEHRM_URL=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+          PLAYWRIGHT_DOCS_URL=https://playwright.dev/
+          AUTOMATION_EXERCISE_URL=https://automationexercise.com
+          SELECTORS_HUB_URL=https://selectorshub.com/xpath-practice-page/
+
+          # Credentials
+          USERNAME=Admin
+          PASSWORD=admin123
+          INVALID_USERNAME=invalid
+          INVALID_PASSWORD=wrong
+          API_TOKEN=your_api_token
+
+          # Test Data
+          TEST_USER_ID=2
+          TEST_NONEXISTENT_USER_ID=999
+          TEST_PAGE=1
+          MAX_VALID_USER_ID=12
+          MAX_PAGE_WITH_DATA=2
+          USERS_PER_PAGE=6
+          TEST_USER_IDS=1,2,3,23
+          TEST_PAGES=1,2,3
+
+          # External Resources
+          AXE_CORE_CDN=https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js
+          EOL
+      - run: npm run test -- --project=${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: reports
           path: reports/

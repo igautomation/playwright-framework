@@ -1,81 +1,151 @@
 /**
- * Combined API and UI Test
+ * API-UI Combined Tests
  * 
- * This test demonstrates how to combine API and UI testing in a single test
- * using both Reqres.in API and OrangeHRM UI
+ * Tests that combine API and UI interactions
  */
 const { test, expect } = require('@playwright/test');
-const { ApiClient } = require('../../utils/api/apiUtils');
-const LoginPage = require('../../pages/orangehrm/LoginPage');
-const DashboardPage = require('../../pages/orangehrm/DashboardPage');
+const { ApiUtils } = require('../../utils/api/apiUtils');
+const { WebInteractions } = require('../../utils/web/webInteractions');
+const { DataGenerator } = require('../../utils/data/dataGenerator');
+const config = require('../../config');
 
-test.describe('Combined API and UI Tests', () => {
-  let apiClient;
-  let loginPage;
-  let dashboardPage;
+// Read base URLs from environment or config
+const baseUrl = process.env.BASE_URL || config.baseUrl;
+const apiBaseUrl = process.env.API_BASE_URL || config.api?.baseUrl;
+const loginPath = process.env.LOGIN_PATH || config.paths?.login;
+const dashboardPath = process.env.DASHBOARD_PATH || config.paths?.dashboard;
+
+// Read credentials from environment or config
+const username = process.env.USERNAME || config.credentials?.username;
+const password = process.env.PASSWORD || config.credentials?.password;
+
+// Read selectors from environment or config
+const selectors = {
+  usernameInput: process.env.USERNAME_INPUT || config.selectors?.combined?.usernameInput,
+  passwordInput: process.env.PASSWORD_INPUT || config.selectors?.combined?.passwordInput,
+  loginButton: process.env.LOGIN_BUTTON || config.selectors?.combined?.loginButton,
+  pimLink: process.env.PIM_LINK || config.selectors?.combined?.pimLink,
+  searchInput: process.env.SEARCH_INPUT || config.selectors?.combined?.searchInput,
+  searchButton: process.env.SEARCH_BUTTON || config.selectors?.combined?.searchButton,
+  employeeTable: process.env.EMPLOYEE_TABLE || config.selectors?.combined?.employeeTable
+};
+
+test.describe('API-UI Combined Tests', () => {
+  let apiUtils;
+  let webInteractions;
+  let dataGenerator;
+  let authToken;
   
-  test.beforeEach(async ({ page }) => {
-    apiClient = new ApiClient(process.env.API_URL);
-    loginPage = new LoginPage(page);
-    dashboardPage = new DashboardPage(page);
+  test.beforeEach(async ({ page, request }) => {
+    // Initialize utilities
+    apiUtils = new ApiUtils(request, apiBaseUrl);
+    webInteractions = new WebInteractions(page);
+    dataGenerator = new DataGenerator();
+    
+    // Navigate to the login page
+    await page.goto(`${baseUrl}${loginPath}`);
+    
+    // Intercept network requests to capture auth token
+    await page.route('**/api/v2/auth/login', async route => {
+      // Continue the request
+      await route.continue();
+      // Get the response
+      const response = await route.request().response();
+      const responseBody = await response.json();
+      // Store the token
+      authToken = responseBody?.data?.access_token || '';
+    });
+    
+    // Login
+    await webInteractions.fillForm({
+      [selectors.usernameInput]: username,
+      [selectors.passwordInput]: password
+    });
+    await webInteractions.click(selectors.loginButton);
+    
+    // Wait for dashboard to load
+    await page.waitForURL(`**${dashboardPath}`);
   });
   
-  test('should fetch user data via API and use in UI test', async ({ page }) => {
-    // 1. Fetch user data via API
-    const response = await apiClient.get('/users/2');
+  test('should create employee via API and verify in UI', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
     
-    // 2. Verify API response
-    expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('id', 2);
-    expect(response.data).toHaveProperty('email');
-    
-    // 3. Navigate to OrangeHRM
-    await loginPage.goto();
-    
-    // 4. Login with valid credentials
-    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
-    
-    // 5. Wait for dashboard to load
-    await page.waitForLoadState('networkidle');
-    
-    // 6. Verify dashboard is displayed
-    await expect(dashboardPage.header).toBeVisible();
-    
-    // 7. Navigate to Admin page
-    await dashboardPage.navigateToMenu('Admin');
-    
-    // 8. Wait for Admin page to load
-    await page.waitForSelector('.oxd-topbar-header-breadcrumb');
-    
-    // 9. Verify Admin page is loaded
-    await expect(page.locator('.oxd-topbar-header-breadcrumb')).toContainText('Admin');
-  });
-  
-  test('should create user via API and verify on UI', async ({ page }) => {
-    // 1. Create user data
-    const userData = {
-      name: 'John Doe',
-      job: 'Software Tester'
+    // Generate random employee data
+    const employeeData = {
+      firstName: dataGenerator.firstName(),
+      middleName: dataGenerator.firstName(),
+      lastName: dataGenerator.lastName(),
+      employeeId: dataGenerator.employeeId()
     };
     
-    // 2. Create user via API
-    const response = await apiClient.post('/users', userData);
+    // Create employee via API
+    const response = await apiUtils.post('/v2/pim/employees', employeeData, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
     
-    // 3. Verify API response
-    expect(response).toHaveProperty('id');
-    expect(response).toHaveProperty('name', userData.name);
-    expect(response).toHaveProperty('job', userData.job);
+    // Verify API response
+    expect(response.status()).toBe(200);
+    const responseData = await response.json();
+    expect(responseData.data).toBeDefined();
+    const employeeId = responseData.data.empNumber;
     
-    // 4. Navigate to OrangeHRM
-    await loginPage.goto();
+    // Navigate to PIM page to verify employee in UI
+    await webInteractions.click(selectors.pimLink);
     
-    // 5. Login with valid credentials
-    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
+    // Search for the employee
+    await webInteractions.fill(selectors.searchInput, `${employeeData.firstName} ${employeeData.lastName}`);
+    await webInteractions.click(selectors.searchButton);
     
-    // 6. Wait for dashboard to load
-    await page.waitForLoadState('networkidle');
+    // Wait for search results
+    await page.waitForSelector(selectors.employeeTable);
     
-    // 7. Verify dashboard is displayed
-    await expect(dashboardPage.header).toBeVisible();
+    // Verify employee is found in the table
+    const employeeRow = page.locator(selectors.employeeTable).first();
+    await expect(employeeRow).toContainText(employeeData.firstName);
+    await expect(employeeRow).toContainText(employeeData.lastName);
+    await expect(employeeRow).toContainText(employeeData.employeeId);
+  });
+  
+  test('should get employee list via API and verify in UI', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
+    
+    // Get employees via API
+    const response = await apiUtils.get('/v2/pim/employees', {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    // Verify API response
+    expect(response.status()).toBe(200);
+    const responseData = await response.json();
+    expect(responseData.data).toBeDefined();
+    
+    // Skip if no employees found
+    test.skip(!responseData.data || responseData.data.length === 0, 'No employees found');
+    
+    // Get the first employee
+    const employee = responseData.data[0];
+    
+    // Navigate to PIM page
+    await webInteractions.click(selectors.pimLink);
+    
+    // Search for the employee
+    await webInteractions.fill(selectors.searchInput, `${employee.firstName} ${employee.lastName}`);
+    await webInteractions.click(selectors.searchButton);
+    
+    // Wait for search results
+    await page.waitForSelector(selectors.employeeTable);
+    
+    // Verify employee is found in the table
+    const employeeRow = page.locator(selectors.employeeTable).first();
+    await expect(employeeRow).toContainText(employee.firstName);
+    await expect(employeeRow).toContainText(employee.lastName);
+    await expect(employeeRow).toContainText(employee.employeeId);
   });
 });

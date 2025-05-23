@@ -9,16 +9,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Default project settings
+// SAMPLE TEST APPLICATIONS:
+// - Web UI: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+// - API: https://reqres.in/
 const projectConfig = {
   default: {
     name: 'default',
     envFile: join(__dirname, '..', 'config', 'env', 'dev.env'), // Optional .env file
     requiredEnvVars: ['BASE_URL', 'API_BASE_URL'], // Project-specific required variables
     ui: {
-      baseURL: process.env.BASE_URL || getConfig('ui', 'baseURL')
+      baseURL: process.env.BASE_URL || 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login'
     },
     api: {
-      baseURL: process.env.API_BASE_URL || getConfig('api', 'baseURL')
+      baseURL: process.env.API_BASE_URL || 'https://reqres.in/api'
     },
     testPatterns: {
       ui: /.*\.ui\.spec\.js/,

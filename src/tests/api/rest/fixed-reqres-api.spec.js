@@ -1,286 +1,178 @@
 /**
- * Reqres.in API Tests - Fixed Version
+ * ReqRes API Tests with Schema Validation
  * 
- * This test suite demonstrates API testing best practices using the Reqres.in API
+ * Tests for ReqRes API with JSON schema validation
  */
-const { test, expect } = require('../../../fixtures/api-fixtures');
+const { test, expect } = require('@playwright/test');
+const { ApiUtils } = require('../../../utils/api/apiUtils');
+const { SchemaValidator } = require('../../../utils/api/schemaValidator');
+const config = require('../../../config');
 
-/**
- * Repository pattern for API interactions
- */
-class ReqresApiRepository {
-  /**
-   * @param {import('@playwright/test').APIRequestContext} request 
-   */
-  constructor(request) {
-    this.request = request;
+// Read base URL from environment or config
+const baseUrl = process.env.API_BASE_URL || config.api?.baseUrl;
+
+// Load schemas from config or use defaults
+const schemas = config.api?.schemas || {
+  usersList: {
+    type: 'object',
+    required: ['page', 'per_page', 'total', 'total_pages', 'data', 'support'],
+    properties: {
+      page: { type: 'number' },
+      per_page: { type: 'number' },
+      total: { type: 'number' },
+      total_pages: { type: 'number' },
+      data: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
+          properties: {
+            id: { type: 'number' },
+            email: { type: 'string', format: 'email' },
+            first_name: { type: 'string' },
+            last_name: { type: 'string' },
+            avatar: { type: 'string', format: 'uri' }
+          }
+        }
+      },
+      support: {
+        type: 'object',
+        required: ['url', 'text'],
+        properties: {
+          url: { type: 'string', format: 'uri' },
+          text: { type: 'string' }
+        }
+      }
+    }
+  },
+  singleUser: {
+    type: 'object',
+    required: ['data', 'support'],
+    properties: {
+      data: {
+        type: 'object',
+        required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
+        properties: {
+          id: { type: 'number' },
+          email: { type: 'string', format: 'email' },
+          first_name: { type: 'string' },
+          last_name: { type: 'string' },
+          avatar: { type: 'string', format: 'uri' }
+        }
+      },
+      support: {
+        type: 'object',
+        required: ['url', 'text'],
+        properties: {
+          url: { type: 'string', format: 'uri' },
+          text: { type: 'string' }
+        }
+      }
+    }
+  },
+  createUser: {
+    type: 'object',
+    required: ['name', 'job', 'id', 'createdAt'],
+    properties: {
+      name: { type: 'string' },
+      job: { type: 'string' },
+      id: { type: 'string' },
+      createdAt: { type: 'string', format: 'date-time' }
+    }
+  }
+};
+
+test.describe('ReqRes API with Schema Validation', () => {
+  let apiUtils;
+  let schemaValidator;
+  
+  test.beforeEach(({ request }) => {
+    apiUtils = new ApiUtils(request, baseUrl);
+    schemaValidator = new SchemaValidator();
+  });
+  
+  test('Get users list with schema validation', async ({ request }) => {
+    // Get page parameter from environment or config
+    const page = parseInt(process.env.TEST_PAGE) || config.api?.testData?.page;
     
-    // Import the API header provider
-    const { getApiBaseUrl, getApiHeaders } = require('../../../utils/api/apiHeaderProvider');
-    
-    // Get API configuration from data provider
-    this.baseUrl = getApiBaseUrl();
-    this.headers = getApiHeaders();
-  }
-
-  /**
-   * Get list of users
-   * @param {number} page - Page number
-   * @returns {Promise<Object>} - Response data
-   */
-  async getUsers(page = 1) {
-    const response = await this.request.get(`${this.baseUrl}/users?page=${page}`, {
-      headers: this.headers
-    });
-    if (!response.ok()) {
-      throw new Error(`Failed to get users: ${response.statusText()}`);
-    }
-    return await response.json();
-  }
-
-  /**
-   * Get a single user
-   * @param {number} id - User ID
-   * @returns {Promise<Object>} - Response data
-   */
-  async getUser(id) {
-    const response = await this.request.get(`${this.baseUrl}/users/${id}`, {
-      headers: this.headers
-    });
-    if (!response.ok()) {
-      throw new Error(`Failed to get user ${id}: ${response.statusText()}`);
-    }
-    return await response.json();
-  }
-
-  /**
-   * Create a new user
-   * @param {Object} userData - User data
-   * @returns {Promise<Object>} - Response data
-   */
-  async createUser(userData) {
-    const response = await this.request.post(`${this.baseUrl}/users`, {
-      data: userData,
-      headers: this.headers
-    });
-    // Reqres.in returns 201 for successful creation
-    if (!response.ok()) {
-      throw new Error(`Failed to create user: ${response.statusText()}`);
-    }
-    return await response.json();
-  }
-
-  /**
-   * Update a user
-   * @param {number} id - User ID
-   * @param {Object} userData - User data
-   * @returns {Promise<Object>} - Response data
-   */
-  async updateUser(id, userData) {
-    const response = await this.request.put(`${this.baseUrl}/users/${id}`, {
-      data: userData,
-      headers: this.headers
-    });
-    // Reqres.in returns 200 for successful update
-    if (!response.ok()) {
-      throw new Error(`Failed to update user ${id}: ${response.statusText()}`);
-    }
-    return await response.json();
-  }
-
-  /**
-   * Delete a user
-   * @param {number} id - User ID
-   * @returns {Promise<boolean>} - Success status
-   */
-  async deleteUser(id) {
-    const response = await this.request.delete(`${this.baseUrl}/users/${id}`, {
-      headers: this.headers
-    });
-    // Reqres.in returns 204 for successful deletion
-    return response.status() === 204;
-  }
-
-  /**
-   * Register a new user
-   * @param {Object} userData - User registration data
-   * @returns {Promise<Object>} - Response data
-   */
-  async registerUser(userData) {
-    const response = await this.request.post(`${this.baseUrl}/register`, {
-      data: userData,
-      headers: this.headers
+    // Send GET request to list users endpoint
+    const response = await apiUtils.get('/users', {
+      params: { page }
     });
     
-    return {
-      ok: response.ok(),
-      status: response.status(),
-      data: response.ok() ? await response.json() : await response.text()
+    // Verify response status
+    expect(response.status()).toBe(200);
+    
+    // Get response body
+    const responseBody = await response.json();
+    
+    // Validate response against schema
+    const validationResult = schemaValidator.validate(responseBody, schemas.usersList);
+    expect(validationResult.valid).toBeTruthy();
+    
+    // Additional assertions
+    expect(responseBody.page).toBe(page);
+    expect(responseBody.data.length).toBeGreaterThan(0);
+  });
+  
+  test('Get single user with schema validation', async ({ request }) => {
+    // Get user ID from environment or config
+    const userId = parseInt(process.env.TEST_USER_ID) || config.api?.testData?.userId;
+    
+    // Send GET request to get a specific user
+    const response = await apiUtils.get(`/users/${userId}`);
+    
+    // Verify response status
+    expect(response.status()).toBe(200);
+    
+    // Get response body
+    const responseBody = await response.json();
+    
+    // Validate response against schema
+    const validationResult = schemaValidator.validate(responseBody, schemas.singleUser);
+    expect(validationResult.valid).toBeTruthy();
+    
+    // Additional assertions
+    expect(responseBody.data.id).toBe(userId);
+  });
+  
+  test('Create user with schema validation', async ({ request }) => {
+    // Get user data from environment or config
+    const userData = {
+      name: process.env.NEW_USER_NAME || config.api?.testData?.newUser?.name,
+      job: process.env.NEW_USER_JOB || config.api?.testData?.newUser?.job
     };
-  }
-
-  /**
-   * Login a user
-   * @param {Object} userData - User login data
-   * @returns {Promise<Object>} - Response data
-   */
-  async loginUser(userData) {
-    const response = await this.request.post(`${this.baseUrl}/login`, {
-      data: userData,
-      headers: this.headers
-    });
     
-    return {
-      ok: response.ok(),
-      status: response.status(),
-      data: response.ok() ? await response.json() : await response.text()
-    };
-  }
-}
-
-// Import data provider
-const { readYaml } = require('../../../utils/common/dataOrchestrator');
-
-// Load test data from data provider
-let testData;
-try {
-  const yamlData = readYaml('src/data/testData.yaml');
-  testData = {
-    newUser: yamlData.user,
-    updatedUser: {
-      name: yamlData.user.name + ' Updated',
-      job: 'Senior ' + yamlData.user.job
-    },
-    registerUser: {
-      email: yamlData.user.email,
-      password: 'pistol'
-    },
-    loginUser: {
-      email: yamlData.user.email,
-      password: 'cityslicka'
-    },
-    invalidLogin: {
-      email: 'invalid@example.com'
-      // Missing password field to trigger error
-    }
-  };
-} catch (error) {
-  console.warn('Failed to load test data from YAML:', error.message);
-  // Fallback to default test data if data provider fails
-  testData = {
-    newUser: {
-      name: 'John Doe',
-      job: 'QA Engineer'
-    },
-    updatedUser: {
-      name: 'John Updated',
-      job: 'Senior QA Engineer'
-    },
-    registerUser: {
-      email: 'eve.holt@reqres.in',
-      password: 'pistol'
-    },
-    loginUser: {
-      email: 'eve.holt@reqres.in',
-      password: 'cityslicka'
-    },
-    invalidLogin: {
-      email: 'invalid@example.com'
-      // Missing password field to trigger error
-    }
-  };
-}
-
-test.describe('Reqres.in API Tests', () => {
-  let apiRepo;
-
-  test.beforeEach(async ({ request }) => {
-    apiRepo = new ReqresApiRepository(request);
-  });
-
-  test('should get list of users', async () => {
-    // When: Getting users from API
-    const response = await apiRepo.getUsers();
-});
-
-    // Then: Response should have expected structure
-    expect(response.page).toBe(1);
-    expect(response.data).toBeInstanceOf(Array);
-    expect(response.data.length).toBeGreaterThan(0);
-    expect(response.data[0]).toHaveProperty('email');
-    expect(response.data[0]).toHaveProperty('first_name');
-    expect(response.data[0]).toHaveProperty('last_name');
-  });
-
-  test('should get a single user', async () => {
-    // When: Getting a single user from API
-    const response = await apiRepo.getUser(2);
+    // Send POST request to create a user
+    const response = await apiUtils.post('/users', userData);
     
-    // Then: Response should have expected structure
-    expect(response.data).toHaveProperty('id', 2);
-    expect(response.data).toHaveProperty('email');
-    expect(response.data).toHaveProperty('first_name');
-    expect(response.data).toHaveProperty('last_name');
-    expect(response.data).toHaveProperty('avatar');
-  });
-
-  test('should create a user', async () => {
-    // When: Creating a user via API
-    const response = await apiRepo.createUser(testData.newUser);
+    // Verify response status
+    expect(response.status()).toBe(201);
     
-    // Then: Response should have expected structure
-    expect(response).toHaveProperty('name', testData.newUser.name);
-    expect(response).toHaveProperty('job', testData.newUser.job);
-    expect(response).toHaveProperty('id');
-    expect(response).toHaveProperty('createdAt');
-  });
-
-  test('should update a user', async () => {
-    // When: Updating a user via API
-    const response = await apiRepo.updateUser(2, testData.updatedUser);
+    // Get response body
+    const responseBody = await response.json();
     
-    // Then: Response should have expected structure
-    expect(response).toHaveProperty('name', testData.updatedUser.name);
-    expect(response).toHaveProperty('job', testData.updatedUser.job);
-    expect(response).toHaveProperty('updatedAt');
-  });
-
-  test('should delete a user', async () => {
-    // When: Deleting a user via API
-    const success = await apiRepo.deleteUser(2);
+    // Validate response against schema
+    const validationResult = schemaValidator.validate(responseBody, schemas.createUser);
+    expect(validationResult.valid).toBeTruthy();
     
-    // Then: Operation should be successful
-    expect(success).toBeTruthy();
+    // Additional assertions
+    expect(responseBody.name).toBe(userData.name);
+    expect(responseBody.job).toBe(userData.job);
   });
-
-  test('should register a user successfully', async () => {
-    // When: Registering a user via API
-    const response = await apiRepo.registerUser(testData.registerUser);
+  
+  test('Validate error response for non-existent resource', async ({ request }) => {
+    // Get non-existent resource ID from environment or config
+    const resourceId = parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId;
     
-    // Then: Response should be successful
-    expect(response.ok).toBeTruthy();
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveProperty('id');
-    expect(response.data).toHaveProperty(process.env.API_TOKEN);
-  });
-
-  test('should login a user successfully', async () => {
-    // When: Logging in a user via API
-    const response = await apiRepo.loginUser(testData.loginUser);
+    // Send GET request for a non-existent resource
+    const response = await apiUtils.get(`/unknown/${resourceId}`);
     
-    // Then: Response should be successful
-    expect(response.ok).toBeTruthy();
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveProperty(process.env.API_TOKEN);
-  });
-
-  test('should fail login with invalid credentials', async () => {
-    // When: Logging in with invalid credentials
-    const response = await apiRepo.loginUser(testData.invalidLogin);
+    // Verify response status is 404 Not Found
+    expect(response.status()).toBe(404);
     
-    // Then: Response should indicate failure
-    expect(response.ok).toBeFalsy();
-    expect(response.status).toBe(400); // Reqres.in returns 400 for missing password
-    expect(response.data).toContain('error');
+    // Verify response body is empty object
+    const responseBody = await response.json();
+    expect(Object.keys(responseBody).length).toBe(0);
   });
 });

@@ -1,72 +1,221 @@
 /**
- * Combined API and UI Test - Fixed Version 2
+ * API-UI Combined Tests V2
  * 
- * This test demonstrates how to combine API and UI testing in a single test
- * using both Reqres.in API and OrangeHRM UI
+ * Enhanced tests that combine API and UI interactions with improved error handling
  */
 const { test, expect } = require('@playwright/test');
-const { ApiClient } = require('../../utils/api/apiUtils');
-const LoginPage = require('../../pages/orangehrm/LoginPage');
-const DashboardPage = require('../../pages/orangehrm/DashboardPage');
+const { ApiUtils } = require('../../utils/api/apiUtils');
+const { WebInteractions } = require('../../utils/web/webInteractions');
+const { DataGenerator } = require('../../utils/data/dataGenerator');
+const { PlaywrightErrorHandler } = require('../../utils/common/errorHandler');
+const config = require('../../config');
 
-test.describe('Combined API and UI Tests', () => {
-  let apiClient;
-  let loginPage;
-  let dashboardPage;
+// Read base URLs from environment or config
+const baseUrl = process.env.BASE_URL || config.baseUrl;
+const apiBaseUrl = process.env.API_BASE_URL || config.api?.baseUrl;
+const loginPath = process.env.LOGIN_PATH || config.paths?.login;
+const dashboardPath = process.env.DASHBOARD_PATH || config.paths?.dashboard;
+
+// Read credentials from environment or config
+const username = process.env.USERNAME || config.credentials?.username;
+const password = process.env.PASSWORD || config.credentials?.password;
+
+// Read selectors from environment or config
+const selectors = {
+  usernameInput: process.env.USERNAME_INPUT || config.selectors?.combined?.usernameInput,
+  passwordInput: process.env.PASSWORD_INPUT || config.selectors?.combined?.passwordInput,
+  loginButton: process.env.LOGIN_BUTTON || config.selectors?.combined?.loginButton,
+  pimLink: process.env.PIM_LINK || config.selectors?.combined?.pimLink,
+  adminLink: process.env.ADMIN_LINK || config.selectors?.combined?.adminLink,
+  searchInput: process.env.SEARCH_INPUT || config.selectors?.combined?.searchInput,
+  searchButton: process.env.SEARCH_BUTTON || config.selectors?.combined?.searchButton,
+  employeeTable: process.env.EMPLOYEE_TABLE || config.selectors?.combined?.employeeTable,
+  addButton: process.env.ADD_BUTTON || config.selectors?.combined?.addButton,
+  userRoleDropdown: process.env.USER_ROLE_DROPDOWN || config.selectors?.combined?.userRoleDropdown,
+  employeeNameInput: process.env.EMPLOYEE_NAME_INPUT || config.selectors?.combined?.employeeNameInput,
+  statusDropdown: process.env.STATUS_DROPDOWN || config.selectors?.combined?.statusDropdown,
+  usernameField: process.env.USERNAME_FIELD || config.selectors?.combined?.usernameField,
+  passwordField: process.env.PASSWORD_FIELD || config.selectors?.combined?.passwordField,
+  saveButton: process.env.SAVE_BUTTON || config.selectors?.combined?.saveButton
+};
+
+test.describe('API-UI Combined Tests V2', () => {
+  let apiUtils;
+  let webInteractions;
+  let dataGenerator;
+  let authToken;
   
-  test.beforeEach(async ({ page }) => {
-    apiClient = new ApiClient(process.env.API_URL);
-    loginPage = new LoginPage(page);
-    dashboardPage = new DashboardPage(page);
+  test.beforeEach(async ({ page, request }) => {
+    // Initialize utilities
+    apiUtils = new ApiUtils(request, apiBaseUrl);
+    webInteractions = new WebInteractions(page);
+    dataGenerator = new DataGenerator();
+    
+    // Navigate to the login page
+    await page.goto(`${baseUrl}${loginPath}`);
+    
+    // Intercept network requests to capture auth token
+    await page.route('**/api/v2/auth/login', async route => {
+      // Continue the request
+      await route.continue();
+      // Get the response
+      const response = await route.request().response();
+      const responseBody = await response.json();
+      // Store the token
+      authToken = responseBody?.data?.access_token || '';
+    });
+    
+    // Login with error handling
+    await PlaywrightErrorHandler.withRetry(async () => {
+      await webInteractions.fillForm({
+        [selectors.usernameInput]: username,
+        [selectors.passwordInput]: password
+      });
+      await webInteractions.click(selectors.loginButton);
+      
+      // Wait for dashboard to load
+      await page.waitForURL(`**${dashboardPath}`);
+    }, { maxRetries: 2, retryDelay: 1000 });
   });
   
-  test('should fetch user data via API and verify on UI', async ({ page }) => {
-    // 1. Fetch user data via API
-    const response = await apiClient.get('/users/2');
+  test('should create user via UI and verify via API', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
     
-    // 2. Verify API response
-    expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('id', 2);
-    expect(response.data).toHaveProperty('email');
-    
-    // 3. Navigate to OrangeHRM
-    await loginPage.goto();
-    
-    // 4. Login with valid credentials
-    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
-    
-    // 5. Wait for dashboard to load
-    await page.waitForLoadState('networkidle');
-    
-    // 6. Verify dashboard is displayed
-    await expect(dashboardPage.header).toBeVisible();
-  });
-  
-  test('should create user via API and verify on UI', async ({ page }) => {
-    // 1. Create user data
+    // Generate random user data
     const userData = {
-      name: 'John Doe',
-      job: 'Software Tester'
+      username: dataGenerator.username(),
+      password: dataGenerator.password(),
+      employeeName: 'Paul Collings', // Using existing employee
+      userRole: 'ESS',
+      status: 'Enabled'
     };
     
-    // 2. Create user via API
-    const response = await apiClient.post('/users', userData);
+    // Navigate to Admin page
+    await webInteractions.click(selectors.adminLink);
     
-    // 3. Verify API response
-    expect(response).toHaveProperty('id');
-    expect(response).toHaveProperty('name', userData.name);
-    expect(response).toHaveProperty('job', userData.job);
+    // Click Add button
+    await webInteractions.click(selectors.addButton);
     
-    // 4. Navigate to OrangeHRM
-    await loginPage.goto();
+    // Wait for form to load
+    await page.waitForSelector('.oxd-form');
     
-    // 5. Login with valid credentials
-    await loginPage.login(process.env.USERNAME, process.env.PASSWORD);
+    // Fill the form with self-healing locators
+    await PlaywrightErrorHandler.withSelfHealing(async (selector) => {
+      // Select User Role
+      await page.locator(selector).first().click();
+      await page.getByRole('option', { name: userData.userRole }).click();
+    }, {
+      selector: selectors.userRoleDropdown,
+      alternativeSelectors: ['.oxd-select-wrapper input', '.oxd-select-text-input']
+    });
     
-    // 6. Wait for dashboard to load
-    await page.waitForLoadState('networkidle');
+    // Enter Employee Name
+    await webInteractions.fill(selectors.employeeNameInput, userData.employeeName.split(' ')[0]);
+    await page.waitForTimeout(1000); // Wait for suggestions
+    await page.getByText(userData.employeeName).click();
     
-    // 7. Verify dashboard is displayed
-    await expect(dashboardPage.header).toBeVisible();
+    // Select Status
+    await PlaywrightErrorHandler.withSelfHealing(async (selector) => {
+      await page.locator(selector).nth(1).click();
+      await page.getByRole('option', { name: userData.status }).click();
+    }, {
+      selector: selectors.userRoleDropdown,
+      alternativeSelectors: ['.oxd-select-wrapper input', '.oxd-select-text-input']
+    });
+    
+    // Enter Username and Password
+    await webInteractions.fill(selectors.usernameField, userData.username);
+    await webInteractions.fillForm({
+      [selectors.passwordField]: userData.password,
+      [selectors.passwordField + ':nth-child(2)']: userData.password
+    });
+    
+    // Save the form
+    await webInteractions.click(selectors.saveButton);
+    
+    // Wait for success (redirect back to users list)
+    await page.waitForURL('**/admin/viewSystemUsers');
+    
+    // Verify via API that the user was created
+    const response = await apiUtils.get('/v2/admin/users', {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      },
+      params: {
+        username: userData.username
+      }
+    });
+    
+    // Verify API response
+    expect(response.status()).toBe(200);
+    const responseData = await response.json();
+    expect(responseData.data).toBeDefined();
+    expect(responseData.data.length).toBeGreaterThan(0);
+    
+    // Find the created user
+    const createdUser = responseData.data.find(user => user.username === userData.username);
+    expect(createdUser).toBeDefined();
+    expect(createdUser.userRole.name).toBe(userData.userRole);
+    expect(createdUser.status).toBe(userData.status === 'Enabled' ? true : false);
+  });
+  
+  test('should update employee via API and verify changes in UI', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
+    
+    // First, get an existing employee via API
+    const employeesResponse = await apiUtils.get('/v2/pim/employees', {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    expect(employeesResponse.status()).toBe(200);
+    const employees = await employeesResponse.json();
+    
+    // Skip if no employees found
+    test.skip(!employees.data || employees.data.length === 0, 'No employees found');
+    
+    // Get the first employee
+    const employee = employees.data[0];
+    const employeeId = employee.empNumber;
+    
+    // Generate updated data
+    const updatedData = {
+      firstName: dataGenerator.firstName(),
+      lastName: dataGenerator.lastName(),
+      middleName: dataGenerator.firstName()
+    };
+    
+    // Update employee via API with error handling
+    const updateResponse = await PlaywrightErrorHandler.withRetry(async () => {
+      return await apiUtils.put(`/v2/pim/employees/${employeeId}`, updatedData, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    }, { maxRetries: 2, retryDelay: 1000 });
+    
+    // Verify API response
+    expect(updateResponse.status()).toBe(200);
+    
+    // Navigate to PIM page to verify updated employee in UI
+    await webInteractions.click(selectors.pimLink);
+    
+    // Search for the employee with performance measurement
+    await PlaywrightErrorHandler.withPerformanceMeasurement(async () => {
+      await webInteractions.fill(selectors.searchInput, `${updatedData.firstName} ${updatedData.lastName}`);
+      await webInteractions.click(selectors.searchButton);
+      
+      // Wait for search results
+      await page.waitForSelector(selectors.employeeTable);
+    }, 'Employee Search');
+    
+    // Verify employee is found with updated data
+    const employeeRow = page.locator(selectors.employeeTable).first();
+    await expect(employeeRow).toContainText(updatedData.firstName);
+    await expect(employeeRow).toContainText(updatedData.lastName);
   });
 });

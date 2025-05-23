@@ -1,13 +1,17 @@
 /**
  * Development environment configuration
+ * 
+ * SAMPLE TEST APPLICATIONS:
+ * - Web UI: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+ * - API: https://reqres.in/
  */
 module.exports = {
-  baseUrl: 'https://dev.example.com',
-  apiUrl: 'https://dev-api.example.com',
+  baseUrl: 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
+  apiUrl: 'https://reqres.in/api',
   
   // Authentication
-  username: 'devuser',
-  password: 'devpassword',
+  username: 'Admin',
+  password: 'admin123',
   
   // Timeouts
   defaultTimeout: 30000,

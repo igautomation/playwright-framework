@@ -1,131 +1,175 @@
 /**
  * API Utilities
  * 
- * Provides helper functions for API testing
+ * Provides utilities for API testing with Playwright
  */
-const externalResources = require('../../config/external-resources');
+const config = require('../../config');
 
 /**
- * API Client for making HTTP requests
+ * API Utils class for API testing
  */
-class ApiClient {
+class ApiUtils {
   /**
+   * Constructor
+   * @param {Object} request - Playwright request object
    * @param {string} baseUrl - Base URL for API requests
-   * @param {Object} defaultHeaders - Default headers for all requests
    */
-  constructor(baseUrl, defaultHeaders = {}) {
-    this.baseUrl = baseUrl || externalResources.apis.default;
+  constructor(request, baseUrl) {
+    this.request = request;
+    this.baseUrl = baseUrl || config.api?.baseUrl || process.env.API_BASE_URL;
+    
+    // Get API key from config or environment
+    const apiKey = process.env.API_KEY || config.api?.apiKey;
+    
+    // Set default headers with API key if available
     this.defaultHeaders = {
       'Content-Type': 'application/json',
-      ...defaultHeaders
+      'Accept': 'application/json'
     };
     
-    // Validate that baseUrl is provided
-    if (!this.baseUrl) {
-      throw new Error('API base URL is required. Provide it as a parameter or set DEFAULT_API_URL environment variable.');
+    if (apiKey) {
+      this.defaultHeaders['x-api-key'] = apiKey;
     }
   }
   
   /**
-   * Set authorization header
-   * @param {string} token - Authorization token
+   * Format URL with path
+   * @param {string} path - API path
+   * @returns {string} Full URL
    */
-  setAuthToken(token) {
-    this.defaultHeaders['Authorization'] = `Bearer ${token}`;
-  }
-  
-  /**
-   * Make a GET request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} headers - Additional headers
-   * @returns {Promise<Object>} Response data
-   */
-  async get(endpoint, headers = {}) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'GET',
-      headers: { ...this.defaultHeaders, ...headers }
-    });
-    
-    return this.handleResponse(response);
-  }
-  
-  /**
-   * Make a POST request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @param {Object} headers - Additional headers
-   * @returns {Promise<Object>} Response data
-   */
-  async post(endpoint, data, headers = {}) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'POST',
-      headers: { ...this.defaultHeaders, ...headers },
-      body: JSON.stringify(data)
-    });
-    
-    return this.handleResponse(response);
-  }
-  
-  /**
-   * Make a PUT request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @param {Object} headers - Additional headers
-   * @returns {Promise<Object>} Response data
-   */
-  async put(endpoint, data, headers = {}) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'PUT',
-      headers: { ...this.defaultHeaders, ...headers },
-      body: JSON.stringify(data)
-    });
-    
-    return this.handleResponse(response);
-  }
-  
-  /**
-   * Make a DELETE request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} headers - Additional headers
-   * @returns {Promise<Object>} Response data
-   */
-  async delete(endpoint, headers = {}) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'DELETE',
-      headers: { ...this.defaultHeaders, ...headers }
-    });
-    
-    return this.handleResponse(response);
-  }
-  
-  /**
-   * Handle API response
-   * @param {Response} response - Fetch response
-   * @returns {Promise<Object>} Response data
-   */
-  async handleResponse(response) {
-    const contentType = response.headers.get('content-type');
-    
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText} - ${JSON.stringify(data)}`);
-      }
-      
-      return data;
-    } else {
-      const text = await response.text();
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText} - ${text}`);
-      }
-      
-      return text;
+  formatUrl(path) {
+    // Handle paths that already have a protocol
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
     }
+    
+    // Ensure path starts with / if baseUrl doesn't end with /
+    if (this.baseUrl && !this.baseUrl.endsWith('/') && !path.startsWith('/')) {
+      path = `/${path}`;
+    }
+    
+    return this.baseUrl ? `${this.baseUrl}${path}` : path;
+  }
+  
+  /**
+   * Make GET request
+   * @param {string} path - API path
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response
+   */
+  async get(path, options = {}) {
+    const url = this.formatUrl(path);
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    // Handle query parameters
+    const params = options.params || {};
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      queryParams.append(key, value);
+    }
+    
+    const queryString = queryParams.toString();
+    const fullUrl = queryString ? `${url}${url.includes('?') ? '&' : '?'}${queryString}` : url;
+    
+    return await this.request.get(fullUrl, {
+      headers,
+      ...options
+    });
+  }
+  
+  /**
+   * Make POST request
+   * @param {string} path - API path
+   * @param {Object|string} data - Request body
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response
+   */
+  async post(path, data, options = {}) {
+    const url = this.formatUrl(path);
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    return await this.request.post(url, {
+      headers,
+      data,
+      ...options
+    });
+  }
+  
+  /**
+   * Make PUT request
+   * @param {string} path - API path
+   * @param {Object} data - Request body
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response
+   */
+  async put(path, data, options = {}) {
+    const url = this.formatUrl(path);
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    return await this.request.put(url, {
+      headers,
+      data,
+      ...options
+    });
+  }
+  
+  /**
+   * Make PATCH request
+   * @param {string} path - API path
+   * @param {Object} data - Request body
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response
+   */
+  async patch(path, data, options = {}) {
+    const url = this.formatUrl(path);
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    return await this.request.patch(url, {
+      headers,
+      data,
+      ...options
+    });
+  }
+  
+  /**
+   * Make DELETE request
+   * @param {string} path - API path
+   * @param {Object} options - Request options
+   * @returns {Promise<Object>} Response
+   */
+  async delete(path, options = {}) {
+    const url = this.formatUrl(path);
+    const headers = { ...this.defaultHeaders, ...options.headers };
+    
+    return await this.request.delete(url, {
+      headers,
+      ...options
+    });
+  }
+  
+  /**
+   * Set auth token for requests
+   * @param {string} token - Auth token
+   * @param {string} scheme - Auth scheme (default: Bearer)
+   */
+  setAuthToken(token, scheme = 'Bearer') {
+    this.defaultHeaders['Authorization'] = `${scheme} ${token}`;
+  }
+  
+  /**
+   * Get headers with auth token
+   * @param {string} token - Auth token
+   * @param {string} scheme - Auth scheme (default: Bearer)
+   * @returns {Object} Headers with auth token
+   */
+  getAuthHeaders(token, scheme = 'Bearer') {
+    return {
+      ...this.defaultHeaders,
+      'Authorization': `${scheme} ${token}`
+    };
   }
 }
 
 module.exports = {
-  ApiClient
+  ApiUtils
 };

@@ -1,32 +1,36 @@
 module.exports = {
+  root: true,
   env: {
     node: true,
     es2021: true,
-    jest: true,
   },
   extends: [
     'eslint:recommended',
     'plugin:playwright/recommended',
-    'prettier',
   ],
   parserOptions: {
-    ecmaVersion: 'latest',
+    ecmaVersion: 2021,
     sourceType: 'module',
   },
   rules: {
-    'no-console': 'off',
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'playwright/no-conditional-in-test': 'off',
-    'playwright/expect-expect': 'off',
-    'playwright/no-force-option': 'warn',
-    'playwright/no-wait-for-timeout': 'warn',
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-unused-vars': ['warn', { 
+      'argsIgnorePattern': '^_',
+      'varsIgnorePattern': '^_' 
+    }],
+    'playwright/no-conditional-in-test': 'warn',
+    'playwright/no-focused-test': process.env.CI ? 'error' : 'warn',
+    'playwright/no-skipped-test': process.env.CI ? 'error' : 'warn',
+    'playwright/valid-expect': 'error',
   },
-  overrides: [
-    {
-      files: ['**/*.test.js', '**/*.spec.js'],
-      rules: {
-        'no-undef': 'off',
-      },
-    },
+  ignorePatterns: [
+    'node_modules/',
+    'reports/',
+    'allure-results/',
+    'playwright-report/',
+    'dist/',
+    'build/',
+    'docs-site/',
   ],
 };

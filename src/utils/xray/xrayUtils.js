@@ -3,9 +3,13 @@
  * 
  * Provides utilities for integrating with Xray test management
  */
-const externalResources = require('../../config/external-resources');
-const logger = require('../common/logger');
+const fs = require('fs');
+const path = require('path');
+const config = require('../../config');
 
+/**
+ * Xray Integration Utilities
+ */
 class XrayUtils {
   /**
    * Create a new XrayUtils instance
@@ -16,7 +20,7 @@ class XrayUtils {
    * @param {string} options.projectKey - Jira project key
    */
   constructor(options = {}) {
-    this.baseUrl = options.baseUrl || externalResources.apis.xray || '';
+    this.baseUrl = options.baseUrl || config.externalResources?.apis?.xray || process.env.XRAY_API_URL || '';
     this.clientId = options.clientId || process.env.XRAY_CLIENT_ID || '';
     this.clientSecret = options.clientSecret || process.env.XRAY_CLIENT_SECRET || '';
     this.projectKey = options.projectKey || process.env.XRAY_PROJECT_KEY || '';
@@ -25,15 +29,15 @@ class XrayUtils {
     
     // Validate required configuration
     if (!this.baseUrl) {
-      logger.warn('Xray API URL not configured. Set XRAY_API_URL environment variable or provide in options.');
+      console.warn('Xray API URL not configured. Set XRAY_API_URL environment variable or provide in options.');
     }
     
     if (!this.clientId || !this.clientSecret) {
-      logger.warn('Xray credentials not configured. Set XRAY_CLIENT_ID and XRAY_CLIENT_SECRET environment variables or provide in options.');
+      console.warn('Xray credentials not configured. Set XRAY_CLIENT_ID and XRAY_CLIENT_SECRET environment variables or provide in options.');
     }
     
     if (!this.projectKey) {
-      logger.warn('Xray project key not configured. Set XRAY_PROJECT_KEY environment variable or provide in options.');
+      console.warn('Xray project key not configured. Set XRAY_PROJECT_KEY environment variable or provide in options.');
     }
   }
   
@@ -83,7 +87,7 @@ class XrayUtils {
       
       return this.token;
     } catch (error) {
-      logger.error('Failed to get Xray token:', error);
+      console.error('Failed to get Xray token:', error);
       throw error;
     }
   }
@@ -100,11 +104,49 @@ class XrayUtils {
         throw new Error('Xray integration not fully configured');
       }
       
-      const token = await this.getToken();
-      const formData = new FormData();
-      formData.append('file', require('fs').createReadStream(resultsFile));
+      if (!fs.existsSync(resultsFile)) {
+        throw new Error(`Results file not found: ${resultsFile}`);
+      }
       
-      const response = await fetch(`${this.baseUrl}/import/execution`, {
+      const token = await this.getToken();
+      
+      // Determine file format based on extension
+      const fileExtension = path.extname(resultsFile).toLowerCase();
+      let endpoint = `${this.baseUrl}/import/execution`;
+      
+      // Add format-specific endpoint
+      if (fileExtension === '.json') {
+        endpoint += '/cucumber';
+      } else if (fileExtension === '.xml') {
+        endpoint += '/junit';
+      } else if (fileExtension === '.nunit') {
+        endpoint += '/nunit';
+      } else if (fileExtension === '.robot') {
+        endpoint += '/robot';
+      } else if (fileExtension === '.behave') {
+        endpoint += '/behave';
+      }
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', new Blob([fs.readFileSync(resultsFile)]));
+      
+      // Add project key if provided
+      if (options.projectKey || this.projectKey) {
+        formData.append('projectKey', options.projectKey || this.projectKey);
+      }
+      
+      // Add test execution key if provided
+      if (options.testExecutionKey) {
+        formData.append('testExecutionKey', options.testExecutionKey);
+      }
+      
+      // Add test plan key if provided
+      if (options.testPlanKey) {
+        formData.append('testPlanKey', options.testPlanKey);
+      }
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -117,11 +159,11 @@ class XrayUtils {
       }
       
       const data = await response.json();
-      logger.info(`Test results uploaded to Xray: ${data.key}`);
+      console.log(`Test results uploaded to Xray: ${data.key}`);
       
       return data;
     } catch (error) {
-      logger.error('Failed to upload test results to Xray:', error);
+      console.error('Failed to upload test results to Xray:', error);
       throw error;
     }
   }
@@ -151,6 +193,21 @@ class XrayUtils {
         }
       };
       
+      // Add test environment if provided
+      if (options.environment) {
+        execution.fields.environment = options.environment;
+      }
+      
+      // Add test plan if provided
+      if (options.testPlanKey) {
+        execution.fields.testPlanKey = options.testPlanKey;
+      }
+      
+      // Add test keys if provided
+      if (options.testKeys && Array.isArray(options.testKeys) && options.testKeys.length > 0) {
+        execution.fields.tests = options.testKeys;
+      }
+      
       const response = await fetch(`${this.baseUrl}/import/execution`, {
         method: 'POST',
         headers: {
@@ -165,11 +222,11 @@ class XrayUtils {
       }
       
       const data = await response.json();
-      logger.info(`Test execution created in Xray: ${data.key}`);
+      console.log(`Test execution created in Xray: ${data.key}`);
       
       return data;
     } catch (error) {
-      logger.error('Failed to create test execution in Xray:', error);
+      console.error('Failed to create test execution in Xray:', error);
       throw error;
     }
   }
@@ -200,7 +257,7 @@ class XrayUtils {
       
       return await response.json();
     } catch (error) {
-      logger.error(`Failed to get test execution ${executionKey}:`, error);
+      console.error(`Failed to get test execution ${executionKey}:`, error);
       throw error;
     }
   }
@@ -226,6 +283,34 @@ class XrayUtils {
         executionDate: options.executionDate || new Date().toISOString()
       };
       
+      // Add execution key if provided
+      if (options.executionKey) {
+        result.testExecutionKey = options.executionKey;
+      }
+      
+      // Add evidence if provided
+      if (options.evidence && Array.isArray(options.evidence) && options.evidence.length > 0) {
+        result.evidence = options.evidence.map(item => {
+          if (typeof item === 'string') {
+            // Assume it's a file path
+            if (fs.existsSync(item)) {
+              const filename = path.basename(item);
+              const data = fs.readFileSync(item, { encoding: 'base64' });
+              const contentType = this._getContentType(item);
+              
+              return {
+                filename,
+                data,
+                contentType
+              };
+            }
+          } else {
+            // Assume it's already formatted
+            return item;
+          }
+        }).filter(Boolean);
+      }
+      
       const response = await fetch(`${this.baseUrl}/api/v1/import/execution/test`, {
         method: 'POST',
         headers: {
@@ -241,14 +326,14 @@ class XrayUtils {
       
       return await response.json();
     } catch (error) {
-      logger.error(`Failed to update test result for ${testKey}:`, error);
+      console.error(`Failed to update test result for ${testKey}:`, error);
       throw error;
     }
   }
   
   /**
    * Get test details
-   * @param {string} executionKey - Execution key
+   * @param {string} testKey - Test key
    * @returns {Promise<Object>} Test details
    */
   async getTest(testKey) {
@@ -272,8 +357,142 @@ class XrayUtils {
       
       return await response.json();
     } catch (error) {
-      logger.error(`Failed to get test ${testKey}:`, error);
+      console.error(`Failed to get test ${testKey}:`, error);
       throw error;
+    }
+  }
+  
+  /**
+   * Extract test IDs from test files
+   * @param {string} testDir - Directory containing test files
+   * @param {string} pattern - Glob pattern for test files
+   * @returns {Promise<Object>} Object mapping test files to test IDs
+   */
+  async extractTestIds(testDir = 'src/tests', pattern = '**/*.spec.js') {
+    try {
+      const glob = require('glob');
+      const files = glob.sync(path.join(testDir, pattern));
+      const testIdMap = {};
+      
+      for (const file of files) {
+        const content = fs.readFileSync(file, 'utf-8');
+        const matches = content.match(/@TEST-\d+/g) || [];
+        
+        if (matches.length > 0) {
+          testIdMap[file] = matches.map(match => match.replace('@', ''));
+        }
+      }
+      
+      return testIdMap;
+    } catch (error) {
+      console.error('Failed to extract test IDs:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Generate Xray payload from test results
+   * @param {Object} results - Test results
+   * @param {Object} options - Options
+   * @returns {Object} Xray payload
+   */
+  generateXrayPayload(results, options = {}) {
+    try {
+      const payload = {
+        info: {
+          summary: options.summary || `Test Execution - ${new Date().toISOString()}`,
+          description: options.description || 'Automated test execution',
+          project: options.projectKey || this.projectKey,
+          version: options.version || '1.0'
+        },
+        tests: []
+      };
+      
+      // Add test plan key if provided
+      if (options.testPlanKey) {
+        payload.info.testPlanKey = options.testPlanKey;
+      }
+      
+      // Add test environment if provided
+      if (options.environment) {
+        payload.info.testEnvironments = [options.environment];
+      }
+      
+      // Add tests
+      if (results && Array.isArray(results.tests)) {
+        results.tests.forEach(test => {
+          // Extract test key from test name or description
+          const testKeyMatch = (test.name || test.description || '').match(/@(TEST-\d+)/);
+          const testKey = testKeyMatch ? testKeyMatch[1] : null;
+          
+          if (testKey) {
+            const xrayTest = {
+              testKey,
+              start: test.startTime || new Date().toISOString(),
+              finish: test.endTime || new Date().toISOString(),
+              comment: test.description || '',
+              status: test.status === 'passed' ? 'PASS' : 'FAIL'
+            };
+            
+            // Add evidence if available
+            if (test.attachments && Array.isArray(test.attachments)) {
+              xrayTest.evidence = test.attachments.map(attachment => {
+                if (fs.existsSync(attachment)) {
+                  const filename = path.basename(attachment);
+                  const data = fs.readFileSync(attachment, { encoding: 'base64' });
+                  const contentType = this._getContentType(attachment);
+                  
+                  return {
+                    filename,
+                    data,
+                    contentType
+                  };
+                }
+                return null;
+              }).filter(Boolean);
+            }
+            
+            payload.tests.push(xrayTest);
+          }
+        });
+      }
+      
+      return payload;
+    } catch (error) {
+      console.error('Failed to generate Xray payload:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Get content type based on file extension
+   * @param {string} filePath - File path
+   * @returns {string} Content type
+   * @private
+   */
+  _getContentType(filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    
+    switch (ext) {
+      case '.png':
+        return 'image/png';
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.gif':
+        return 'image/gif';
+      case '.pdf':
+        return 'application/pdf';
+      case '.txt':
+        return 'text/plain';
+      case '.html':
+        return 'text/html';
+      case '.json':
+        return 'application/json';
+      case '.xml':
+        return 'application/xml';
+      default:
+        return 'application/octet-stream';
     }
   }
 }

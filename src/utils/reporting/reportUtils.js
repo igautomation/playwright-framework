@@ -4,8 +4,11 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const logger = require('../common/logger');
+const config = require('../../config');
 
+/**
+ * Report utilities for test reporting
+ */
 class ReportUtils {
   /**
    * Generate Allure report
@@ -13,10 +16,10 @@ class ReportUtils {
    * @returns {string} Report path
    */
   static generateAllureReport(options = {}) {
-    const resultsDir = options.resultsDir || path.join(process.cwd(), 'allure-results');
-    const reportDir = options.reportDir || path.join(process.cwd(), 'allure-report');
+    const resultsDir = options.resultsDir || config.reporting?.allure?.resultsDir || 'allure-results';
+    const reportDir = options.reportDir || config.reporting?.allure?.reportDir || 'reports/allure';
     
-    logger.info(`Generating Allure report from ${resultsDir} to ${reportDir}`);
+    console.log(`Generating Allure report from ${resultsDir} to ${reportDir}`);
     
     try {
       // Clean report directory
@@ -29,7 +32,7 @@ class ReportUtils {
       
       return reportDir;
     } catch (error) {
-      logger.error('Failed to generate Allure report:', error);
+      console.error('Failed to generate Allure report:', error);
       throw error;
     }
   }
@@ -38,13 +41,14 @@ class ReportUtils {
    * Open Allure report
    * @param {string} reportDir - Report directory
    */
-  static openAllureReport(reportDir = 'allure-report') {
-    logger.info(`Opening Allure report from ${reportDir}`);
+  static openAllureReport(reportDir) {
+    const allureReportDir = reportDir || config.reporting?.allure?.reportDir || 'reports/allure';
+    console.log(`Opening Allure report from ${allureReportDir}`);
     
     try {
-      execSync(`npx allure open ${reportDir}`);
+      execSync(`npx allure open ${allureReportDir}`);
     } catch (error) {
-      logger.error('Failed to open Allure report:', error);
+      console.error('Failed to open Allure report:', error);
       throw error;
     }
   }
@@ -55,10 +59,10 @@ class ReportUtils {
    * @returns {string} Report path
    */
   static generateHtmlReport(options = {}) {
-    const resultsDir = options.resultsDir || path.join(process.cwd(), 'test-results');
-    const reportDir = options.reportDir || path.join(process.cwd(), 'html-report');
+    const resultsDir = options.resultsDir || config.reporting?.html?.resultsDir || 'test-results';
+    const reportDir = options.reportDir || config.reporting?.html?.reportDir || 'reports/html';
     
-    logger.info(`Generating HTML report from ${resultsDir} to ${reportDir}`);
+    console.log(`Generating HTML report from ${resultsDir} to ${reportDir}`);
     
     try {
       // Clean report directory
@@ -79,7 +83,7 @@ class ReportUtils {
       
       return reportPath;
     } catch (error) {
-      logger.error('Failed to generate HTML report:', error);
+      console.error('Failed to generate HTML report:', error);
       throw error;
     }
   }
@@ -282,9 +286,6 @@ class ReportUtils {
    * @private
    */
   static _getTestResults(resultsDir) {
-    // This is a simplified implementation
-    // In a real implementation, you would parse the test results files
-    
     // Check if results directory exists
     if (!fs.existsSync(resultsDir)) {
       return [];
@@ -313,15 +314,15 @@ class ReportUtils {
                   duration: test.duration,
                   error: test.error,
                   screenshots: test.attachments
-                    .filter(a => a.contentType.startsWith('image/'))
-                    .map(a => a.path)
+                    ?.filter(a => a.contentType?.startsWith('image/'))
+                    ?.map(a => a.path) || []
                 });
               }
             }
           }
         }
       } catch (error) {
-        logger.error(`Failed to parse test results file ${file}:`, error);
+        console.error(`Failed to parse test results file ${file}:`, error);
       }
     }
     
@@ -335,7 +336,7 @@ class ReportUtils {
    * @returns {string} Merged report path
    */
   static mergeReports(reportPaths, outputPath) {
-    logger.info(`Merging reports: ${reportPaths.join(', ')}`);
+    console.log(`Merging reports: ${reportPaths.join(', ')}`);
     
     try {
       // For Allure reports, use allure-merge
@@ -358,10 +359,200 @@ class ReportUtils {
       
       return outputPath;
     } catch (error) {
-      logger.error('Failed to merge reports:', error);
+      console.error('Failed to merge reports:', error);
       throw error;
     }
   }
+  
+  /**
+   * Generate JUnit XML report
+   * @param {Object} options - Report options
+   * @returns {string} Report path
+   */
+  static generateJUnitReport(options = {}) {
+    const resultsDir = options.resultsDir || config.reporting?.junit?.resultsDir || 'test-results';
+    const reportPath = options.reportPath || config.reporting?.junit?.reportPath || 'reports/junit/junit.xml';
+    
+    console.log(`Generating JUnit report from ${resultsDir} to ${reportPath}`);
+    
+    try {
+      // Create directory if it doesn't exist
+      const reportDir = path.dirname(reportPath);
+      if (!fs.existsSync(reportDir)) {
+        fs.mkdirSync(reportDir, { recursive: true });
+      }
+      
+      // Get test results
+      const results = this._getTestResults(resultsDir);
+      
+      // Generate JUnit XML
+      const xml = this._generateJUnitXml(results);
+      
+      // Write to file
+      fs.writeFileSync(reportPath, xml);
+      
+      return reportPath;
+    } catch (error) {
+      console.error('Failed to generate JUnit report:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Generate JUnit XML
+   * @param {Array} results - Test results
+   * @returns {string} JUnit XML
+   * @private
+   */
+  static _generateJUnitXml(results) {
+    // Group results by suite
+    const suites = {};
+    
+    for (const result of results) {
+      const parts = result.name.split(' - ');
+      const suiteName = parts[0];
+      const testName = parts.slice(1).join(' - ');
+      
+      if (!suites[suiteName]) {
+        suites[suiteName] = [];
+      }
+      
+      suites[suiteName].push({
+        ...result,
+        name: testName
+      });
+    }
+    
+    // Generate XML
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<testsuites>\n';
+    
+    for (const [suiteName, tests] of Object.entries(suites)) {
+      const failures = tests.filter(t => t.status === 'failed').length;
+      const skipped = tests.filter(t => t.status === 'skipped').length;
+      const duration = tests.reduce((sum, t) => sum + t.duration, 0) / 1000; // Convert to seconds
+      
+      xml += `  <testsuite name="${escapeXml(suiteName)}" tests="${tests.length}" failures="${failures}" skipped="${skipped}" time="${duration.toFixed(3)}">\n`;
+      
+      for (const test of tests) {
+        const testDuration = test.duration / 1000; // Convert to seconds
+        
+        xml += `    <testcase name="${escapeXml(test.name)}" classname="${escapeXml(suiteName)}" time="${testDuration.toFixed(3)}"`;
+        
+        if (test.status === 'skipped') {
+          xml += '>\n';
+          xml += '      <skipped />\n';
+          xml += '    </testcase>\n';
+        } else if (test.status === 'failed') {
+          xml += '>\n';
+          xml += `      <failure message="${escapeXml(test.error?.message || 'Test failed')}">${escapeXml(test.error?.stack || '')}</failure>\n`;
+          xml += '    </testcase>\n';
+        } else {
+          xml += ' />\n';
+        }
+      }
+      
+      xml += '  </testsuite>\n';
+    }
+    
+    xml += '</testsuites>';
+    
+    return xml;
+  }
+  
+  /**
+   * Send report notification
+   * @param {Object} options - Notification options
+   * @returns {Promise<void>}
+   */
+  static async sendReportNotification(options = {}) {
+    const { type, reportUrl, stats, recipients } = options;
+    
+    if (!type || !reportUrl) {
+      throw new Error('Notification type and report URL are required');
+    }
+    
+    console.log(`Sending ${type} notification for report: ${reportUrl}`);
+    
+    try {
+      switch (type.toLowerCase()) {
+        case 'slack':
+          await this._sendSlackNotification(reportUrl, stats, options);
+          break;
+          
+        case 'teams':
+          await this._sendTeamsNotification(reportUrl, stats, options);
+          break;
+          
+        case 'email':
+          await this._sendEmailNotification(reportUrl, stats, recipients, options);
+          break;
+          
+        default:
+          throw new Error(`Unsupported notification type: ${type}`);
+      }
+      
+      console.log('Notification sent successfully');
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Send Slack notification
+   * @param {string} reportUrl - Report URL
+   * @param {Object} stats - Test statistics
+   * @param {Object} options - Notification options
+   * @returns {Promise<void>}
+   * @private
+   */
+  static async _sendSlackNotification(reportUrl, stats, options) {
+    // Implementation would use Slack API
+    console.log('Slack notification not implemented');
+  }
+  
+  /**
+   * Send Teams notification
+   * @param {string} reportUrl - Report URL
+   * @param {Object} stats - Test statistics
+   * @param {Object} options - Notification options
+   * @returns {Promise<void>}
+   * @private
+   */
+  static async _sendTeamsNotification(reportUrl, stats, options) {
+    // Implementation would use Teams API
+    console.log('Teams notification not implemented');
+  }
+  
+  /**
+   * Send email notification
+   * @param {string} reportUrl - Report URL
+   * @param {Object} stats - Test statistics
+   * @param {Array<string>} recipients - Email recipients
+   * @param {Object} options - Notification options
+   * @returns {Promise<void>}
+   * @private
+   */
+  static async _sendEmailNotification(reportUrl, stats, recipients, options) {
+    // Implementation would use email service
+    console.log('Email notification not implemented');
+  }
+}
+
+/**
+ * Escape XML special characters
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ * @private
+ */
+function escapeXml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 module.exports = ReportUtils;

@@ -1,4 +1,9 @@
-const logger = require('../common/logger');
+/**
+ * Network Utilities
+ * 
+ * Provides utilities for intercepting and manipulating network requests
+ */
+const config = require('../../config');
 
 /**
  * Network Utilities class for handling network requests and responses
@@ -7,8 +12,9 @@ class NetworkUtils {
   /**
    * Constructor
    * @param {import('@playwright/test').Page} page - Playwright page object
+   * @param {Object} options - Options
    */
-  constructor(page) {
+  constructor(page, options = {}) {
     if (!page) {
       throw new Error('Page object is required');
     }
@@ -17,6 +23,11 @@ class NetworkUtils {
     this.interceptedResponses = [];
     this.requestHandlers = new Map();
     this.responseHandlers = new Map();
+    this.options = {
+      maxStoredRequests: options.maxStoredRequests || 100,
+      maxStoredResponses: options.maxStoredResponses || 100,
+      ...options
+    };
   }
 
   /**
@@ -24,28 +35,94 @@ class NetworkUtils {
    * @returns {Promise<void>}
    */
   async startIntercepting() {
-    try {
-      logger.debug('Starting network interception');
+    // Set up request interception
+    await this.page.route('**/*', async (route, request) => {
+      const url = request.url();
+      const method = request.method();
+      const resourceType = request.resourceType();
 
-      // Set up request interception
-      await this.page.route('**/*', async (route, request) => {
-        const url = request.url();
-        const method = request.method();
-        const resourceType = request.resourceType();
+      // Store the intercepted request
+      const interceptedRequest = {
+        url,
+        method,
+        resourceType,
+        headers: request.headers(),
+        timestamp: new Date().toISOString(),
+      };
 
-        // Store the intercepted request
-        const interceptedRequest = {
+      // Add to intercepted requests, maintaining max size
+      this.interceptedRequests.unshift(interceptedRequest);
+      if (this.interceptedRequests.length > this.options.maxStoredRequests) {
+        this.interceptedRequests = this.interceptedRequests.slice(0, this.options.maxStoredRequests);
+      }
+
+      // Check if we have a handler for this request
+      const handlers = Array.from(this.requestHandlers.entries())
+        .filter(([pattern]) => this.matchPattern(url, pattern))
+        .map(([, handler]) => handler);
+
+      if (handlers.length > 0) {
+        // Execute handlers
+        for (const handler of handlers) {
+          try {
+            await handler(route, request);
+            // If handler doesn't call route.continue() or route.fulfill(), we need to continue
+            if (!route.isHandled()) {
+              await route.continue();
+            }
+            return;
+          } catch (handlerError) {
+            console.error(`Error in request handler for: ${url}`, handlerError);
+          }
+        }
+      }
+
+      // Continue the request if no handlers or all handlers failed
+      if (!route.isHandled()) {
+        await route.continue();
+      }
+    });
+
+    // Set up response interception
+    this.page.on('response', async (response) => {
+      try {
+        const url = response.url();
+        const status = response.status();
+        const headers = response.headers();
+
+        // Store the intercepted response
+        const interceptedResponse = {
           url,
-          method,
-          resourceType,
-          headers: request.headers(),
+          status,
+          headers,
           timestamp: new Date().toISOString(),
         };
 
-        this.interceptedRequests.push(interceptedRequest);
+        // Try to get the response body
+        try {
+          const contentType = headers['content-type'] || '';
 
-        // Check if we have a handler for this request
-        const handlers = Array.from(this.requestHandlers.entries())
+          if (contentType.includes('application/json')) {
+            interceptedResponse.body = await response
+              .json()
+              .catch(() => null);
+          } else if (contentType.includes('text/')) {
+            interceptedResponse.body = await response
+              .text()
+              .catch(() => null);
+          }
+        } catch (bodyError) {
+          // Ignore body extraction errors
+        }
+
+        // Add to intercepted responses, maintaining max size
+        this.interceptedResponses.unshift(interceptedResponse);
+        if (this.interceptedResponses.length > this.options.maxStoredResponses) {
+          this.interceptedResponses = this.interceptedResponses.slice(0, this.options.maxStoredResponses);
+        }
+
+        // Check if we have a handler for this response
+        const handlers = Array.from(this.responseHandlers.entries())
           .filter(([pattern]) => this.matchPattern(url, pattern))
           .map(([, handler]) => handler);
 
@@ -53,82 +130,16 @@ class NetworkUtils {
           // Execute handlers
           for (const handler of handlers) {
             try {
-              await handler(route, request);
+              await handler(response);
             } catch (handlerError) {
-              logger.error(
-                `Error in request handler for: ${url}`,
-                handlerError
-              );
+              console.error(`Error in response handler for: ${url}`, handlerError);
             }
           }
-        } else {
-          // Continue the request
-          await route.continue();
         }
-      });
-
-      // Set up response interception
-      this.page.on('response', async (response) => {
-        try {
-          const url = response.url();
-          const status = response.status();
-          const headers = response.headers();
-
-          // Store the intercepted response
-          const interceptedResponse = {
-            url,
-            status,
-            headers,
-            timestamp: new Date().toISOString(),
-          };
-
-          // Try to get the response body
-          try {
-            const contentType = headers['content-type'] || '';
-
-            if (contentType.includes('application/json')) {
-              interceptedResponse.body = await response
-                .json()
-                .catch(() => null);
-            } else if (contentType.includes('text/')) {
-              interceptedResponse.body = await response
-                .text()
-                .catch(() => null);
-            }
-          } catch (bodyError) {
-            logger.debug(`Could not get response body for: ${url}`, bodyError);
-          }
-
-          this.interceptedResponses.push(interceptedResponse);
-
-          // Check if we have a handler for this response
-          const handlers = Array.from(this.responseHandlers.entries())
-            .filter(([pattern]) => this.matchPattern(url, pattern))
-            .map(([, handler]) => handler);
-
-          if (handlers.length > 0) {
-            // Execute handlers
-            for (const handler of handlers) {
-              try {
-                await handler(response);
-              } catch (handlerError) {
-                logger.error(
-                  `Error in response handler for: ${url}`,
-                  handlerError
-                );
-              }
-            }
-          }
-        } catch (error) {
-          logger.error(`Error intercepting response: ${response.url()}`, error);
-        }
-      });
-
-      logger.info('Network interception started');
-    } catch (error) {
-      logger.error('Failed to start network interception', error);
-      throw error;
-    }
+      } catch (error) {
+        console.error(`Error intercepting response: ${response.url()}`, error);
+      }
+    });
   }
 
   /**
@@ -136,21 +147,12 @@ class NetworkUtils {
    * @returns {Promise<void>}
    */
   async stopIntercepting() {
-    try {
-      logger.debug('Stopping network interception');
+    // Remove all route handlers
+    await this.page.unroute('**/*');
 
-      // Remove all route handlers
-      await this.page.unroute('**/*');
-
-      // Clear handlers
-      this.requestHandlers.clear();
-      this.responseHandlers.clear();
-
-      logger.info('Network interception stopped');
-    } catch (error) {
-      logger.error('Failed to stop network interception', error);
-      throw error;
-    }
+    // Clear handlers
+    this.requestHandlers.clear();
+    this.responseHandlers.clear();
   }
 
   /**
@@ -160,7 +162,6 @@ class NetworkUtils {
    * @returns {NetworkUtils} This instance for chaining
    */
   addRequestHandler(urlPattern, handler) {
-    logger.debug(`Adding request handler for: ${urlPattern}`);
     this.requestHandlers.set(urlPattern, handler);
     return this;
   }
@@ -172,7 +173,6 @@ class NetworkUtils {
    * @returns {NetworkUtils} This instance for chaining
    */
   addResponseHandler(urlPattern, handler) {
-    logger.debug(`Adding response handler for: ${urlPattern}`);
     this.responseHandlers.set(urlPattern, handler);
     return this;
   }
@@ -185,8 +185,6 @@ class NetworkUtils {
    * @returns {NetworkUtils} This instance for chaining
    */
   mockResponse(urlPattern, responseData, options = {}) {
-    logger.debug(`Setting up mock response for: ${urlPattern}`);
-
     this.addRequestHandler(urlPattern, async (route, request) => {
       try {
         // Get response data
@@ -197,22 +195,20 @@ class NetworkUtils {
 
         // Set up response options
         const responseOptions = {
-          status: 200,
+          status: options.status || 200,
           headers: {
             'Content-Type': 'application/json',
-          },
-          ...options,
+            ...options.headers
+          }
         };
 
         // Fulfill the request with mock data
         await route.fulfill({
           ...responseOptions,
-          body: JSON.stringify(data),
+          body: typeof data === 'string' ? data : JSON.stringify(data),
         });
-
-        logger.debug(`Mocked response for: ${request.url()}`);
       } catch (error) {
-        logger.error(`Error mocking response for: ${request.url()}`, error);
+        console.error(`Error mocking response for: ${request.url()}`, error);
         await route.continue();
       }
     });
@@ -227,17 +223,8 @@ class NetworkUtils {
    * @returns {NetworkUtils} This instance for chaining
    */
   blockRequests(urlPattern, options = {}) {
-    logger.debug(`Setting up request blocking for: ${urlPattern}`);
-
-    this.addRequestHandler(urlPattern, async (route, request) => {
-      try {
-        // Abort the request
-        await route.abort(options.errorCode || 'blockedbyclient');
-        logger.debug(`Blocked request: ${request.url()}`);
-      } catch (error) {
-        logger.error(`Error blocking request: ${request.url()}`, error);
-        await route.continue();
-      }
+    this.addRequestHandler(urlPattern, async (route) => {
+      await route.abort(options.errorCode || 'blockedbyclient');
     });
 
     return this;
@@ -250,41 +237,31 @@ class NetworkUtils {
    * @returns {Promise<Object>} Request object
    */
   async waitForRequest(urlPattern, options = {}) {
-    try {
-      logger.debug(`Waiting for request: ${urlPattern}`);
+    const timeout = options.timeout || 30000;
+    const predicate = options.predicate || (() => true);
 
-      const timeout = options.timeout || 30000;
-      const predicate = options.predicate || (() => true);
+    // Check if we already have a matching request
+    const existingRequest = this.interceptedRequests.find(
+      (req) => this.matchPattern(req.url, urlPattern) && predicate(req)
+    );
 
-      // Check if we already have a matching request
-      const existingRequest = this.interceptedRequests.find(
-        (req) => this.matchPattern(req.url, urlPattern) && predicate(req)
-      );
-
-      if (existingRequest) {
-        logger.debug(`Found existing request: ${existingRequest.url}`);
-        return existingRequest;
-      }
-
-      // Wait for the request
-      const request = await this.page.waitForRequest(
-        (req) => this.matchPattern(req.url(), urlPattern) && predicate(req),
-        { timeout }
-      );
-
-      logger.debug(`Request found: ${request.url()}`);
-
-      return {
-        url: request.url(),
-        method: request.method(),
-        headers: request.headers(),
-        resourceType: request.resourceType(),
-        timestamp: new Date().toISOString(),
-      };
-    } catch (error) {
-      logger.error(`Error waiting for request: ${urlPattern}`, error);
-      throw error;
+    if (existingRequest) {
+      return existingRequest;
     }
+
+    // Wait for the request
+    const request = await this.page.waitForRequest(
+      (req) => this.matchPattern(req.url(), urlPattern) && predicate(req),
+      { timeout }
+    );
+
+    return {
+      url: request.url(),
+      method: request.method(),
+      headers: request.headers(),
+      resourceType: request.resourceType(),
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -294,58 +271,45 @@ class NetworkUtils {
    * @returns {Promise<Object>} Response object
    */
   async waitForResponse(urlPattern, options = {}) {
-    try {
-      logger.debug(`Waiting for response: ${urlPattern}`);
+    const timeout = options.timeout || 30000;
+    const predicate = options.predicate || (() => true);
 
-      const timeout = options.timeout || 30000;
-      const predicate = options.predicate || (() => true);
+    // Check if we already have a matching response
+    const existingResponse = this.interceptedResponses.find(
+      (res) => this.matchPattern(res.url, urlPattern) && predicate(res)
+    );
 
-      // Check if we already have a matching response
-      const existingResponse = this.interceptedResponses.find(
-        (res) => this.matchPattern(res.url, urlPattern) && predicate(res)
-      );
-
-      if (existingResponse) {
-        logger.debug(`Found existing response: ${existingResponse.url}`);
-        return existingResponse;
-      }
-
-      // Wait for the response
-      const response = await this.page.waitForResponse(
-        (res) => this.matchPattern(res.url(), urlPattern) && predicate(res),
-        { timeout }
-      );
-
-      logger.debug(`Response found: ${response.url()}`);
-
-      const result = {
-        url: response.url(),
-        status: response.status(),
-        headers: response.headers(),
-        timestamp: new Date().toISOString(),
-      };
-
-      // Try to get the response body
-      try {
-        const contentType = response.headers()['content-type'] || '';
-
-        if (contentType.includes('application/json')) {
-          result.body = await response.json().catch(() => null);
-        } else if (contentType.includes('text/')) {
-          result.body = await response.text().catch(() => null);
-        }
-      } catch (bodyError) {
-        logger.debug(
-          `Could not get response body for: ${response.url()}`,
-          bodyError
-        );
-      }
-
-      return result;
-    } catch (error) {
-      logger.error(`Error waiting for response: ${urlPattern}`, error);
-      throw error;
+    if (existingResponse) {
+      return existingResponse;
     }
+
+    // Wait for the response
+    const response = await this.page.waitForResponse(
+      (res) => this.matchPattern(res.url(), urlPattern) && predicate(res),
+      { timeout }
+    );
+
+    const result = {
+      url: response.url(),
+      status: response.status(),
+      headers: response.headers(),
+      timestamp: new Date().toISOString(),
+    };
+
+    // Try to get the response body
+    try {
+      const contentType = response.headers()['content-type'] || '';
+
+      if (contentType.includes('application/json')) {
+        result.body = await response.json().catch(() => null);
+      } else if (contentType.includes('text/')) {
+        result.body = await response.text().catch(() => null);
+      }
+    } catch (bodyError) {
+      // Ignore body extraction errors
+    }
+
+    return result;
   }
 
   /**
@@ -393,6 +357,7 @@ class NetworkUtils {
    * @param {string} url - URL to match
    * @param {string|RegExp} pattern - Pattern to match against
    * @returns {boolean} Whether the URL matches the pattern
+   * @private
    */
   matchPattern(url, pattern) {
     if (pattern instanceof RegExp) {
@@ -403,7 +368,6 @@ class NetworkUtils {
       // Handle glob patterns
       if (pattern.includes('*')) {
         const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*');
-
         return new RegExp(`^${regexPattern}$`).test(url);
       }
 
@@ -415,7 +379,7 @@ class NetworkUtils {
   }
 
   /**
-   * Validates the payload of a network request.
+   * Validates the payload of a network request
    * @param {string|RegExp} urlPattern - URL pattern to match
    * @param {Function} validator - Validator function
    * @returns {Promise<boolean>} Whether the request is valid
@@ -442,7 +406,7 @@ class NetworkUtils {
   }
 
   /**
-   * Captures a network response for a given URL pattern.
+   * Captures a network response for a given URL pattern
    * @param {string|RegExp} urlPattern - URL pattern to match
    * @returns {Promise<Object>} Response data
    */
@@ -452,6 +416,72 @@ class NetworkUtils {
     }
 
     return this.waitForResponse(urlPattern, { timeout: 5000 });
+  }
+  
+  /**
+   * Modify a request before it's sent
+   * @param {string|RegExp} urlPattern - URL pattern to match
+   * @param {Function} modifier - Function to modify the request
+   * @returns {NetworkUtils} This instance for chaining
+   */
+  modifyRequest(urlPattern, modifier) {
+    this.addRequestHandler(urlPattern, async (route, request) => {
+      try {
+        const modifiedRequest = await modifier(request);
+        await route.continue(modifiedRequest);
+      } catch (error) {
+        console.error(`Error modifying request for: ${request.url()}`, error);
+        await route.continue();
+      }
+    });
+    
+    return this;
+  }
+  
+  /**
+   * Delay a response
+   * @param {string|RegExp} urlPattern - URL pattern to match
+   * @param {number} delayMs - Delay in milliseconds
+   * @returns {NetworkUtils} This instance for chaining
+   */
+  delayResponse(urlPattern, delayMs) {
+    this.addRequestHandler(urlPattern, async (route, request) => {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await route.continue();
+    });
+    
+    return this;
+  }
+  
+  /**
+   * Throttle network speed
+   * @param {Object} options - Throttling options
+   * @returns {Promise<void>}
+   */
+  async throttleNetwork(options = {}) {
+    const throttlingOptions = {
+      offline: options.offline || false,
+      downloadThroughput: options.downloadThroughput || 200000, // 200 kbps
+      uploadThroughput: options.uploadThroughput || 200000, // 200 kbps
+      latency: options.latency || 100 // 100 ms
+    };
+    
+    const client = await this.page.context().newCDPSession(this.page);
+    await client.send('Network.emulateNetworkConditions', throttlingOptions);
+  }
+  
+  /**
+   * Reset network throttling
+   * @returns {Promise<void>}
+   */
+  async resetNetworkThrottling() {
+    const client = await this.page.context().newCDPSession(this.page);
+    await client.send('Network.emulateNetworkConditions', {
+      offline: false,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+      latency: 0
+    });
   }
 }
 

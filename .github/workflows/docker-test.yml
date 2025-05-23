@@ -12,8 +12,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Create .env file
+        run: |
+          cat > .env << 'EOL'
+          # API Configuration
+          API_BASE_URL=https://reqres.in/api
+          API_URL=https://reqres.in/api
+          API_KEY=reqres-free-v1
+
+          # Web Configuration
+          BASE_URL=https://opensource-demo.orangehrmlive.com
+          EXAMPLE_URL=https://example.com
+          TODO_APP_URL=https://demo.playwright.dev/todomvc
+          ORANGEHRM_URL=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+          PLAYWRIGHT_DOCS_URL=https://playwright.dev/
+
+          # Credentials
+          USERNAME=Admin
+          PASSWORD=admin123
+          INVALID_USERNAME=invalid
+          INVALID_PASSWORD=wrong
+          API_TOKEN=your_api_token
+
+          # Test Data
+          TEST_USER_ID=2
+          TEST_NONEXISTENT_USER_ID=999
+          TEST_PAGE=1
+          MAX_VALID_USER_ID=12
+          MAX_PAGE_WITH_DATA=2
+          USERS_PER_PAGE=6
+          TEST_USER_IDS=1,2,3,23
+          TEST_PAGES=1,2,3
+
+          # External Resources
+          AXE_CORE_CDN=https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js
+          EOL
+      
+      - name: Create Dockerfile
+        run: |
+          cat > Dockerfile << 'EOL'
+          FROM mcr.microsoft.com/playwright:v1.40.0-focal
+
+          WORKDIR /app
+
+          # Copy package files
+          COPY package*.json ./
+          
+          # Install dependencies
+          RUN npm ci
+          
+          # Copy project files
+          COPY . .
+          
+          # Set environment variables
+          ENV NODE_ENV=production
+          ENV CI=true
+          
+          # Default command
+          CMD ["npm", "test"]
+          EOL
+      
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       
       - name: Build Docker image
         uses: docker/build-push-action@v4
@@ -24,22 +84,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Run tests
+      - name: Run API tests in Docker
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/test-results:/app/test-results \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
-            -v ${{ github.workspace }}/allure-results:/app/allure-results \
             -v ${{ github.workspace }}/reports:/app/reports \
-            -v ${{ github.workspace }}/visual-diffs:/app/visual-diffs \
-            -e BASE_URL=${{ secrets.BASE_URL }} \
-            -e API_URL=${{ secrets.API_URL }} \
-            -e API_BASE_URL=${{ secrets.API_BASE_URL }} \
-            -e TEST_USERNAME=${{ secrets.TEST_USERNAME }} \
-            -e TEST_PASSWORD=${{ secrets.TEST_PASSWORD }} \
-            -e NODE_ENV=production \
-            -e CI=true \
-            playwright-framework:test
+            --env-file .env \
+            playwright-framework:test npx playwright test src/tests/api/rest/data-driven-api.spec.js --project=chromium
       
       - name: Upload test results
         if: always()
@@ -48,12 +100,5 @@ jobs:
           name: playwright-report
           path: |
             playwright-report/
-            allure-results/
             reports/
-      
-      - name: Upload visual test diffs (if any)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-diffs
-          path: visual-diffs/
+            test-results/

@@ -1,195 +1,137 @@
 /**
- * User API tests
+ * User API Tests
+ * 
+ * Tests for user-related API endpoints
  */
 const { test, expect } = require('@playwright/test');
-const User = require('../../../utils/api/models/User');
-const TestDataFactory = require('../../../utils/common/testDataFactory');
-const schemaValidator = require('../../../utils/api/schemaValidator');
-const fs = require('fs');
-const path = require('path');
+const { ApiUtils } = require('../../../utils/api/apiUtils');
+const { SchemaValidator } = require('../../../utils/api/schemaValidator');
+const config = require('../../../config');
 
-// Load user schema
-const userSchemaPath = path.resolve(
-  __dirname,
-  '../../../../data/schemas/user.schema.json'
-);
-let userSchema;
+// Read base URL from environment or config
+const baseUrl = process.env.API_BASE_URL || config.api?.baseUrl;
 
-test.beforeAll(() => {
-  // Load user schema if it exists
-  if (fs.existsSync(userSchemaPath)) {
-    userSchema = JSON.parse(fs.readFileSync(userSchemaPath, 'utf8'));
-    schemaValidator.addSchema('user', userSchema);
-  }
-});
+// Read test data from config or use environment variables
+const testData = {
+  userId: parseInt(process.env.TEST_USER_ID) || config.api?.testData?.userId,
+  nonExistentUserId: parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId
+};
 
-test.describe('User API @api', () => {
-  let testUser;
-
-  test.beforeEach(() => {
-    // Generate test user data
-    testUser = new User(TestDataFactory.generateUser());
-  });
-
-  test('should create a new user @smoke', async ({ request }) => {
-    // Create a simple API client
-    const apiClient = {
-      post: async (url, data) => {
-        const response = await request.post(url, { data });
-});
-
-        return await response.json();
-      },
-      get: async (url) => {
-        const response = await request.get(url);
-        return await response.json();
-      },
-      put: async (url, data) => {
-        const response = await request.put(url, { data });
-        return await response.json();
-      },
-      delete: async (url) => {
-        const response = await request.delete(url);
-        return await response.json();
-      }
-    };
-    
-    // Create user
-    const response = await apiClient.post('/user', testUser.toJSON());
-
-    // Verify response
-    expect(response).toBeDefined();
-    expect(response.id).toBeDefined();
-    expect(response.username).toBe(testUser.username);
-
-    // Validate against schema if available
-    if (userSchema) {
-      const result = schemaValidator.validate('user', response);
-      expect(result.valid).toBeTruthy();
-    }
-  });
-
-  test('should get user by username', async ({ request }) => {
-    // Create a simple API client
-    const apiClient = {
-      post: async (url, data) => {
-        const response = await request.post(url, { data });
-        return await response.json();
-      },
-      get: async (url) => {
-        const response = await request.get(url);
-        return await response.json();
-      },
-      put: async (url, data) => {
-        const response = await request.put(url, { data });
-        return await response.json();
-      },
-      delete: async (url) => {
-        const response = await request.delete(url);
-        return await response.json();
-      }
-    };
-    
-    // Create user first
-    await apiClient.post('/user', testUser.toJSON());
-
-    // Get user
-    const response = await apiClient.get(`/user/${testUser.username}`);
-
-    // Verify response
-    expect(response).toBeDefined();
-    expect(response.username).toBe(testUser.username);
-    expect(response.email).toBe(testUser.email);
-
-    // Validate against schema if available
-    if (userSchema) {
-      const result = schemaValidator.validate('user', response);
-      expect(result.valid).toBeTruthy();
-    }
-  });
-
-  test('should update user', async ({ request }) => {
-    // Create a simple API client
-    const apiClient = {
-      post: async (url, data) => {
-        const response = await request.post(url, { data });
-        return await response.json();
-      },
-      get: async (url) => {
-        const response = await request.get(url);
-        return await response.json();
-      },
-      put: async (url, data) => {
-        const response = await request.put(url, { data });
-        return await response.json();
-      },
-      delete: async (url) => {
-        const response = await request.delete(url);
-        return await response.json();
-      }
-    };
-    
-    // Create user first
-    await apiClient.post('/user', testUser.toJSON());
-
-    // Update user
-    testUser.email = `updated-${testUser.email}`;
-    const response = await apiClient.put(
-      `/user/${testUser.username}`,
-      testUser.toJSON()
-    );
-
-    // Verify response
-    expect(response).toBeDefined();
-
-    // Get updated user
-    const updatedUser = await apiClient.get(`/user/${testUser.username}`);
-    expect(updatedUser.email).toBe(testUser.email);
-  });
-
-  test('should delete user', async ({ request }) => {
-    // Create a simple API client
-    const apiClient = {
-      post: async (url, data) => {
-        const response = await request.post(url, { data });
-        return await response.json();
-      },
-      get: async (url) => {
-        const response = await request.get(url);
-        if (!response.ok()) {
-          const error = new Error('API request failed');
-          error.response = response;
-          throw error;
+// Define schemas
+const userListSchema = {
+  type: 'object',
+  required: ['page', 'per_page', 'total', 'total_pages', 'data'],
+  properties: {
+    page: { type: 'number' },
+    per_page: { type: 'number' },
+    total: { type: 'number' },
+    total_pages: { type: 'number' },
+    data: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
+        properties: {
+          id: { type: 'number' },
+          email: { type: 'string', format: 'email' },
+          first_name: { type: 'string' },
+          last_name: { type: 'string' },
+          avatar: { type: 'string', format: 'uri' }
         }
-        return await response.json();
-      },
-      put: async (url, data) => {
-        const response = await request.put(url, { data });
-        return await response.json();
-      },
-      delete: async (url) => {
-        const response = await request.delete(url);
-        return await response.json();
       }
-    };
-    
-    // Create user first
-    await apiClient.post('/user', testUser.toJSON());
-
-    // Delete user
-    const response = await apiClient.delete(`/user/${testUser.username}`);
-
-    // Verify response
-    expect(response).toBeDefined();
-
-    // Try to get deleted user (should fail)
-    try {
-      await apiClient.get(`/user/${testUser.username}`);
-      // If we get here, the user was not deleted
-      expect(false).toBeTruthy();
-    } catch (error) {
-      // Expected error
-      expect(error.response.status()).toBe(404);
     }
+  }
+};
+
+const singleUserSchema = {
+  type: 'object',
+  required: ['data'],
+  properties: {
+    data: {
+      type: 'object',
+      required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
+      properties: {
+        id: { type: 'number' },
+        email: { type: 'string', format: 'email' },
+        first_name: { type: 'string' },
+        last_name: { type: 'string' },
+        avatar: { type: 'string', format: 'uri' }
+      }
+    }
+  }
+};
+
+test.describe('User API Tests', () => {
+  let apiUtils;
+  let schemaValidator;
+  
+  test.beforeEach(({ request }) => {
+    apiUtils = new ApiUtils(request, baseUrl);
+    schemaValidator = new SchemaValidator();
+  });
+  
+  test('Get list of users', async ({ request }) => {
+    // Send GET request to list users endpoint
+    const response = await apiUtils.get('/users', {
+      params: { page: 1 }
+    });
+    
+    // Verify response status
+    expect(response.status()).toBe(200);
+    
+    // Verify response structure using schema validation
+    const responseBody = await response.json();
+    const validationResult = schemaValidator.validate(responseBody, userListSchema);
+    expect(validationResult.valid).toBeTruthy();
+    
+    // Additional assertions
+    expect(responseBody.page).toBe(1);
+    expect(responseBody.data.length).toBeGreaterThan(0);
+  });
+  
+  test('Get single user by ID', async ({ request }) => {
+    // Send GET request to get a specific user
+    const userId = testData.userId;
+    const response = await apiUtils.get(`/users/${userId}`);
+    
+    // Verify response status
+    expect(response.status()).toBe(200);
+    
+    // Verify response structure using schema validation
+    const responseBody = await response.json();
+    const validationResult = schemaValidator.validate(responseBody, singleUserSchema);
+    expect(validationResult.valid).toBeTruthy();
+    
+    // Additional assertions
+    expect(responseBody.data.id).toBe(userId);
+  });
+  
+  test('Get non-existent user returns 404', async ({ request }) => {
+    // Send GET request for a user that doesn't exist
+    const userId = testData.nonExistentUserId;
+    const response = await apiUtils.get(`/users/${userId}`);
+    
+    // Verify response status is 404 Not Found
+    expect(response.status()).toBe(404);
+    
+    // Verify response body is empty
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({});
+  });
+  
+  test('Get user resources', async ({ request }) => {
+    // Send GET request to get user resources
+    const response = await apiUtils.get('/unknown');
+    
+    // Verify response status
+    expect(response.status()).toBe(200);
+    
+    // Verify response structure
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty('page');
+    expect(responseBody).toHaveProperty('per_page');
+    expect(responseBody).toHaveProperty('total');
+    expect(responseBody).toHaveProperty('data');
+    expect(Array.isArray(responseBody.data)).toBeTruthy();
   });
 });

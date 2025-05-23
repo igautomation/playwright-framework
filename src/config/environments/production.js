@@ -1,12 +1,17 @@
 /**
  * Production environment configuration
+ * 
+ * SAMPLE TEST APPLICATIONS:
+ * - Web UI: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+ * - API: https://reqres.in/
  */
 module.exports = {
-  baseUrl: 'https://example.com',
-  apiUrl: 'https://api.example.com',
+  baseUrl: 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
+  apiUrl: 'https://reqres.in/api',
   
   // Authentication
-  // Credentials should be provided via environment variables in production
+  username: process.env.PROD_USERNAME || 'Admin',
+  password: process.env.PROD_PASSWORD || 'admin123',
   
   // Timeouts
   defaultTimeout: 45000, // Longer timeouts for production

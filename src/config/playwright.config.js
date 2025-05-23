@@ -6,7 +6,7 @@ const { defineConfig, devices } = require('@playwright/test');
  * @see https://playwright.dev/docs/test-configuration
  */
 module.exports = defineConfig({
-  testDir: '../tests',
+  testDir: './src/tests',
   timeout: 30000,
   expect: {
     timeout: 5000
@@ -22,7 +22,7 @@ module.exports = defineConfig({
   ],
   use: {
     actionTimeout: 15000,
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

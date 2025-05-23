@@ -1,118 +1,134 @@
 /**
- * Hybrid flow tests combining API and UI testing
+ * Hybrid Flow Tests
+ * 
+ * End-to-end tests combining UI and API interactions
  */
-const { test, expect } = require('../fixtures/baseFixtures');
-const User = require('../../utils/api/models/User').default;
-const TestDataFactory = require('../../utils/common/testDataFactory');
+const { test, expect } = require('@playwright/test');
 
-test.describe('Hybrid Flow Tests @e2e', () => {
-  let testUser;
-
-  test.beforeEach(() => {
-    // Generate test user data
-    testUser = new User(TestDataFactory.generateUser());
+test.describe('Hybrid Flow', () => {
+  let authToken;
+  
+  test.beforeEach(async ({ page, request }) => {
+    // UI Login to get auth token
+    await page.goto(process.env.ORANGEHRM_URL);
+    
+    // Fill in login form
+    await page.getByPlaceholder('Username').fill(process.env.USERNAME);
+    await page.getByPlaceholder('Password').fill(process.env.PASSWORD);
+    
+    // Intercept network requests to capture auth token
+    await page.route('**/api/v2/auth/login', async route => {
+      // Continue the request
+      await route.continue();
+      // Get the response
+      const response = await route.request().response();
+      const responseBody = await response.json();
+      // Store the token
+      authToken = responseBody?.data?.access_token || '';
+    });
+    
+    // Click login button
+    await page.getByRole('button', { name: 'Login' }).click();
+    
+    // Wait for dashboard to load
+    await page.waitForURL('**/dashboard/index');
   });
-
-  test('should create user via API and verify in UI @smoke', async ({
-    page,
-    apiClient,
-    loginPage,
-  }) => {
-    // Step 1: Create user via API
-    // Using reqres.in API which only simulates creation
-    const createResponse = await apiClient.post('/users', {
-      name: testUser.firstName + ' ' + testUser.lastName,
-      job: 'QA Engineer',
-      email: testUser.email
+  
+  test('should create employee via API and verify in UI', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
+    
+    // Create employee via API
+    const employeeData = {
+      firstName: 'John',
+      middleName: 'William',
+      lastName: 'Doe',
+      employeeId: '1234'
+    };
+    
+    const response = await request.post(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      data: employeeData
     });
-});
-
-    console.log('User created via API:', createResponse.data);
-    expect(createResponse.status).toBe(201);
-
-    // Step 2: Login to the application
-    await loginPage.navigate();
-    await loginPage.login(
-      process.env.USERNAME || process.env.USERNAME,
-      process.env.PASSWORD || process.env.PASSWORD
-    );
-
-    // Step 3: Navigate to the user management page
-    await page.goto(`${process.env.BASE_URL}/admin/viewSystemUsers`);
-
-    // Step 4: Search for an existing user instead of the created one
-    // since we can't actually create users in the demo system via API
-    await page.fill(
-      'input[name="searchSystemUser[userName]"]',
-      process.env.USERNAME
-    );
-    await page.click('button[type="submit"]');
-
-    // Step 5: Verify a user is found
-    const userRow = page.locator(
-      `//div[contains(text(), "Admin")]`
-    );
-    await expect(userRow).toBeVisible();
+    
+    // Verify API response
+    expect(response.status()).toBe(200);
+    const responseData = await response.json();
+    expect(responseData.data).toBeDefined();
+    const employeeId = responseData.data.empNumber;
+    
+    // Navigate to PIM page to verify employee in UI
+    await page.getByRole('link', { name: 'PIM' }).click();
+    
+    // Search for the employee
+    await page.getByPlaceholder('Type for hints...').fill(`${employeeData.firstName} ${employeeData.lastName}`);
+    await page.getByRole('button', { name: 'Search' }).click();
+    
+    // Wait for search results
+    await page.waitForSelector('.oxd-table-card');
+    
+    // Verify employee is found in the table
+    const employeeRow = page.locator('.oxd-table-card').first();
+    await expect(employeeRow).toContainText(employeeData.firstName);
+    await expect(employeeRow).toContainText(employeeData.lastName);
+    await expect(employeeRow).toContainText(employeeData.employeeId);
   });
-
-  test('should update user via API and verify changes in UI', async ({
-    page,
-    apiClient,
-    loginPage,
-  }) => {
-    // Step 1: Create user via API (simulated with reqres.in)
-    const createResponse = await apiClient.post('/users', {
-      name: testUser.firstName + ' ' + testUser.lastName,
-      job: 'QA Engineer',
-      email: testUser.email
+  
+  test('should update employee data via API and verify in UI', async ({ page, request }) => {
+    // Skip if no auth token
+    test.skip(!authToken, 'Auth token not captured');
+    
+    // First, get an existing employee via API
+    const employeesResponse = await request.get(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
     });
     
-    console.log('User created via API:', createResponse.data);
-    expect(createResponse.status).toBe(201);
+    expect(employeesResponse.status()).toBe(200);
+    const employees = await employeesResponse.json();
     
-    // Get the ID from the response
-    const userId = createResponse.data.id;
-
-    // Step 2: Update user via API
-    const updatedName = `Updated ${testUser.firstName}`;
-    const updateResponse = await apiClient.put(`/users/${userId}`, {
-      name: updatedName,
-      job: 'Senior QA Engineer'
+    // Skip if no employees found
+    test.skip(!employees.data || employees.data.length === 0, 'No employees found');
+    
+    // Get the first employee
+    const employee = employees.data[0];
+    const employeeId = employee.empNumber;
+    
+    // Update employee via API
+    const updatedData = {
+      firstName: 'Updated',
+      lastName: 'Employee',
+      middleName: 'Test'
+    };
+    
+    const updateResponse = await request.put(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees/${employeeId}`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      data: updatedData
     });
     
-    console.log('User updated via API:', updateResponse.data);
-    expect(updateResponse.status).toBe(200);
-
-    // Step 3: Login to the application
-    await loginPage.navigate();
-    await loginPage.login(
-      process.env.USERNAME || process.env.USERNAME,
-      process.env.PASSWORD || process.env.PASSWORD
-    );
-
-    // Step 4: Navigate to the user management page
-    await page.goto(`${process.env.BASE_URL}/admin/viewSystemUsers`);
-
-    // Step 5: Search for an existing user
-    await page.fill(
-      'input[name="searchSystemUser[userName]"]',
-      process.env.USERNAME
-    );
-    await page.click('button[type="submit"]');
-
-    // Step 6: Verify a user is found and click on it
-    const userRow = page.locator(
-      `//div[contains(text(), "Admin")]`
-    );
-    await expect(userRow).toBeVisible();
+    // Verify API response
+    expect(updateResponse.status()).toBe(200);
     
-    // Click on the user row to view details
-    await userRow.click();
+    // Navigate to PIM page to verify updated employee in UI
+    await page.getByRole('link', { name: 'PIM' }).click();
     
-    // Step 7: Verify we can see the user details page
-    // We can't verify the specific email since we didn't actually update a real user
-    // but we can verify that we're on the user details page
-    const saveButton = page.locator('button[type="submit"]');
-    await expect(saveButton).toBeVisible();
+    // Search for the employee
+    await page.getByPlaceholder('Type for hints...').fill(`${updatedData.firstName} ${updatedData.lastName}`);
+    await page.getByRole('button', { name: 'Search' }).click();
+    
+    // Wait for search results
+    await page.waitForSelector('.oxd-table-card');
+    
+    // Verify employee is found with updated data
+    const employeeRow = page.locator('.oxd-table-card').first();
+    await expect(employeeRow).toContainText(updatedData.firstName);
+    await expect(employeeRow).toContainText(updatedData.lastName);
   });
 });

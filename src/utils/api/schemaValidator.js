@@ -1,122 +1,137 @@
-const logger = require('../common/logger');
+/**
+ * Schema Validator
+ * 
+ * Provides utilities for validating JSON schemas
+ */
 
 /**
- * Schema Validator for API response validation
+ * Schema Validator class
  */
 class SchemaValidator {
+  /**
+   * Constructor
+   */
   constructor() {
-    // We'll use a simple implementation since we don't want to add Ajv as a dependency yet
-    this.schemas = new Map();
-  }
-
-  /**
-   * Add a schema to the validator
-   * @param {string} schemaName - Name of the schema
-   * @param {Object} schema - JSON schema object
-   */
-  addSchema(schemaName, schema) {
-    this.schemas.set(schemaName, schema);
-    logger.info(`Schema added: ${schemaName}`);
-  }
-
-  /**
-   * Validate data against a schema
-   * @param {string} schemaName - Name of the schema
-   * @param {Object} data - Data to validate
-   * @returns {Object} Validation result
-   */
-  validate(schemaName, data) {
-    if (!this.schemas.has(schemaName)) {
-      throw new Error(`Schema not found: ${schemaName}`);
-    }
-
-    const schema = this.schemas.get(schemaName);
-    const errors = this.validateAgainstSchema(schema, data);
-
-    if (errors.length > 0) {
-      logger.error(`Schema validation failed for ${schemaName}`, errors);
-      return {
-        valid: false,
-        errors,
-      };
-    }
-
-    return {
-      valid: true,
-      errors: null,
+    // Simple type validation
+    this.typeValidators = {
+      string: (value) => typeof value === 'string',
+      number: (value) => typeof value === 'number',
+      boolean: (value) => typeof value === 'boolean',
+      object: (value) => typeof value === 'object' && value !== null && !Array.isArray(value),
+      array: (value) => Array.isArray(value),
+      null: (value) => value === null
+    };
+    
+    // Format validators
+    this.formatValidators = {
+      'date-time': (value) => {
+        const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+        return regex.test(value);
+      },
+      'email': (value) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(value);
+      },
+      'uri': (value) => {
+        try {
+          new URL(value);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
     };
   }
-
+  
   /**
-   * Validate data against a schema (simple implementation)
-   * @param {Object} schema - Schema object
+   * Validate data against schema
    * @param {Object} data - Data to validate
-   * @returns {Array} Validation errors
+   * @param {Object} schema - JSON schema
+   * @returns {Object} Validation result
    */
-  validateAgainstSchema(schema, data) {
+  validate(data, schema) {
     const errors = [];
-
-    // Check required properties
-    if (schema.required) {
-      for (const prop of schema.required) {
-        if (data[prop] === undefined) {
-          errors.push(`Missing required property: ${prop}`);
-        }
-      }
-    }
-
-    // Check property types
-    if (schema.properties) {
-      for (const [prop, propSchema] of Object.entries(schema.properties)) {
-        if (data[prop] !== undefined) {
-          // Check type
-          if (propSchema.type) {
-            const type = propSchema.type;
-            const value = data[prop];
-
-            if (type === 'string' && typeof value !== 'string') {
-              errors.push(`Property ${prop} should be a string`);
-            } else if (type === 'number' && typeof value !== 'number') {
-              errors.push(`Property ${prop} should be a number`);
-            } else if (type === 'boolean' && typeof value !== 'boolean') {
-              errors.push(`Property ${prop} should be a boolean`);
-            } else if (
-              type === 'object' &&
-              (typeof value !== 'object' || Array.isArray(value))
-            ) {
-              errors.push(`Property ${prop} should be an object`);
-            } else if (type === 'array' && !Array.isArray(value)) {
-              errors.push(`Property ${prop} should be an array`);
-            }
-          }
-
-          // Check enum
-          if (propSchema.enum && !propSchema.enum.includes(data[prop])) {
-            errors.push(
-              `Property ${prop} should be one of: ${propSchema.enum.join(', ')}`
-            );
-          }
-
-          // Check format (simple implementation)
-          if (propSchema.format === 'email' && typeof data[prop] === 'string') {
-            if (!data[prop].includes('@')) {
-              errors.push(`Property ${prop} should be a valid email`);
-            }
-          }
-        }
-      }
-    }
-
-    return errors;
+    
+    this._validateAgainstSchema(data, schema, '', errors);
+    
+    return {
+      valid: errors.length === 0,
+      errors
+    };
   }
-
+  
   /**
-   * Get all registered schemas
-   * @returns {Map} Map of schemas
+   * Validate data against schema recursively
+   * @param {*} data - Data to validate
+   * @param {Object} schema - Schema to validate against
+   * @param {string} path - Current path
+   * @param {Array} errors - Errors array
+   * @private
    */
-  getSchemas() {
-    return this.schemas;
+  _validateAgainstSchema(data, schema, path, errors) {
+    // Check type
+    if (schema.type) {
+      const typeValidator = this.typeValidators[schema.type];
+      if (typeValidator && !typeValidator(data)) {
+        errors.push({
+          path,
+          message: `Expected type ${schema.type} but got ${typeof data}`
+        });
+        return;
+      }
+    }
+    
+    // Check required properties
+    if (schema.required && schema.properties) {
+      for (const requiredProp of schema.required) {
+        if (data[requiredProp] === undefined) {
+          errors.push({
+            path: path ? `${path}.${requiredProp}` : requiredProp,
+            message: `Missing required property: ${requiredProp}`
+          });
+        }
+      }
+    }
+    
+    // Check properties
+    if (schema.properties && typeof data === 'object' && data !== null) {
+      for (const [propName, propSchema] of Object.entries(schema.properties)) {
+        if (data[propName] !== undefined) {
+          this._validateAgainstSchema(
+            data[propName],
+            propSchema,
+            path ? `${path}.${propName}` : propName,
+            errors
+          );
+        }
+      }
+    }
+    
+    // Check array items
+    if (schema.type === 'array' && schema.items && Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        this._validateAgainstSchema(
+          data[i],
+          schema.items,
+          `${path}[${i}]`,
+          errors
+        );
+      }
+    }
+    
+    // Check format
+    if (schema.format && typeof data === 'string') {
+      const formatValidator = this.formatValidators[schema.format];
+      if (formatValidator && !formatValidator(data)) {
+        errors.push({
+          path,
+          message: `Invalid format: ${schema.format}`
+        });
+      }
+    }
   }
 }
 
-module.exports = new SchemaValidator();
+module.exports = {
+  SchemaValidator
+};

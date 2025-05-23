@@ -1,32 +1,44 @@
-<<<<<<< HEAD
 # IDE/Editor
 .vscode/
 .idea/
+*.sublime-*
+*.swp
+*.swo
 
 # Node modules and dependencies
 node_modules/
-package-lock.json
+npm-debug.log
+yarn-error.log
+yarn-debug.log
 
 # Build outputs and temp
 dist/
 build/
 out/
+temp/
 
 # Logs
 logs/
 *.log
+npm-debug.log*
 
 # Environment
 .env
-.env.*
+.env.local
+.env.*.local
 
 # Test results and reports
 allure-results/
 allure-report/
 playwright-report/
 reports/
-screenshots/
 test-results/
+temp-test-results/
+screenshots/
+traces/
+
+# Visual testing
+visual-diffs/
 
 # GitHub workflows history or backups
 .history/
@@ -39,6 +51,4 @@ docs-site/build/
 # Others
 coverage/
 .DS_Store
-=======
-node_modules
->>>>>>> 51948a2 (Main v1.0)
+Thumbs.db

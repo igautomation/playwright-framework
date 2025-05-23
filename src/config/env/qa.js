@@ -1,12 +1,16 @@
 /**
  * QA environment configuration
+ * 
+ * SAMPLE TEST APPLICATIONS:
+ * - Web UI: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+ * - API: https://reqres.in/
  */
 module.exports = {
-  baseUrl: 'https://qa.example.com',
-  apiUrl: 'https://api.qa.example.com',
+  baseUrl: 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
+  apiUrl: 'https://reqres.in/api',
   credentials: {
-    username: 'qa-user',
-    password: 'qa-password',
+    username: 'Admin',
+    password: 'admin123',
   },
   timeouts: {
     default: 30000,

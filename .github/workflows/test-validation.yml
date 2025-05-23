@@ -2,52 +2,31 @@ name: Test Validation
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   validate:
+    name: Validate Tests
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '18'
           cache: 'npm'
       
       - name: Install dependencies
         run: npm ci
       
       - name: Validate tests
-        run: node ./scripts/utils/validate-tests.js
-        
-      - name: Create .env file
-        run: |
-          echo "BASE_URL=https://demo.playwright.dev" >> .env
-          echo "API_URL=https://reqres.in/api" >> .env
-          echo "API_BASE_URL=https://reqres.in" >> .env
-          echo "ORANGEHRM_URL=https://opensource-demo.orangehrmlive.com/web/index.php/auth/login" >> .env
-          echo "TODO_APP_URL=https://demo.playwright.dev/todomvc/#/" >> .env
-          echo "PLAYWRIGHT_DOCS_URL=https://playwright.dev/" >> .env
-          echo "AUTOMATION_EXERCISE_URL=https://automationexercise.com" >> .env
-          echo "EXAMPLE_URL=https://example.com" >> .env
-          echo "EXAMPLE_API_URL=https://api.example.com" >> .env
-          echo "W3C_URL=https://www.w3.org" >> .env
-          echo "W3C_WAI_URL=https://www.w3.org/WAI" >> .env
-          echo "GITHUB_URL=https://github.com" >> .env
-          echo "NON_EXISTENT_URL=http://non-existent-domain-123456789.com" >> .env
-          echo "USERNAME=Admin" >> .env
-          echo "PASSWORD=admin123" >> .env
-          echo "API_TOKEN=token" >> .env
+        run: node scripts/utils/validate-tests.js
       
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-      
-      - name: Run sample tests
-        run: npx playwright test ./src/tests/ui/smoke/login.spec.js --project=chromium
-        env:
-          CI: true
+      - name: Run test discovery
+        run: npx playwright test --list

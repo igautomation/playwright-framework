@@ -1,91 +1,89 @@
 /**
  * Accessibility Tests
  * 
- * Comprehensive test suite for accessibility testing using various approaches
+ * Tests for accessibility compliance using axe-core
  */
 const { test, expect } = require('@playwright/test');
-const { checkAccessibility, generateAccessibilityReport } = require('../../utils/accessibility/accessibilityUtils');
+const { getViolations, checkAccessibility } = require('../../utils/accessibility/accessibilityUtils');
+const config = require('../../config');
 
-test.describe('Basic Accessibility Tests', () => {
-  test('homepage should not have critical accessibility violations', async ({ page }) => {
-    // Navigate to the page
-    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
-    
-    // Check for accessibility violations
-    const { passes, violations } = await checkAccessibility(page);
-    expect(passes).toBeTruthy();
-  });
+// Read base URL from environment or config
+const baseUrl = process.env.BASE_URL || config.baseUrl || process.env.BASE_URL;
+const loginPath = process.env.LOGIN_PATH || config.paths?.login || '/web/index.php/auth/login';
+const dashboardPath = process.env.DASHBOARD_PATH || config.paths?.dashboard || '/web/index.php/dashboard/index';
 
-  test('form elements should be accessible', async ({ page }) => {
-    // Navigate to a page with forms
-    await page.goto(process.env.TODO_APP_URL);
+// Read credentials from environment or config
+const username = process.env.USERNAME || config.credentials?.username || process.env.USERNAME;
+const password = process.env.PASSWORD || config.credentials?.password || process.env.PASSWORD;
+
+test.describe('Accessibility Tests', () => {
+  test('login page should not have critical accessibility violations', async ({ page }) => {
+    // Navigate to the login page
+    await page.goto(`${baseUrl}${loginPath}`);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
     
-    // Check for accessibility violations
-    const { passes, violations } = await checkAccessibility(page);
-    expect(passes).toBeTruthy();
-  });
-});
-
-test.describe('Advanced Accessibility Tests', () => {
-  test('should generate accessibility report', async ({ page }) => {
-    // Navigate to the page
-    await page.goto(process.env.PLAYWRIGHT_DOCS_URL);
-    
-    // Generate accessibility report
-    const reportPath = './reports/accessibility-report.json';
-    await generateAccessibilityReport(page, reportPath);
-    
-    // Verify report was generated
-    const fs = require('fs');
-    expect(fs.existsSync(reportPath)).toBeTruthy();
-  });
-  
-  test('should check specific accessibility rules', async ({ page }) => {
-    // Navigate to the page
-    await page.goto(process.env.API_BASE_URL);
-    
-    // Check for specific accessibility violations
-    const { violations } = await checkAccessibility(page, {
-      includedImpacts: ['critical', 'serious', 'moderate']
-    });
+    // Check accessibility with default options (critical and serious violations)
+    const result = await checkAccessibility(page);
     
     // Log violations for debugging
-    console.log(`Found ${violations.length} accessibility violations`);
+    if (result.violations.length > 0) {
+      console.log('Accessibility violations:', result.violations);
+    }
     
     // Verify no critical violations
-    const criticalViolations = violations.filter(v => v.impact === 'critical');
+    const criticalViolations = result.violations.filter(v => v.impact === 'critical');
     expect(criticalViolations.length).toBe(0);
   });
-});
-
-test.describe('Simple Accessibility Checks', () => {
-  test('form labels should be properly associated with inputs', async ({ page }) => {
-    // Create a simple form for testing
-    await page.setContent(`
-      <form>
-        <label for="username">Username</label>
-        <input id="username" type="text">
-        <label for="pass">Secret</label>
-        <input id="pass" type="hidden">
-        <button type="submit">Submit</button>
-      </form>
-    `);
+  
+  test('dashboard should not have critical accessibility violations', async ({ page }) => {
+    // Navigate to the login page
+    await page.goto(`${baseUrl}${loginPath}`);
     
-    // Check that labels are properly associated with inputs
-    const usernameLabel = await page.locator('label[for="username"]');
-    const secretLabel = await page.locator('label[for="pass"]');
+    // Login with credentials
+    await page.getByPlaceholder('Username').fill(username);
+    await page.getByPlaceholder('Password').fill(password);
+    await page.getByRole('button', { name: 'Login' }).click();
     
-    await expect(usernameLabel).toBeVisible();
-    await expect(secretLabel).toBeVisible();
+    // Wait for dashboard to load
+    await page.waitForURL(`**${dashboardPath}`);
+    await page.waitForLoadState('networkidle');
     
-    // Check that inputs have proper attributes
-    const usernameInput = await page.locator('#username');
-    const secretInput = await page.locator('#pass');
+    // Check accessibility with default options
+    const result = await checkAccessibility(page);
     
-    await expect(usernameInput).toHaveAttribute('id', 'username');
-    await expect(secretInput).toHaveAttribute('id', 'pass');
+    // Verify no critical violations
+    const criticalViolations = result.violations.filter(v => v.impact === 'critical');
+    expect(criticalViolations.length).toBe(0);
+  });
+  
+  test('login page should pass specific accessibility rules', async ({ page }) => {
+    // Navigate to the login page
+    await page.goto(`${baseUrl}${loginPath}`);
+    
+    // Wait for the page to be fully loaded
+    await page.waitForLoadState('networkidle');
+    
+    // Get accessibility rules from config or use defaults
+    const accessibilityRules = config.accessibility?.rules || [
+      'color-contrast',
+      'label',
+      'aria-roles',
+      'image-alt'
+    ];
+    
+    // Get violations for specific rules
+    const violations = await getViolations(page, {
+      axeOptions: {
+        runOnly: {
+          type: 'rule',
+          values: accessibilityRules
+        }
+      }
+    });
+    
+    // Verify no violations for these specific rules
+    expect(violations.length).toBe(0);
   });
 });

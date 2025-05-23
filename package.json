@@ -7,6 +7,7 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
     "test:smoke": "playwright test -g '@smoke'",
     "test:regression": "playwright test -g '@regression'",
     "test:api": "playwright test -g '@api'",
@@ -14,10 +15,17 @@
     "test:accessibility": "playwright test -g '@accessibility'",
     "test:performance": "playwright test -g '@performance'",
     "test:e2e": "playwright test -g '@e2e'",
+    "test:parallel": "playwright test --workers=4",
+    "test:single": "playwright test --workers=1",
     "report": "playwright show-report",
+    "report:allure": "allure generate ./allure-results --clean -o ./reports/allure && allure open ./reports/allure",
     "validate": "node ./scripts/utils/validate-tests.js",
-    "setup-hooks": "node ./scripts/setup-hooks.js",
-    "postinstall": "npm run setup-hooks"
+    "setup": "node ./scripts/setup/setup.js",
+    "setup:hooks": "node ./scripts/setup/setup-hooks.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "postinstall": "npm run setup:hooks"
   },
   "keywords": [
     "playwright",
@@ -30,15 +38,26 @@
     "performance"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@playwright/test": "^1.40.0",
     "allure-playwright": "^2.9.2",
     "axe-core": "^4.7.0",
     "chart.js": "^4.4.0",
     "dotenv": "^16.3.1",
+    "dotenv-safe": "^9.1.0",
     "js-yaml": "^4.1.0",
     "lighthouse": "^11.0.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
     "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-plugin-playwright": "^0.18.0",
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

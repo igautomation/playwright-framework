@@ -1,7 +1,11 @@
-const logger = require('./logger');
-
 /**
  * Enhanced error handler for Playwright operations
+ */
+const logger = require('./logger');
+const config = require('../../config');
+
+/**
+ * Error handler for Playwright operations
  */
 class PlaywrightErrorHandler {
   /**
@@ -69,6 +73,41 @@ class PlaywrightErrorHandler {
       return enhancedError;
     }
     
+    if (error.name === 'ApiError' || context.api) {
+      logger.error('API request error', {
+        ...errorInfo,
+        endpoint: context.endpoint || 'unknown endpoint',
+        method: context.method || 'unknown method',
+        statusCode: context.statusCode
+      });
+      
+      // Create a more descriptive error
+      const enhancedError = new Error(
+        `API error ${context.statusCode ? `(${context.statusCode})` : ''} with "${context.endpoint || 'unknown endpoint'}": ${error.message}`
+      );
+      enhancedError.originalError = error;
+      enhancedError.code = 'API_ERROR';
+      enhancedError.context = context;
+      return enhancedError;
+    }
+    
+    if (error.name === 'AssertionError' || context.assertion) {
+      logger.error('Assertion error', {
+        ...errorInfo,
+        expected: context.expected,
+        actual: context.actual
+      });
+      
+      // Create a more descriptive error
+      const enhancedError = new Error(
+        `Assertion failed: ${error.message}`
+      );
+      enhancedError.originalError = error;
+      enhancedError.code = 'ASSERTION_ERROR';
+      enhancedError.context = context;
+      return enhancedError;
+    }
+    
     // Default error handling
     logger.error('Playwright error', errorInfo);
     
@@ -87,9 +126,10 @@ class PlaywrightErrorHandler {
    * @returns {Function} Wrapped function with retry logic
    */
   static withRetry(fn, options = {}) {
-    const maxRetries = options.maxRetries || 3;
-    const retryDelay = options.retryDelay || 1000;
+    const maxRetries = options.maxRetries || config.retry?.maxRetries || 3;
+    const retryDelay = options.retryDelay || config.retry?.retryDelay || 1000;
     const retryCondition = options.retryCondition || (error => true);
+    const exponentialBackoff = options.exponentialBackoff || config.retry?.exponentialBackoff || false;
     
     return async (...args) => {
       let lastError;
@@ -116,9 +156,12 @@ class PlaywrightErrorHandler {
             maxRetries
           });
           
-          // Wait before retrying
+          // Wait before retrying with optional exponential backoff
           if (attempt < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, retryDelay));
+            const delay = exponentialBackoff 
+              ? retryDelay * Math.pow(2, attempt - 1) 
+              : retryDelay;
+            await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
       }
@@ -141,18 +184,20 @@ class PlaywrightErrorHandler {
    * @returns {Function} Wrapped function with timeout
    */
   static withTimeout(fn, timeoutMs, context = {}) {
+    const timeout = timeoutMs || config.timeouts?.default || 30000;
+    
     return async (...args) => {
       return new Promise(async (resolve, reject) => {
         // Set timeout
         const timeoutId = setTimeout(() => {
-          const timeoutError = new Error(`Operation timed out after ${timeoutMs}ms`);
+          const timeoutError = new Error(`Operation timed out after ${timeout}ms`);
           timeoutError.name = 'TimeoutError';
-          timeoutError.timeout = timeoutMs;
+          timeoutError.timeout = timeout;
           reject(this.handleError(timeoutError, {
             ...context,
             action: context.action || 'custom operation'
           }));
-        }, timeoutMs);
+        }, timeout);
         
         try {
           // Run the function
@@ -187,6 +232,102 @@ class PlaywrightErrorHandler {
         
         // Call fallback function
         return await fallbackFn(...args, error);
+      }
+    };
+  }
+  
+  /**
+   * Create a self-healing wrapper for Playwright operations
+   * @param {Function} fn - Function to wrap
+   * @param {Object} options - Self-healing options
+   * @returns {Function} Wrapped function with self-healing capability
+   */
+  static withSelfHealing(fn, options = {}) {
+    const alternativeSelectors = options.alternativeSelectors || [];
+    const healingStrategies = options.healingStrategies || ['relaxed', 'nearest', 'fuzzy'];
+    
+    return async (...args) => {
+      try {
+        // Try with original selector
+        return await fn(...args);
+      } catch (error) {
+        // Only attempt healing for selector errors
+        if (error.name !== 'SelectorError' && !error.message.includes('selector')) {
+          throw error;
+        }
+        
+        logger.warn('Selector failed, attempting self-healing', {
+          originalSelector: options.selector,
+          error: error.message
+        });
+        
+        // Try alternative selectors if provided
+        if (alternativeSelectors.length > 0) {
+          for (const altSelector of alternativeSelectors) {
+            try {
+              // Replace the selector in args
+              const newArgs = [...args];
+              newArgs[0] = altSelector; // Assuming selector is first arg
+              
+              logger.info(`Trying alternative selector: ${altSelector}`);
+              return await fn(...newArgs);
+            } catch (altError) {
+              // Continue to next alternative
+            }
+          }
+        }
+        
+        // If we get here, all alternatives failed
+        throw this.handleError(error, {
+          ...options.context,
+          selector: options.selector,
+          alternativeSelectors,
+          selfHealingFailed: true
+        });
+      }
+    };
+  }
+  
+  /**
+   * Create a performance measurement wrapper for Playwright operations
+   * @param {Function} fn - Function to wrap
+   * @param {string} operationName - Name of the operation
+   * @param {Object} options - Options
+   * @returns {Function} Wrapped function with performance measurement
+   */
+  static withPerformanceMeasurement(fn, operationName, options = {}) {
+    return async (...args) => {
+      const startTime = Date.now();
+      let result;
+      
+      try {
+        result = await fn(...args);
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        logger.info(`Performance: ${operationName} completed in ${duration}ms`, {
+          operation: operationName,
+          durationMs: duration,
+          ...options
+        });
+        
+        return result;
+      } catch (error) {
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        logger.error(`Performance: ${operationName} failed after ${duration}ms`, {
+          operation: operationName,
+          durationMs: duration,
+          error: error.message,
+          ...options
+        });
+        
+        throw this.handleError(error, {
+          ...options,
+          operation: operationName,
+          durationMs: duration
+        });
       }
     };
   }

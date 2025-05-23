@@ -3,8 +3,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const logger = require('../common/logger');
-const PlaywrightErrorHandler = require('../common/errorHandler');
+const config = require('../../config');
 
 /**
  * Utilities for localization testing
@@ -17,9 +16,9 @@ class LocalizationUtils {
    */
   constructor(page, options = {}) {
     this.page = page;
-    this.outputDir = options.outputDir || path.join(process.cwd(), 'reports', 'localization');
-    this.localesDir = options.localesDir || path.join(process.cwd(), 'locales');
-    this.defaultLocale = options.defaultLocale || 'en';
+    this.outputDir = options.outputDir || config.localization?.outputDir || path.join(process.cwd(), 'reports', 'localization');
+    this.localesDir = options.localesDir || config.localization?.localesDir || path.join(process.cwd(), 'locales');
+    this.defaultLocale = options.defaultLocale || config.localization?.defaultLocale || 'en';
     
     // Create directories if they don't exist
     if (!fs.existsSync(this.outputDir)) {
@@ -35,7 +34,7 @@ class LocalizationUtils {
    * Set page locale
    * @param {string} locale - Locale code (e.g., 'en-US', 'fr-FR')
    * @param {Object} options - Options
-   * @returns {Promise<void>}
+   * @returns {Promise<Object>} Browser context
    */
   async setLocale(locale, options = {}) {
     try {
@@ -70,17 +69,14 @@ class LocalizationUtils {
         }
       } catch (e) {
         // Ignore errors when closing the old page
-        logger.warn(`Error closing old page: ${e.message}`);
+        console.warn(`Error closing old page: ${e.message}`);
       }
       
-      logger.info(`Set locale to ${locale}`);
+      console.log(`Set locale to ${locale}`);
       return context; // Return the new context for proper management
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'setting locale',
-        locale,
-        options
-      });
+      console.error(`Error setting locale to ${locale}:`, error);
+      throw error;
     }
   }
   
@@ -189,10 +185,8 @@ class LocalizationUtils {
       
       return result;
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'extracting text',
-        options
-      });
+      console.error('Error extracting text:', error);
+      throw error;
     }
   }
   
@@ -210,7 +204,7 @@ class LocalizationUtils {
       
       // Extract text for each locale
       for (const locale of locales) {
-        logger.info(`Testing locale: ${locale}`);
+        console.log(`Testing locale: ${locale}`);
         
         // Create a new browser context with the specified locale
         const context = await this.page.context().browser().newContext({
@@ -414,12 +408,8 @@ class LocalizationUtils {
       
       return finalResult;
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'comparing locales',
-        url,
-        locales,
-        options
-      });
+      console.error('Error comparing locales:', error);
+      throw error;
     }
   }
   
@@ -454,225 +444,233 @@ class LocalizationUtils {
       }
       
       // Generate HTML report
-      const html = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Localization Test Report</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              margin: 0;
-              padding: 20px;
-              color: #333;
-            }
-            h1, h2, h3 {
-              color: #2c3e50;
-            }
-            h1 {
-              border-bottom: 2px solid #3498db;
-              padding-bottom: 10px;
-            }
-            .summary {
-              background-color: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-              margin-bottom: 20px;
-            }
-            .locale-stats {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 15px;
-              margin-top: 15px;
-            }
-            .locale-stat {
-              background-color: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-              flex: 1;
-              min-width: 200px;
-            }
-            .locale-stat h3 {
-              margin-top: 0;
-              color: #2c3e50;
-            }
-            .progress-bar {
-              height: 20px;
-              background-color: #ecf0f1;
-              border-radius: 10px;
-              margin-top: 10px;
-              overflow: hidden;
-            }
-            .progress-fill {
-              height: 100%;
-              background-color: #3498db;
-              border-radius: 10px;
-            }
-            .locale-section {
-              border: 1px solid #ddd;
-              border-radius: 5px;
-              padding: 15px;
-              margin-bottom: 20px;
-            }
-            .locale-section h3 {
-              margin-top: 0;
-              border-bottom: 1px solid #eee;
-              padding-bottom: 10px;
-            }
-            .issue-list {
-              margin-top: 15px;
-            }
-            .issue {
-              background-color: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-              margin-bottom: 10px;
-            }
-            .issue-missing {
-              border-left: 5px solid #e74c3c;
-            }
-            .issue-potential {
-              border-left: 5px solid #f39c12;
-            }
-            .selector {
-              font-family: monospace;
-              background-color: #f1f1f1;
-              padding: 5px;
-              border-radius: 3px;
-            }
-            .text-comparison {
-              display: flex;
-              margin-top: 10px;
-              gap: 10px;
-            }
-            .text-box {
-              flex: 1;
-              padding: 10px;
-              border-radius: 5px;
-              border: 1px solid #ddd;
-            }
-            .screenshots {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 20px;
-              margin-top: 15px;
-            }
-            .screenshot {
-              max-width: 45%;
-            }
-            .screenshot img {
-              max-width: 100%;
-              border: 1px solid #ddd;
-            }
-            .screenshot-label {
-              font-weight: bold;
-              margin-bottom: 5px;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Localization Test Report</h1>
-          <div class="summary">
-            <p><strong>URL:</strong> ${result.url}</p>
-            <p><strong>Generated:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
-            <p><strong>Default Locale:</strong> ${result.defaultLocale}</p>
-            <p><strong>Tested Locales:</strong> ${result.locales.join(', ')}</p>
-          </div>
-          
-          <h2>Localization Statistics</h2>
-          <div class="locale-stats">
-            ${Object.entries(stats).map(([locale, stat]) => `
-              <div class="locale-stat">
-                <h3>${locale}</h3>
-                <p><strong>Total Texts:</strong> ${stat.totalTexts}</p>
-                <p><strong>Missing Translations:</strong> ${stat.missingTranslations}</p>
-                <p><strong>Potential Issues:</strong> ${stat.potentialIssues}</p>
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width: ${Math.max(0, 100 - (stat.missingTranslations / stat.totalTexts * 100))}%"></div>
-                </div>
-                <p>${Math.max(0, 100 - (stat.missingTranslations / stat.totalTexts * 100)).toFixed(1)}% translated</p>
-              </div>
-            `).join('')}
-          </div>
-          
-          ${result.locales.filter(locale => locale !== result.defaultLocale).map(locale => `
-            <div class="locale-section">
-              <h3>${locale}</h3>
-              
-              ${result.results[locale].screenshotPath && result.results[result.defaultLocale].screenshotPath ? `
-                <h4>Screenshots</h4>
-                <div class="screenshots">
-                  <div class="screenshot">
-                    <div class="screenshot-label">Default (${result.defaultLocale})</div>
-                    <img src="file://${result.results[result.defaultLocale].screenshotPath}" alt="${result.defaultLocale} Screenshot">
-                  </div>
-                  <div class="screenshot">
-                    <div class="screenshot-label">${locale}</div>
-                    <img src="file://${result.results[locale].screenshotPath}" alt="${locale} Screenshot">
-                  </div>
-                </div>
-              ` : ''}
-              
-              <h4>Missing Translations (${result.comparisonResults[locale].missingTranslations.length})</h4>
-              <div class="issue-list">
-                ${result.comparisonResults[locale].missingTranslations.length > 0 ? 
-                  result.comparisonResults[locale].missingTranslations.map(issue => `
-                    <div class="issue issue-missing">
-                      <p><strong>Selector:</strong> <span class="selector">${issue.selector}</span></p>
-                      <div class="text-comparison">
-                        <div class="text-box">
-                          <strong>${result.defaultLocale}:</strong> ${issue.defaultText}
-                        </div>
-                        <div class="text-box">
-                          <strong>${locale}:</strong> ${issue.text}
-                        </div>
-                      </div>
-                    </div>
-                  `).join('') : 
-                  '<p>No missing translations found. Great job!</p>'
-                }
-              </div>
-              
-              <h4>Potential Issues (${result.comparisonResults[locale].potentialIssues.length})</h4>
-              <div class="issue-list">
-                ${result.comparisonResults[locale].potentialIssues.length > 0 ? 
-                  result.comparisonResults[locale].potentialIssues.map(issue => `
-                    <div class="issue issue-potential">
-                      <p><strong>Issue Type:</strong> ${issue.issue}</p>
-                      <p><strong>Selector:</strong> <span class="selector">${issue.selector}</span></p>
-                      <div class="text-comparison">
-                        <div class="text-box">
-                          <strong>${result.defaultLocale}:</strong> ${issue.defaultText}
-                        </div>
-                        <div class="text-box">
-                          <strong>${locale}:</strong> ${issue.text}
-                        </div>
-                      </div>
-                    </div>
-                  `).join('') : 
-                  '<p>No potential issues found. Great job!</p>'
-                }
-              </div>
-            </div>
-          `).join('')}
-        </body>
-        </html>
-      `;
+      const html = this._generateReportHtml(result, stats);
       
       // Write report to file
       fs.writeFileSync(reportPath, html);
       
       return reportPath;
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'generating localization report',
-        result,
-        outputPath
-      });
+      console.error('Error generating localization report:', error);
+      throw error;
     }
+  }
+  
+  /**
+   * Generate HTML report content
+   * @param {Object} result - Test result
+   * @param {Object} stats - Statistics
+   * @returns {string} HTML content
+   * @private
+   */
+  _generateReportHtml(result, stats) {
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Localization Test Report</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+          }
+          h1, h2, h3 {
+            color: #2c3e50;
+          }
+          h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+          }
+          .summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+          }
+          .locale-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+          }
+          .locale-stat {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            flex: 1;
+            min-width: 200px;
+          }
+          .locale-stat h3 {
+            margin-top: 0;
+            color: #2c3e50;
+          }
+          .progress-bar {
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+          }
+          .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 10px;
+          }
+          .locale-section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+          }
+          .locale-section h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          }
+          .issue-list {
+            margin-top: 15px;
+          }
+          .issue {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+          }
+          .issue-missing {
+            border-left: 5px solid #e74c3c;
+          }
+          .issue-potential {
+            border-left: 5px solid #f39c12;
+          }
+          .selector {
+            font-family: monospace;
+            background-color: #f1f1f1;
+            padding: 5px;
+            border-radius: 3px;
+          }
+          .text-comparison {
+            display: flex;
+            margin-top: 10px;
+            gap: 10px;
+          }
+          .text-box {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+          }
+          .screenshots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+          }
+          .screenshot {
+            max-width: 45%;
+          }
+          .screenshot img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+          }
+          .screenshot-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Localization Test Report</h1>
+        <div class="summary">
+          <p><strong>URL:</strong> ${result.url}</p>
+          <p><strong>Generated:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
+          <p><strong>Default Locale:</strong> ${result.defaultLocale}</p>
+          <p><strong>Tested Locales:</strong> ${result.locales.join(', ')}</p>
+        </div>
+        
+        <h2>Localization Statistics</h2>
+        <div class="locale-stats">
+          ${Object.entries(stats).map(([locale, stat]) => `
+            <div class="locale-stat">
+              <h3>${locale}</h3>
+              <p><strong>Total Texts:</strong> ${stat.totalTexts}</p>
+              <p><strong>Missing Translations:</strong> ${stat.missingTranslations}</p>
+              <p><strong>Potential Issues:</strong> ${stat.potentialIssues}</p>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${Math.max(0, 100 - (stat.missingTranslations / stat.totalTexts * 100))}%"></div>
+              </div>
+              <p>${Math.max(0, 100 - (stat.missingTranslations / stat.totalTexts * 100)).toFixed(1)}% translated</p>
+            </div>
+          `).join('')}
+        </div>
+        
+        ${result.locales.filter(locale => locale !== result.defaultLocale).map(locale => `
+          <div class="locale-section">
+            <h3>${locale}</h3>
+            
+            ${result.results[locale].screenshotPath && result.results[result.defaultLocale].screenshotPath ? `
+              <h4>Screenshots</h4>
+              <div class="screenshots">
+                <div class="screenshot">
+                  <div class="screenshot-label">Default (${result.defaultLocale})</div>
+                  <img src="file://${result.results[result.defaultLocale].screenshotPath}" alt="${result.defaultLocale} Screenshot">
+                </div>
+                <div class="screenshot">
+                  <div class="screenshot-label">${locale}</div>
+                  <img src="file://${result.results[locale].screenshotPath}" alt="${locale} Screenshot">
+                </div>
+              </div>
+            ` : ''}
+            
+            <h4>Missing Translations (${result.comparisonResults[locale].missingTranslations.length})</h4>
+            <div class="issue-list">
+              ${result.comparisonResults[locale].missingTranslations.length > 0 ? 
+                result.comparisonResults[locale].missingTranslations.map(issue => `
+                  <div class="issue issue-missing">
+                    <p><strong>Selector:</strong> <span class="selector">${issue.selector}</span></p>
+                    <div class="text-comparison">
+                      <div class="text-box">
+                        <strong>${result.defaultLocale}:</strong> ${issue.defaultText}
+                      </div>
+                      <div class="text-box">
+                        <strong>${locale}:</strong> ${issue.text}
+                      </div>
+                    </div>
+                  </div>
+                `).join('') : 
+                '<p>No missing translations found. Great job!</p>'
+              }
+            </div>
+            
+            <h4>Potential Issues (${result.comparisonResults[locale].potentialIssues.length})</h4>
+            <div class="issue-list">
+              ${result.comparisonResults[locale].potentialIssues.length > 0 ? 
+                result.comparisonResults[locale].potentialIssues.map(issue => `
+                  <div class="issue issue-potential">
+                    <p><strong>Issue Type:</strong> ${issue.issue}</p>
+                    <p><strong>Selector:</strong> <span class="selector">${issue.selector}</span></p>
+                    <div class="text-comparison">
+                      <div class="text-box">
+                        <strong>${result.defaultLocale}:</strong> ${issue.defaultText}
+                      </div>
+                      <div class="text-box">
+                        <strong>${locale}:</strong> ${issue.text}
+                      </div>
+                    </div>
+                  </div>
+                `).join('') : 
+                '<p>No potential issues found. Great job!</p>'
+              }
+            </div>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
   }
   
   /**
@@ -710,11 +708,73 @@ class LocalizationUtils {
       
       return localePath;
     } catch (error) {
-      throw PlaywrightErrorHandler.handleError(error, {
-        action: 'exporting translations',
-        locale,
-        options
-      });
+      console.error('Error exporting translations:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Check for missing translations in locale files
+   * @param {Object} options - Options
+   * @returns {Promise<Object>} Missing translations
+   */
+  async checkMissingTranslations(options = {}) {
+    try {
+      const defaultLocale = options.defaultLocale || this.defaultLocale;
+      const localesDir = options.localesDir || this.localesDir;
+      
+      // Get all locale files
+      const localeFiles = fs.readdirSync(localesDir)
+        .filter(file => file.endsWith('.json'))
+        .map(file => ({
+          locale: path.basename(file, '.json'),
+          path: path.join(localesDir, file)
+        }));
+      
+      // Find default locale file
+      const defaultLocaleFile = localeFiles.find(file => file.locale === defaultLocale);
+      if (!defaultLocaleFile) {
+        throw new Error(`Default locale file not found: ${defaultLocale}`);
+      }
+      
+      // Load default translations
+      const defaultTranslations = JSON.parse(fs.readFileSync(defaultLocaleFile.path, 'utf8'));
+      const defaultKeys = Object.keys(defaultTranslations);
+      
+      // Check each locale file
+      const results = {};
+      
+      for (const localeFile of localeFiles) {
+        if (localeFile.locale === defaultLocale) continue;
+        
+        // Load translations
+        const translations = JSON.parse(fs.readFileSync(localeFile.path, 'utf8'));
+        const keys = Object.keys(translations);
+        
+        // Find missing keys
+        const missingKeys = defaultKeys.filter(key => !keys.includes(key));
+        
+        // Find extra keys
+        const extraKeys = keys.filter(key => !defaultKeys.includes(key));
+        
+        results[localeFile.locale] = {
+          missingKeys,
+          extraKeys,
+          missingCount: missingKeys.length,
+          extraCount: extraKeys.length,
+          totalKeys: keys.length,
+          completionPercentage: ((keys.length - missingKeys.length) / defaultKeys.length) * 100
+        };
+      }
+      
+      return {
+        defaultLocale,
+        defaultKeyCount: defaultKeys.length,
+        results
+      };
+    } catch (error) {
+      console.error('Error checking missing translations:', error);
+      throw error;
     }
   }
 }

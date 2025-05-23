@@ -1,1 +1,0 @@
-/Users/mzahirudeen/playwright-framework/scripts/make-executable/make-scripts-executable.sh
