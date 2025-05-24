@@ -1,179 +1,93 @@
-# Page Object Generator
+# Page Object Generators
 
-Automatically generate Page Objects from any web page with smart selector strategies and framework-specific support.
+This directory contains utilities for automatically generating Page Objects from DOM elements.
+
+## Features
+
+- Extract standard web elements (inputs, buttons, selects, etc.)
+- Extract Salesforce-specific elements (lightning components)
+- Extract DOM collections (tables, lists, grids)
+- Generate page object classes with appropriate methods
+- Generate test files with basic test cases
+
+## DOM Collections Support
+
+The generators support extracting and working with DOM collections:
+
+- **Tables**: Standard HTML tables, ARIA tables, and grid roles
+- **Lists**: Ordered and unordered lists, listbox roles
+- **Grids**: CSS grid-based layouts
+- **Repeaters**: Repeated elements with similar structure
+- **Lightning Datatables**: Salesforce Lightning datatable components
 
 ## Usage
 
 ```bash
-# Basic usage
-npx generate-page <url> <name>
+# Standard web application
+node generate-page.js --url https://example.com/page --name ExamplePage
 
-# Examples
-npx generate-page https://example.com LoginPage
-npx generate-page https://app.salesforce.com AccountPage --framework salesforce
+# Salesforce application
+node generate-page.js --url https://myorg.lightning.force.com/page --name SfPage --salesforce
+
+# With authentication
+node generate-page.js --url https://myorg.lightning.force.com/page --name SfPage --salesforce --username user@example.com --password mypassword
+
+# Without collections
+node generate-page.js --url https://example.com/page --name ExamplePage --no-collections
 ```
 
-## Options
+## Configuration
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `url` | URL of the web page to analyze | (Required) |
-| `name` | Name for the page class | (Required) |
-| `--framework, -f` | Target framework (standard, salesforce, angular, react) | standard |
-| `--output, -o` | Output directory | ./src/pages |
-| `--no-headless` | Run in headed mode | false |
-
-## Features
-
-- 🔍 **Smart Selector Detection**
-  - data-testid attributes
-  - ARIA labels and roles
-  - IDs and names
-  - Framework-specific attributes
-  - Shadow DOM support
-
-- 🎯 **Framework Support**
-  - Standard web elements
-  - Salesforce Lightning components
-  - Angular Material components
-  - React components
-  - Custom framework support
-
-- 🛠️ **Generated Methods**
-  - Form interactions (fill, select, check)
-  - Button clicks
-  - Table operations
-  - Modal handling
-  - Custom component interactions
-
-## Example Output
+See `config.js` for default configuration options. Key settings include:
 
 ```javascript
-class LoginPage extends BasePage {
-  constructor(page) {
-    super(page);
-    
-    // Selectors
-    this.usernameInput = '[data-testid="username"]';
-    this.passwordInput = '[data-testid="password"]';
-    this.loginButton = 'button[type="submit"]';
-    this.errorMessage = '.error-message';
-    this.rememberMeCheckbox = '#rememberMe';
-  }
-
-  // Navigation
-  async goto() {
-    await this.page.goto(this.url);
-    await this.page.waitForLoadState('networkidle');
-  }
-
-  // Form interactions
-  async fillUsername(value) {
-    await this.fill(this.usernameInput, value);
-  }
-
-  async fillPassword(value) {
-    await this.fill(this.passwordInput, value);
-  }
-
-  async setRememberMe(check) {
-    await this.setCheckbox(this.rememberMeCheckbox, check);
-  }
-
-  async clickLogin() {
-    await this.click(this.loginButton);
-  }
-
-  // Helper methods
-  async login(username, password, rememberMe = false) {
-    await this.fillUsername(username);
-    await this.fillPassword(password);
-    if (rememberMe) {
-      await this.setRememberMe(true);
-    }
-    await this.clickLogin();
+{
+  // Output paths
+  output: {
+    pagesDir: './src/pages',
+    testsDir: './tests/pages'
+  },
+  
+  // Extraction options
+  extraction: {
+    waitForSelectors: { /* ... */ },
+    timeout: 30000,
+    extractCollections: true
+  },
+  
+  // Salesforce specific options
+  salesforce: {
+    loginUrl: 'https://login.salesforce.com',
+    components: [ /* ... */ ]
   }
 }
 ```
 
-## Selector Strategies
+## Core Files
 
-Priority order for selecting best locator:
+- `generate-page.js`: Main CLI entry point
+- `page-generator.js`: Core page object generation logic
+- `element-extractor.js`: Element extraction for standard and Salesforce pages
+- `domCollections.js`: DOM collections utilities
+- `config.js`: Configuration settings
+- `selectors.js`: Selector patterns for element identification
 
-1. Testing attributes
-   ```html
-   data-testid="login-button"
-   data-test="username-input"
-   data-qa="submit-form"
-   ```
+## Examples
 
-2. ARIA attributes
-   ```html
-   aria-label="Login"
-   aria-describedby="password-hint"
-   role="button"
-   ```
+### Generate a standard page object:
 
-3. ID and name attributes
-   ```html
-   id="loginForm"
-   name="username"
-   ```
+```bash
+node generate-page.js --url https://example.com/login --name LoginPage
+```
 
-4. Framework-specific
-   ```html
-   <!-- Salesforce -->
-   lightning-input
-   class="slds-button"
+### Generate a Salesforce page object:
 
-   <!-- Angular -->
-   mat-button
-   [formControlName]="username"
+```bash
+node generate-page.js --url https://myorg.lightning.force.com/lightning/o/Contact/new --name ContactPage --salesforce
+```
 
-   <!-- React -->
-   data-testid="submit-button"
-   ```
+### Generate with authentication:
 
-5. CSS selectors (last resort)
-   ```html
-   .login-form button[type="submit"]
-   ```
-
-## Best Practices
-
-1. **Review Generated Code**
-   - Verify selector uniqueness
-   - Add custom methods as needed
-   - Update method names for clarity
-
-2. **Framework Selection**
-   - Use `--framework` for better selectors
-   - Add custom selectors to `selectors.js`
-
-3. **Maintenance**
-   - Regenerate when page structure changes
-   - Keep custom methods in separate files
-   - Use version control for changes
-
-## Common Issues
-
-1. **No Elements Found**
-   - Check if page is fully loaded
-   - Try `--no-headless` mode
-   - Verify framework selection
-
-2. **Poor Selectors**
-   - Add data-testid attributes
-   - Use framework conventions
-   - Update selector patterns
-
-3. **Dynamic Content**
-   - Increase wait timeout
-   - Add explicit waits
-   - Use stable selectors
-
-## Contributing
-
-1. Add new selector patterns in `selectors.js`
-2. Improve element detection in `page-generator.js`
-3. Add framework-specific methods as needed
+```bash
+node generate-page.js --url https://myorg.lightning.force.com/lightning/o/Contact/new --name ContactPage --salesforce --username user@example.com --password mypassword
+```

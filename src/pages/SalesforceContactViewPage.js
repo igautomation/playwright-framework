@@ -1,11 +1,11 @@
 /**
- * SalesforceContactPage Page Object
+ * SalesforceContactViewPage Page Object
  * Generated from https://wise-koala-a44c19-dev-ed.trailblaze.lightning.force.com/lightning/r/Contact/003dL00000S5adqQAB/view
  * @generated
  */
 const { BasePage } = require('./BasePage');
 
-class SalesforceContactPage extends BasePage {
+class SalesforceContactViewPage extends BasePage {
   /**
    * @param {import('@playwright/test').Page} page
    */
@@ -19,25 +19,22 @@ class SalesforceContactPage extends BasePage {
     // Buttons
     this.global_actions = '[data-aura-rendered-by="19:1122;a"]';
     this.setup = '[data-aura-rendered-by="164:218;a"]';
-    this.add_to_campaign = '[data-aura-rendered-by="1171:0"]';
+    this.add_to_campaign = '[data-aura-rendered-by="1174:0"]';
     this.upload_files = '[data-aura-rendered-by="1312:0"]';
-    this.show_all_past_activities_in_a_new_tab = '[data-aura-rendered-by="28:801;a"]';
+    this.show_all_past_activities_in_a_new_tab = '[data-aura-rendered-by="28:848;a"]';
     this.search = '[data-aura-rendered-by="275:0"]';
     this.favorite_this_item = '[data-aura-rendered-by="19:218;a"]';
-    this.follow = '[data-aura-rendered-by="1194:0"]';
-    this.to_do_list = '[data-aura-rendered-by="434:0"]';
-    this.upcoming___overdue = '[data-aura-rendered-by="649:0"]';
-    this.button = '[data-aura-rendered-by="1168:0"]';
+    this.follow = '[data-aura-rendered-by="1207:0"]';
+    this.to_do_list = '[data-aura-rendered-by="445:0"]';
+    this.upcoming___overdue = '[data-aura-rendered-by="743:0"]';
+    this.button = '[data-aura-rendered-by="1171:0"]';
     this.button = '[data-aura-rendered-by="1324:0"]';
     this.salesforce_help = '[data-aura-rendered-by="128:218;a"]';
-    this.timeline_settings = '[data-aura-rendered-by="614:0"]';
-    this.refresh = '[data-aura-rendered-by="625:0"]';
-    this.expand_all = '[data-aura-rendered-by="634:0"]';
-    this.minimize = '[data-aura-rendered-by="474:0"]';
-    this.pop_out = '[data-aura-rendered-by="506:0"]';
-    this.minimize = '[data-aura-rendered-by="1399:0"]';
-    this.maximize = '[data-aura-rendered-by="1408:0"]';
-    this.close = '[data-aura-rendered-by="1417:0"]';
+    this.timeline_settings = '[data-aura-rendered-by="708:0"]';
+    this.refresh = '[data-aura-rendered-by="719:0"]';
+    this.expand_all = '[data-aura-rendered-by="728:0"]';
+    this.minimize = '[data-aura-rendered-by="485:0"]';
+    this.pop_out = '[data-aura-rendered-by="517:0"]';
     this.favorites_list = '[data-aura-rendered-by="43:218;a"]';
     this.0notifications = '[data-aura-rendered-by="74:218;a"]';
     this.view_profile = '[data-aura-rendered-by="100:218;a"]';
@@ -50,23 +47,22 @@ class SalesforceContactPage extends BasePage {
     this.input = 'lightning-input';
 
     // Tables
-    this.campaign_history = '[data-aura-rendered-by="1085:0"]';
+    this.campaign_history = '[data-aura-rendered-by="639:0"]';
 
     // Lists
     this.list = '[data-aura-rendered-by="141:1122;a"]';
     this.list = '[data-aura-rendered-by="180:218;a"]';
-    this.list = '[data-aura-rendered-by="421:0"]';
+    this.list = '[data-aura-rendered-by="432:0"]';
     this.list = '[data-aura-rendered-by="163:0;p"]';
-    this.list = '[data-aura-rendered-by="1152:0"]';
+    this.list = '[data-aura-rendered-by="1155:0"]';
     this.list = '[data-aura-rendered-by="1304:0"]';
-    this.list = '[data-aura-rendered-by="2:1034;a"]';
-    this.list = '[data-aura-rendered-by="658:0"]';
+    this.list = '[data-aura-rendered-by="2:1035;a"]';
+    this.list = '[data-aura-rendered-by="752:0"]';
 
     // Cards
-    this.campaign_history = '[data-aura-rendered-by="1025:0"]';
+    this.campaign_history = '[data-aura-rendered-by="579:0"]';
     this.notes___attachments = '[data-aura-rendered-by="1238:0"]';
-    this.card = '[data-aura-rendered-by="998:0"]';
-    
+    this.card = '[data-aura-rendered-by="1092:0"]';
     // Modal/Dialog selectors
     this.modalContainer = '.slds-modal';
     this.modalHeader = '.slds-modal__header';
@@ -213,27 +209,6 @@ class SalesforceContactPage extends BasePage {
   }
 
   /**
-   * Click Minimize button
-   */
-  async clickMinimize() {
-    await this.click(this.minimize);
-  }
-
-  /**
-   * Click Maximize button
-   */
-  async clickMaximize() {
-    await this.click(this.maximize);
-  }
-
-  /**
-   * Click Close button
-   */
-  async clickClose() {
-    await this.click(this.close);
-  }
-
-  /**
    * Click Favorites list button
    */
   async clickFavorites_list() {
@@ -290,6 +265,72 @@ class SalesforceContactPage extends BasePage {
    */
   async fillInput(value) {
     await this.fill(this.input, value);
+  }
+  /**
+   * Wait for a modal dialog to appear
+   * @param {number} timeout - Timeout in milliseconds
+   * @returns {Promise<boolean>} - Whether the modal appeared
+   */
+  async waitForModal(timeout = 10000) {
+    return await this.page.locator(this.modalContainer).waitFor({ 
+      state: 'visible', 
+      timeout 
+    }).then(() => true).catch(() => false);
+  }
+
+  /**
+   * Get the title of the current modal
+   * @returns {Promise<string>} - Modal title text
+   */
+  async getModalTitle() {
+    return await this.page.locator(this.modalTitle).textContent();
+  }
+
+  /**
+   * Close the current modal by clicking the close button
+   */
+  async closeModal() {
+    await this.click(this.modalCloseButton);
+    await this.page.locator(this.modalContainer).waitFor({ state: 'hidden' })
+      .catch(() => {});
+  }
+
+  /**
+   * Click a button in the modal footer by text
+   * @param {string} buttonText - Text of the button to click
+   */
+  async clickModalButton(buttonText) {
+    await this.page.locator(`${this.modalFooter} button`)
+      .filter({ hasText: buttonText })
+      .click();
+  }
+  
+  /**
+   * Fill an input field in a modal by label
+   * @param {string} label - Label text of the field
+   * @param {string} value - Value to fill
+   */
+  async fillModalInput(label, value) {
+    await this.page.locator(`${this.modalContent} label`)
+      .filter({ hasText: label })
+      .locator('xpath=..//input, ../textarea')
+      .fill(value);
+  }
+  
+  /**
+   * Check if a modal is visible
+   * @returns {Promise<boolean>} - Whether the modal is visible
+   */
+  async isModalVisible() {
+    return await this.page.locator(this.modalContainer).isVisible();
+  }
+  
+  /**
+   * Get text content from the modal
+   * @returns {Promise<string>} - Text content of the modal
+   */
+  async getModalContent() {
+    return await this.page.locator(this.modalContent).textContent();
   }
 
 
@@ -364,73 +405,6 @@ class SalesforceContactPage extends BasePage {
     }
     
     throw new Error('No matching row found in table');
-  }
-  
-  /**
-   * Wait for a modal dialog to appear
-   * @param {number} timeout - Timeout in milliseconds
-   * @returns {Promise<boolean>} - Whether the modal appeared
-   */
-  async waitForModal(timeout = 10000) {
-    return await this.page.locator(this.modalContainer).waitFor({ 
-      state: 'visible', 
-      timeout 
-    }).then(() => true).catch(() => false);
-  }
-
-  /**
-   * Get the title of the current modal
-   * @returns {Promise<string>} - Modal title text
-   */
-  async getModalTitle() {
-    return await this.page.locator(this.modalTitle).textContent();
-  }
-
-  /**
-   * Close the current modal by clicking the close button
-   */
-  async closeModal() {
-    await this.click(this.modalCloseButton);
-    await this.page.locator(this.modalContainer).waitFor({ state: 'hidden' })
-      .catch(() => {});
-  }
-
-  /**
-   * Click a button in the modal footer by text
-   * @param {string} buttonText - Text of the button to click
-   */
-  async clickModalButton(buttonText) {
-    await this.page.locator(`${this.modalFooter} button`)
-      .filter({ hasText: buttonText })
-      .click();
-  }
-  
-  /**
-   * Fill an input field in a modal by label
-   * @param {string} label - Label text of the field
-   * @param {string} value - Value to fill
-   */
-  async fillModalInput(label, value) {
-    await this.page.locator(`${this.modalContent} label`)
-      .filter({ hasText: label })
-      .locator('xpath=..//input, ../textarea')
-      .fill(value);
-  }
-  
-  /**
-   * Check if a modal is visible
-   * @returns {Promise<boolean>} - Whether the modal is visible
-   */
-  async isModalVisible() {
-    return await this.page.locator(this.modalContainer).isVisible();
-  }
-  
-  /**
-   * Get text content from the modal
-   * @returns {Promise<string>} - Text content of the modal
-   */
-  async getModalContent() {
-    return await this.page.locator(this.modalContent).textContent();
   }
   /**
    * Get all items from list list
@@ -684,4 +658,4 @@ class SalesforceContactPage extends BasePage {
   }
 }
 
-module.exports = SalesforceContactPage;
+module.exports = SalesforceContactViewPage;

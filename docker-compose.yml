@@ -11,11 +11,20 @@ services:
       - ./allure-results:/app/allure-results
       - ./reports:/app/reports
       - ./visual-diffs:/app/visual-diffs
+      - ./sf_elements.json:/app/sf_elements.json
+      - ./sessions:/app/sessions
     environment:
       # Application URLs & API Auth
       - API_BASE_URL=${API_BASE_URL:-https://reqres.in}
       - API_URL=${API_URL:-https://reqres.in/api}
       - BASE_URL=${BASE_URL:-https://demo.playwright.dev}
+      
+      # Salesforce Configuration
+      - SF_USERNAME=${SF_USERNAME}
+      - SF_PASSWORD=${SF_PASSWORD}
+      - SF_URL=${SF_URL:-https://login.salesforce.com}
+      - SF_ORG_ALIAS=${SF_ORG_ALIAS:-my-org-alias}
+      - SF_INSTANCE_URL=${SF_INSTANCE_URL}
       
       # Login Credentials
       - USERNAME=${USERNAME:-Admin}
@@ -27,6 +36,13 @@ services:
       - DEFAULT_TIMEOUT=${DEFAULT_TIMEOUT:-30000}
       - ACTION_TIMEOUT=${ACTION_TIMEOUT:-15000}
       - EXPECT_TIMEOUT=${EXPECT_TIMEOUT:-5000}
+      - BROWSER_TIMEOUT=${BROWSER_TIMEOUT:-60000}
+      
+      # Output Configuration
+      - PAGES_OUTPUT_DIR=${PAGES_OUTPUT_DIR:-./src/pages}
+      - TESTS_OUTPUT_DIR=${TESTS_OUTPUT_DIR:-./tests/pages}
+      - ELEMENTS_OUTPUT_FILE=${ELEMENTS_OUTPUT_FILE:-./sf_elements.json}
+      - SF_SESSION_FILE=${SF_SESSION_FILE:-./sessions/sf_session.txt}
       
       # Visual Testing
       - VISUAL_THRESHOLD=${VISUAL_THRESHOLD:-0.1}

@@ -2,189 +2,100 @@
 
 /**
  * Page Object Generator CLI
- * Generates page objects from web pages
+ * Unified entry point for page object generation
  */
-const { program } = require('commander');
-const { chromium } = require('@playwright/test');
-const path = require('path');
-const fs = require('fs');
-const selectors = require('./selectors');
+const { generatePageObject } = require('./page-generator');
+const config = require('./config');
 
-async function generateSalesforcePage(url, name, credentials, outputPath) {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+// Parse command line arguments
+const args = process.argv.slice(2);
+const options = {
+  url: null,
+  name: null,
+  outputPath: config.output.pagesDir,
+  headless: true,
+  auth: null,
+  isSalesforce: false,
+  includeCollections: config.extraction.extractCollections,
+  generateTests: false
+};
 
+// Parse arguments
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--url' || args[i] === '-u') {
+    options.url = args[i + 1];
+    i++;
+  } else if (args[i] === '--name' || args[i] === '-n') {
+    options.name = args[i + 1];
+    i++;
+  } else if (args[i] === '--output' || args[i] === '-o') {
+    options.outputPath = args[i + 1];
+    i++;
+  } else if (args[i] === '--visible' || args[i] === '-v') {
+    options.headless = false;
+  } else if (args[i] === '--username') {
+    options.auth = options.auth || {};
+    options.auth.username = args[i + 1];
+    i++;
+  } else if (args[i] === '--password') {
+    options.auth = options.auth || {};
+    options.auth.password = args[i + 1];
+    i++;
+  } else if (args[i] === '--salesforce' || args[i] === '-sf') {
+    options.isSalesforce = true;
+  } else if (args[i] === '--no-collections') {
+    options.includeCollections = false;
+  } else if (args[i] === '--generate-tests' || args[i] === '-t') {
+    options.generateTests = true;
+  } else if (args[i] === '--help' || args[i] === '-h') {
+    console.log(`
+Page Object Generator
+
+Usage:
+  node generate-page.js [options]
+
+Options:
+  --url, -u <url>         URL to generate page object from
+  --name, -n <name>       Name of the page class
+  --output, -o <path>     Output directory (default: ${config.output.pagesDir})
+  --visible, -v           Run in visible browser mode
+  --username <username>   Username for authentication
+  --password <password>   Password for authentication
+  --salesforce, -sf       Generate Salesforce-specific page object
+  --no-collections        Don't include DOM collection methods
+  --generate-tests, -t    Generate test files
+  --help, -h              Show this help message
+    `);
+    process.exit(0);
+  }
+}
+
+// Validate required options
+if (!options.url) {
+  console.error('Error: URL is required');
+  process.exit(1);
+}
+
+if (!options.name) {
+  // Generate name from URL
+  const urlObj = new URL(options.url.startsWith('http') ? options.url : `http://example.com${options.url}`);
+  const pathParts = urlObj.pathname.split('/').filter(Boolean);
+  options.name = pathParts.length > 0 
+    ? pathParts[pathParts.length - 1].charAt(0).toUpperCase() + pathParts[pathParts.length - 1].slice(1) + 'Page'
+    : 'HomePage';
+}
+
+// Run generator
+(async () => {
   try {
-    // First handle Salesforce login
-    await page.goto('https://login.salesforce.com');
-    await page.fill('#username', credentials.username);
-    await page.fill('#password', credentials.password);
-    await page.click('#Login');
+    const result = await generatePageObject(options);
+    console.log(`Successfully generated ${result.className} at ${result.filePath}`);
     
-    // Wait for login to complete
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('one-app-nav-bar', { timeout: 30000 }).catch(() => {});
-
-    // Now navigate to the actual page
-    await page.goto(url);
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('.slds-form', { timeout: 30000 }).catch(() => {});
-    
-    // Wait for any spinners to disappear
-    await page.waitForSelector('.slds-spinner', { state: 'hidden' }).catch(() => {});
-
-    // Extract Salesforce elements
-    const elements = {
-      buttons: [],
-      inputs: [],
-      selects: [],
-      custom: []
-    };
-
-    // Extract Lightning form fields
-    const formFields = await page.$$('lightning-input-field, lightning-textarea-field, lightning-select-field');
-    for (const field of formFields) {
-      const label = await field.getAttribute('data-label') || await field.getAttribute('label');
-      const fieldName = await field.getAttribute('field-name') || await field.getAttribute('data-field-name');
-      if (label && fieldName) {
-        elements.inputs.push({
-          label,
-          name: fieldName,
-          selector: `lightning-input-field[field-name="${fieldName}"]`
-        });
-      }
+    if (result.testFilePath) {
+      console.log(`Successfully generated tests at ${result.testFilePath}`);
     }
-
-    // Extract buttons
-    const buttons = await page.$$('lightning-button, button.slds-button');
-    for (const button of buttons) {
-      const label = await button.getAttribute('label') || await button.textContent();
-      if (label) {
-        elements.buttons.push({
-          label,
-          name: label.toLowerCase().replace(/[^a-z0-9]/g, ''),
-          selector: `lightning-button[label="${label}"], button:has-text("${label}")`
-        });
-      }
-    }
-
-    // Generate the page class
-    const className = name.replace(/[^a-zA-Z0-9]/g, '');
-    const fileName = className + '.js';
-    const filePath = path.join(outputPath, fileName);
-    
-    const classContent = `/**
- * ${className} Page Object
- * Generated from ${url}
- * @generated
- */
-const { BasePage } = require('./BasePage');
-
-class ${className} extends BasePage {
-  /**
-   * @param {import('@playwright/test').Page} page
-   */
-  constructor(page) {
-    super(page);
-
-    // Page URL
-    this.url = '${url}';
-
-    // Form Fields
-    ${elements.inputs.map(input => `this.${input.name} = '${input.selector}';`).join('\n    ')}
-
-    // Buttons
-    ${elements.buttons.map(button => `this.${button.name} = '${button.selector}';`).join('\n    ')}
+  } catch (error) {
+    console.error('Error generating page object:', error);
+    process.exit(1);
   }
-
-  /**
-   * Navigate to the page
-   */
-  async goto() {
-    await this.page.goto(this.url);
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForSelector('.slds-form', { timeout: 30000 });
-    await this.page.waitForSelector('.slds-spinner', { state: 'hidden' }).catch(() => {});
-  }
-
-  ${elements.inputs.map(input => `
-  /**
-   * Fill ${input.label}
-   * @param {string} value
-   */
-  async fill${input.name}(value) {
-    await this.page.fill(this.${input.name}, value);
-  }`).join('\n')}
-
-  ${elements.buttons.map(button => `
-  /**
-   * Click ${button.label}
-   */
-  async click${button.name}() {
-    await this.page.click(this.${button.name});
-  }`).join('\n')}
-}
-
-module.exports = ${className};`;
-
-    if (!fs.existsSync(outputPath)) {
-      fs.mkdirSync(outputPath, { recursive: true });
-    }
-    
-    fs.writeFileSync(filePath, classContent);
-    
-    return {
-      className,
-      filePath,
-      elementCount: elements.inputs.length + elements.buttons.length
-    };
-
-  } finally {
-    await browser.close();
-  }
-}
-
-program
-  .name('generate-page')
-  .description('Generate a page object class from a web page')
-  .argument('<url>', 'URL of the web page to analyze')
-  .argument('[name]', 'Name for the page class', 'Page')
-  .option('-o, --output <path>', 'Output directory', './src/pages')
-  .option('-f, --framework <name>', 'Target framework (standard, salesforce)', 'standard')
-  .option('--credentials.username <username>', 'Salesforce username')
-  .option('--credentials.password <password>', 'Salesforce password')
-  .action(async (url, name, options) => {
-    try {
-      const outputPath = path.resolve(process.cwd(), options.output);
-      
-      if (options.framework === 'salesforce') {
-        if (!options.credentials?.username || !options.credentials?.password) {
-          throw new Error('Salesforce credentials required');
-        }
-        
-        const result = await generateSalesforcePage(url, name, options.credentials, outputPath);
-        console.log('\nSalesforce page class generated successfully:');
-        console.log(`- Class: ${result.className}`);
-        console.log(`- File: ${result.filePath}`);
-        console.log(`- Elements: ${result.elementCount}`);
-      } else {
-        // Handle standard page generation
-        const result = await generatePageObject({
-          url,
-          name,
-          outputPath,
-          headless: true
-        });
-        console.log('\nStandard page class generated successfully:');
-        console.log(`- Class: ${result.className}`);
-        console.log(`- File: ${result.filePath}`);
-        console.log(`- Elements: ${result.elementCount}`);
-      }
-    } catch (error) {
-      console.error('Error generating page object:', error.message);
-      process.exit(1);
-    }
-  });
-
-program.parse();
+})();
