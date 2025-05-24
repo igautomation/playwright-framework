@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Advanced Playwright Test Framework",
   "main": "index.js",
+  "bin": {
+    "generate-page": "./bin/generate-page"
+  },
   "scripts": {
     "test": "playwright test",
     "test:ui": "playwright test --ui",
@@ -25,7 +28,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "postinstall": "npm run setup:hooks"
+    "postinstall": "npm run setup:hooks",
+    "generate-page": "./bin/generate-page"
   },
   "keywords": [
     "playwright",
@@ -44,6 +48,7 @@
     "allure-playwright": "^2.9.2",
     "axe-core": "^4.7.0",
     "chart.js": "^4.4.0",
+    "commander": "^11.1.0",
     "dotenv": "^16.3.1",
     "dotenv-safe": "^9.1.0",
     "js-yaml": "^4.1.0",
@@ -55,6 +60,7 @@
   "devDependencies": {
     "eslint": "^8.54.0",
     "eslint-plugin-playwright": "^0.18.0",
+    "lint-staged": "^16.0.0",
     "prettier": "^3.1.0"
   },
   "engines": {

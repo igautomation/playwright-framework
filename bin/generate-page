@@ -1,0 +1,127 @@
+#!/usr/bin/env node
+
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+async function generatePage(url, pageName) {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+
+    // Get all interactive elements
+    const elements = await page.evaluate(() => {
+      const selectors = [];
+      
+      // Get buttons
+      document.querySelectorAll('button, input[type="submit"], [role="button"]').forEach(el => {
+        const id = el.id;
+        if (id) {
+          selectors.push({
+            name: id.toLowerCase(),
+            selector: `#${id}`,
+            type: 'button'
+          });
+        }
+      });
+
+      // Get inputs
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        const id = el.id;
+        const name = el.name;
+        if (id || name) {
+          selectors.push({
+            name: (id || name).toLowerCase(),
+            selector: id ? `#${id}` : `[name="${name}"]`,
+            type: 'input'
+          });
+        }
+      });
+
+      return selectors;
+    });
+
+    // Generate the page object class
+    const template = `/**
+ * ${pageName} Page Object
+ * Generated from ${url}
+ * @generated
+ */
+const { BasePage } = require('./BasePage');
+
+class ${pageName} extends BasePage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
+  constructor(page) {
+    super(page);
+
+    // Page URL
+    this.url = '${url}';
+
+    // Selectors
+    // Buttons
+${elements.filter(e => e.type === 'button').map(e => `    this.${e.name} = '${e.selector}';`).join('\n')}
+
+    // Inputs
+${elements.filter(e => e.type === 'input').map(e => `    this.${e.name} = '${e.selector}';`).join('\n')}
+
+  }
+
+  /**
+   * Navigate to the page
+   */
+  async goto() {
+    await this.page.goto(this.url);
+    await this.page.waitForLoadState('networkidle');
+    if (this.url.includes('salesforce.com') || this.url.includes('force.com')) {
+      await this.page.waitForSelector('one-app-nav-bar', { timeout: 30000 }).catch(() => {});
+    }
+  }
+
+${elements.filter(e => e.type === 'button').map(e => `
+  /**
+   * Click ${e.name}
+   */
+  async click${e.name}() {
+    await this.click(this.${e.name});
+  }`).join('\n')}
+
+${elements.filter(e => e.type === 'input').map(e => `
+  /**
+   * Fill ${e.name}
+   * @param {string} value
+   */
+  async fill${e.name}(value) {
+    await this.fill(this.${e.name}, value);
+  }`).join('\n')}
+
+}
+
+module.exports = ${pageName};`;
+
+    // Write the file
+    const outputPath = path.join(process.cwd(), 'src', 'pages', `${pageName}.js`);
+    fs.writeFileSync(outputPath, template);
+    console.log(`Generated ${outputPath}`);
+
+  } catch (error) {
+    console.error('Error generating page:', error);
+  } finally {
+    await browser.close();
+  }
+}
+
+// Get command line arguments
+const [,, url, pageName] = process.argv;
+
+if (!url || !pageName) {
+  console.error('Usage: generate-page <url> <pageName>');
+  process.exit(1);
+}
+
+generatePage(url, pageName).catch(console.error);

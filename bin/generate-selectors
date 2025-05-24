@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const selectors = require('../src/utils/generators/selectors');
+const fs = require('fs');
+const path = require('path');
+
+program
+  .name('generate-selectors')
+  .description('Generate selectors for web testing')
+  .option('-m, --mode <mode>', 'Selector mode (general, salesforce, hybrid)', 'general')
+  .option('-t, --types <types>', 'Selector types (comma-separated: form,interactive,content,etc.)')
+  .option('-o, --output <file>', 'Output file path', './selectors.json')
+  .option('--format <format>', 'Output format (json, js)', 'json')
+  .action((options) => {
+    try {
+      // Parse types if provided
+      const types = options.types ? options.types.split(',') : [];
+
+      // Get selectors
+      const selectedSelectors = selectors.getSelectors({
+        mode: options.mode,
+        types: types
+      });
+
+      // Format output
+      let output;
+      if (options.format === 'js') {
+        output = `module.exports = ${JSON.stringify(selectedSelectors, null, 2)};`;
+      } else {
+        output = JSON.stringify(selectedSelectors, null, 2);
+      }
+
+      // Write to file
+      const outputPath = path.resolve(process.cwd(), options.output);
+      fs.writeFileSync(outputPath, output);
+
+      console.log(`Generated ${selectedSelectors.length} selectors in ${options.mode} mode`);
+      if (types.length) {
+        console.log(`Types included: ${types.join(', ')}`);
+      }
+      console.log(`Output written to: ${outputPath}`);
+
+    } catch (error) {
+      console.error('Error generating selectors:', error.message);
+      process.exit(1);
+    }
+  });
+
+program.parse();

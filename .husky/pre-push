@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🧪 Running basic tests before push..."
+npm run test:smoke || (echo "❌ Smoke tests failed. Please fix the issues before pushing." && exit 1)

@@ -1,54 +1,87 @@
-# IDE/Editor
-.vscode/
+# IDE and Editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
 .idea/
 *.sublime-*
 *.swp
 *.swo
+.DS_Store
+Thumbs.db
 
-# Node modules and dependencies
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
-yarn-debug.log
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Build outputs and temp
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+!.env.example
+
+# Test outputs
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+**/blob-report/
+
+# Reports and logs
+reports/*
+!reports/.gitkeep
+logs/*
+!logs/.gitkeep
+allure-results/
+allure-report/
+coverage/
+junit-reports/
+html-reports/
+
+# Visual testing artifacts
+visual-diffs/*
+!visual-diffs/.gitkeep
+visual-snapshots/*
+!visual-snapshots/baseline
+screenshots/*
+!screenshots/.gitkeep
+traces/*
+!traces/.gitkeep
+
+# Build and temp files
 dist/
 build/
 out/
 temp/
+*.tmp
+*.temp
+.cache/
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Test results and reports
-allure-results/
-allure-report/
-playwright-report/
-reports/
-test-results/
-temp-test-results/
-screenshots/
-traces/
-
-# Visual testing
-visual-diffs/
-
-# GitHub workflows history or backups
-.history/
-.github/parked/
-
-# Docusaurus build
+# Documentation build
 docs-site/.docusaurus/
 docs-site/build/
+docs-site/.cache/
 
-# Others
-coverage/
-.DS_Store
-Thumbs.db
+# GitHub specific
+.github/parked/
+.history/
+
+# Framework specific
+src/data/generated/*
+!src/data/generated/.gitkeep
+src/config/local.*
+!src/config/local.example.*
+
+# Keep important empty directories
+# Add .gitkeep files to empty directories you want to track
+**/empty/

@@ -1,74 +1,90 @@
 /**
- * Base Page Object
- * 
- * Provides common functionality for all page objects
+ * BasePage - Base class for all page objects
  */
 class BasePage {
   /**
-   * @param {import('@playwright/test').Page} page - Playwright page object
+   * @param {import('@playwright/test').Page} page
    */
   constructor(page) {
     this.page = page;
-    this.baseUrl = process.env.BASE_URL || 'https://demo.playwright.dev';
   }
-  
+
   /**
-   * Navigate to a specific path
-   * @param {string} path - Path to navigate to
+   * Navigate to the page
    */
-  async goto(path = '') {
-    await this.page.goto(`${this.baseUrl}${path}`);
-  }
-  
-  /**
-   * Wait for page to be loaded
-   */
-  async waitForPageLoad() {
+  async goto() {
+    await this.page.goto(this.url);
     await this.page.waitForLoadState('networkidle');
   }
-  
+
   /**
-   * Get page title
-   * @returns {Promise<string>} Page title
-   */
-  async getTitle() {
-    return await this.page.title();
-  }
-  
-  /**
-   * Take a screenshot
-   * @param {string} name - Screenshot name
-   */
-  async takeScreenshot(name) {
-    await this.page.screenshot({ path: `reports/screenshots/${name}.png` });
-  }
-  
-  /**
-   * Check if element is visible
-   * @param {string} selector - Element selector
-   * @returns {Promise<boolean>} True if element is visible
-   */
-  async isVisible(selector) {
-    const element = this.page.locator(selector);
-    return await element.isVisible();
-  }
-  
-  /**
-   * Fill input field
-   * @param {string} selector - Input selector
-   * @param {string} value - Value to fill
+   * Fill an input field
+   * @param {string} selector 
+   * @param {string} value 
    */
   async fill(selector, value) {
     await this.page.fill(selector, value);
   }
-  
+
   /**
-   * Click element
-   * @param {string} selector - Element selector
+   * Click an element
+   * @param {string} selector 
    */
   async click(selector) {
     await this.page.click(selector);
   }
+
+  /**
+   * Select an option from a dropdown
+   * @param {string} selector 
+   * @param {string} value 
+   */
+  async selectOption(selector, value) {
+    await this.page.selectOption(selector, value);
+  }
+
+  /**
+   * Set a checkbox state
+   * @param {string} selector 
+   * @param {boolean} checked 
+   */
+  async setCheckbox(selector, checked) {
+    await this.page.setChecked(selector, checked);
+  }
+
+  /**
+   * Wait for an element to be visible
+   * @param {string} selector 
+   * @param {object} options 
+   */
+  async waitForElement(selector, options = {}) {
+    await this.page.waitForSelector(selector, { state: 'visible', ...options });
+  }
+
+  /**
+   * Get text from an element
+   * @param {string} selector 
+   * @returns {Promise<string>}
+   */
+  async getText(selector) {
+    return await this.page.locator(selector).innerText();
+  }
+
+  /**
+   * Check if an element exists
+   * @param {string} selector 
+   * @returns {Promise<boolean>}
+   */
+  async hasElement(selector) {
+    return await this.page.locator(selector).count() > 0;
+  }
+
+  /**
+   * Wait for navigation to complete
+   */
+  async waitForNavigation() {
+    await this.page.waitForLoadState('networkidle');
+  }
 }
 
-module.exports = BasePage;
+module.exports = { BasePage };
