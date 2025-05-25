@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const logger = require('../../utils/common/logger');
+const reportingUtils = require('../../utils/reporting/reportingUtils');
 
 /**
  * Generate test reports
@@ -30,10 +31,17 @@ module.exports = async (options = {}) => {
       try {
         switch (type.toLowerCase()) {
           case 'html':
-            await generateHtmlReport(testResults, reportDir, options);
+            await reportingUtils.generateHtmlReport({
+              resultsDir: testResults,
+              outputDir: path.join(reportDir, 'html'),
+              title: options.title || 'Test Report'
+            });
             break;
           case 'markdown':
-            await generateMarkdownReport(testResults, reportDir, options);
+            await reportingUtils.generateMarkdownReport({
+              resultsDir: testResults,
+              reportPath: path.join(reportDir, 'markdown', 'test-report.md')
+            });
             break;
           case 'json':
             await generateJsonReport(testResults, reportDir, options);
@@ -89,45 +97,6 @@ module.exports = async (options = {}) => {
     };
   }
 };
-
-/**
- * Generate HTML report
- * @param {string} testResults - Test results directory
- * @param {string} reportDir - Report output directory
- * @param {Object} options - Report options
- */
-async function generateHtmlReport(testResults, reportDir, options = {}) {
-  logger.info('Generating HTML report...');
-  
-  const htmlReportDir = path.join(reportDir, 'html');
-  
-  // Ensure directory exists
-  if (!fs.existsSync(htmlReportDir)) {
-    fs.mkdirSync(htmlReportDir, { recursive: true });
-  }
-  
-  try {
-    execSync(`npx playwright show-report "${testResults}" --output "${htmlReportDir}"`, {
-      stdio: options.verbose ? 'inherit' : 'pipe'
-    });
-    
-    logger.info(`HTML report generated at: ${htmlReportDir}`);
-  } catch (error) {
-    // If show-report fails, try to copy the report directly
-    try {
-      if (fs.existsSync(path.join(testResults, 'index.html'))) {
-        execSync(`cp -r "${testResults}"/* "${htmlReportDir}/"`, {
-          stdio: options.verbose ? 'inherit' : 'pipe'
-        });
-        logger.info(`HTML report copied to: ${htmlReportDir}`);
-      } else {
-        throw new Error('No HTML report found in test results');
-      }
-    } catch (copyError) {
-      throw new Error(`Failed to generate HTML report: ${copyError.message}`);
-    }
-  }
-}
 
 /**
  * Generate JSON report
@@ -221,110 +190,6 @@ async function generateJsonReport(testResults, reportDir, options = {}) {
     logger.info(`Combined JSON report generated at: ${combinedReportPath}`);
   } catch (error) {
     throw new Error(`Failed to generate JSON report: ${error.message}`);
-  }
-}
-
-/**
- * Generate Markdown report
- * @param {string} testResults - Test results directory
- * @param {string} reportDir - Report output directory
- * @param {Object} options - Report options
- */
-async function generateMarkdownReport(testResults, reportDir, options = {}) {
-  logger.info('Generating Markdown report...');
-  
-  const mdReportDir = path.join(reportDir, 'markdown');
-  
-  // Ensure directory exists
-  if (!fs.existsSync(mdReportDir)) {
-    fs.mkdirSync(mdReportDir, { recursive: true });
-  }
-  
-  try {
-    // Look for JSON result files to convert to Markdown
-    const jsonFiles = findFiles(testResults, '.json');
-    
-    if (jsonFiles.length === 0) {
-      logger.warn('No JSON result files found for Markdown conversion');
-      return;
-    }
-    
-    // Generate Markdown report
-    const reportPath = path.join(mdReportDir, 'test-report.md');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    
-    let mdContent = `# Test Execution Report\n\n`;
-    mdContent += `Generated: ${new Date().toLocaleString()}\n\n`;
-    
-    let totalTests = 0;
-    let passedTests = 0;
-    let failedTests = 0;
-    let skippedTests = 0;
-    
-    // Process each JSON file
-    jsonFiles.forEach(file => {
-      try {
-        const content = fs.readFileSync(file, 'utf-8');
-        const data = JSON.parse(content);
-        
-        if (Array.isArray(data.suites)) {
-          data.suites.forEach(suite => {
-            mdContent += `## ${suite.title || 'Unnamed Suite'}\n\n`;
-            
-            if (Array.isArray(suite.specs)) {
-              mdContent += `| Test | Status | Duration |\n`;
-              mdContent += `| ---- | ------ | -------- |\n`;
-              
-              suite.specs.forEach(spec => {
-                totalTests++;
-                
-                let statusEmoji = '⏺️';
-                if (spec.status === 'passed') {
-                  statusEmoji = '✅';
-                  passedTests++;
-                } else if (spec.status === 'failed') {
-                  statusEmoji = '❌';
-                  failedTests++;
-                } else {
-                  statusEmoji = '⏭️';
-                  skippedTests++;
-                }
-                
-                const duration = spec.duration ? `${(spec.duration / 1000).toFixed(2)}s` : 'N/A';
-                
-                mdContent += `| ${spec.title} | ${statusEmoji} ${spec.status} | ${duration} |\n`;
-                
-                // Add error details for failed tests
-                if (spec.status === 'failed' && spec.error) {
-                  mdContent += `\n<details>\n<summary>Error Details</summary>\n\n\`\`\`\n${spec.error.message || 'Unknown error'}\n\`\`\`\n</details>\n\n`;
-                }
-              });
-              
-              mdContent += `\n`;
-            }
-          });
-        }
-      } catch (parseError) {
-        logger.debug(`Failed to parse JSON file ${file}: ${parseError.message}`);
-      }
-    });
-    
-    // Add summary
-    mdContent = `# Test Execution Report\n\n` +
-      `Generated: ${new Date().toLocaleString()}\n\n` +
-      `## Summary\n\n` +
-      `- Total Tests: ${totalTests}\n` +
-      `- Passed: ${passedTests} (${totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0}%)\n` +
-      `- Failed: ${failedTests} (${totalTests > 0 ? Math.round((failedTests / totalTests) * 100) : 0}%)\n` +
-      `- Skipped: ${skippedTests} (${totalTests > 0 ? Math.round((skippedTests / totalTests) * 100) : 0}%)\n\n` +
-      mdContent;
-    
-    // Write Markdown report
-    fs.writeFileSync(reportPath, mdContent);
-    
-    logger.info(`Markdown report generated at: ${reportPath}`);
-  } catch (error) {
-    throw new Error(`Failed to generate Markdown report: ${error.message}`);
   }
 }
 
