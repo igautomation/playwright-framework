@@ -7,6 +7,7 @@ This directory contains utilities for automatically generating Page Objects from
 - Extract standard web elements (inputs, buttons, selects, etc.)
 - Extract Salesforce-specific elements (lightning components)
 - Extract DOM collections (tables, lists, grids)
+- Extract and handle modals and dialogs
 - Generate page object classes with appropriate methods
 - Generate test files with basic test cases
 
@@ -19,6 +20,17 @@ The generators support extracting and working with DOM collections:
 - **Grids**: CSS grid-based layouts
 - **Repeaters**: Repeated elements with similar structure
 - **Lightning Datatables**: Salesforce Lightning datatable components
+
+## Modal/Dialog Support
+
+The generators now detect and handle modal dialogs with methods for:
+
+- Waiting for modals to appear
+- Getting modal titles and content
+- Clicking buttons within modals
+- Filling form fields in modals
+- Closing modals
+- Checking modal visibility
 
 ## Usage
 
@@ -34,6 +46,12 @@ node generate-page.js --url https://myorg.lightning.force.com/page --name SfPage
 
 # Without collections
 node generate-page.js --url https://example.com/page --name ExamplePage --no-collections
+
+# Generate test files
+node generate-page.js --url https://example.com/page --name ExamplePage --generate-tests
+
+# Run in visible mode (non-headless)
+node generate-page.js --url https://example.com/page --name ExamplePage --visible
 ```
 
 ## Configuration
@@ -51,7 +69,7 @@ See `config.js` for default configuration options. Key settings include:
   // Extraction options
   extraction: {
     waitForSelectors: { /* ... */ },
-    timeout: 30000,
+    timeout: 60000,
     extractCollections: true
   },
   
@@ -90,4 +108,16 @@ node generate-page.js --url https://myorg.lightning.force.com/lightning/o/Contac
 
 ```bash
 node generate-page.js --url https://myorg.lightning.force.com/lightning/o/Contact/new --name ContactPage --salesforce --username user@example.com --password mypassword
+```
+
+### Generate page object with tests:
+
+```bash
+node generate-page.js --url https://example.com/login --name LoginPage --generate-tests
+```
+
+### Generate for modal/dialog pages:
+
+```bash
+node generate-page.js --url https://myorg.lightning.force.com/lightning/o/Contact/new --name NewContactDialog --salesforce --generate-tests
 ```
