@@ -17,19 +17,20 @@ class OrangeHRMLogin extends BasePage {
     
     // Selectors
     // Buttons
-    this.login = 'button[type="submit"]';
+    this.loginButton = 'button[type="submit"]';
 
     // Inputs
+    this.username = '[name="username"]';
     this.password = '[name="password"]';
 
     // Links
-    this.link = 'a';
+    this.forgotPasswordLink = '.orangehrm-login-forgot p';
 
     // Forms
     this.form = 'form';
 
     // Containers
-    this.container = 'div';
+    this.container = '.orangehrm-login-container';
     this.oxd_toaster_1 = '#oxd-toaster_1';
   }
 
@@ -44,10 +45,30 @@ class OrangeHRMLogin extends BasePage {
   }
 
   /**
+   * Login with credentials
+   * @param {string} username
+   * @param {string} password
+   */
+  async loginWithCredentials(username, password) {
+    await this.fillUsername(username);
+    await this.fillPassword(password);
+    await this.clickLogin();
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  /**
    * Click Login button
    */
   async clickLogin() {
-    await this.click(this.login);
+    await this.click(this.loginButton);
+  }
+
+  /**
+   * Fill Username
+   * @param {string} value
+   */
+  async fillUsername(value) {
+    await this.fill(this.username, value);
   }
 
   /**
@@ -59,19 +80,37 @@ class OrangeHRMLogin extends BasePage {
   }
 
   /**
-   * Click link link
+   * Click Forgot Password link
    */
-  async clickLink() {
-    await this.click(this.link);
+  async clickForgotPassword() {
+    await this.click(this.forgotPasswordLink);
   }
 
   /**
-   * Submit form form
+   * Submit form
    */
   async submitForm() {
     await this.page.evaluate(selector => {
       document.querySelector(selector).submit();
     }, this.form);
+  }
+
+  /**
+   * Get error message text
+   * @returns {Promise<string>}
+   */
+  async getErrorMessage() {
+    const errorSelector = '.oxd-alert-content-text';
+    await this.page.waitForSelector(errorSelector, { state: 'visible', timeout: 5000 }).catch(() => {});
+    return await this.page.locator(errorSelector).textContent().catch(() => '');
+  }
+
+  /**
+   * Check if login page is displayed
+   * @returns {Promise<boolean>}
+   */
+  async isLoginPageDisplayed() {
+    return await this.isVisible(this.container);
   }
 }
 

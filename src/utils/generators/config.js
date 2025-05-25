@@ -1,12 +1,20 @@
 /**
  * Configuration for page generators
+ * Uses the centralized configuration manager
  */
+const configManager = require('../config');
+
+// Get configuration sections
+const sfConfig = configManager.getSection('salesforce');
+const outputConfig = configManager.getSection('output');
+const browserConfig = configManager.getSection('browser');
+
 module.exports = {
   // Output paths
   output: {
-    pagesDir: './src/pages',
-    testsDir: './tests/pages',
-    elementsFile: './temp/extracted-elements.json'
+    pagesDir: outputConfig.pagesDir,
+    testsDir: outputConfig.testsDir,
+    elementsFile: outputConfig.elementsFile
   },
   
   // Extraction options
@@ -18,7 +26,7 @@ module.exports = {
     },
     
     // Timeout for waiting for elements (ms)
-    timeout: 60000,
+    timeout: browserConfig.timeout,
     
     // Whether to include hidden elements
     includeHidden: false,
@@ -33,10 +41,10 @@ module.exports = {
   // Salesforce specific options
   salesforce: {
     // Login URL
-    loginUrl: 'https://login.salesforce.com',
+    loginUrl: sfConfig.url || 'https://login.salesforce.com',
     
     // Auth storage path
-    authStoragePath: './auth/salesforce-storage-state.json',
+    authStoragePath: `${outputConfig.authStorageDir}/salesforce-storage-state.json`,
     
     // Lightning components to extract
     components: [

@@ -4,7 +4,7 @@
  * Tests for user-related API endpoints
  */
 const { test, expect } = require('@playwright/test');
-const { ApiUtils } = require('../../../utils/api/apiUtils');
+const { ApiClient } = require('../../../utils/api');
 const { SchemaValidator } = require('../../../utils/api/schemaValidator');
 const config = require('../../../config');
 
@@ -62,76 +62,68 @@ const singleUserSchema = {
 };
 
 test.describe('User API Tests', () => {
-  let apiUtils;
+  let apiClient;
   let schemaValidator;
   
   test.beforeEach(({ request }) => {
-    apiUtils = new ApiUtils(request, baseUrl);
+    apiClient = new ApiClient(baseUrl);
     schemaValidator = new SchemaValidator();
   });
   
   test('Get list of users', async ({ request }) => {
     // Send GET request to list users endpoint
-    const response = await apiUtils.get('/users', {
+    const responseData = await apiClient.get('/users', {
       params: { page: 1 }
     });
     
-    // Verify response status
-    expect(response.status()).toBe(200);
-    
     // Verify response structure using schema validation
-    const responseBody = await response.json();
-    const validationResult = schemaValidator.validate(responseBody, userListSchema);
+    const validationResult = schemaValidator.validate(responseData, userListSchema);
     expect(validationResult.valid).toBeTruthy();
     
     // Additional assertions
-    expect(responseBody.page).toBe(1);
-    expect(responseBody.data.length).toBeGreaterThan(0);
+    expect(responseData.page).toBe(1);
+    expect(responseData.data.length).toBeGreaterThan(0);
   });
   
   test('Get single user by ID', async ({ request }) => {
     // Send GET request to get a specific user
     const userId = testData.userId;
-    const response = await apiUtils.get(`/users/${userId}`);
-    
-    // Verify response status
-    expect(response.status()).toBe(200);
+    const responseData = await apiClient.get(`/users/${userId}`);
     
     // Verify response structure using schema validation
-    const responseBody = await response.json();
-    const validationResult = schemaValidator.validate(responseBody, singleUserSchema);
+    const validationResult = schemaValidator.validate(responseData, singleUserSchema);
     expect(validationResult.valid).toBeTruthy();
     
     // Additional assertions
-    expect(responseBody.data.id).toBe(userId);
+    expect(responseData.data.id).toBe(userId);
   });
   
   test('Get non-existent user returns 404', async ({ request }) => {
     // Send GET request for a user that doesn't exist
     const userId = testData.nonExistentUserId;
-    const response = await apiUtils.get(`/users/${userId}`);
     
-    // Verify response status is 404 Not Found
-    expect(response.status()).toBe(404);
-    
-    // Verify response body is empty
-    const responseBody = await response.json();
-    expect(responseBody).toEqual({});
+    try {
+      await apiClient.get(`/users/${userId}`);
+      // If we get here, the request didn't fail as expected
+      expect(false).toBeTruthy('Expected request to fail with 404');
+    } catch (error) {
+      // Verify response status is 404 Not Found
+      expect(error.status).toBe(404);
+      
+      // Verify response body is empty
+      expect(Object.keys(error.data || {}).length).toBe(0);
+    }
   });
   
   test('Get user resources', async ({ request }) => {
     // Send GET request to get user resources
-    const response = await apiUtils.get('/unknown');
-    
-    // Verify response status
-    expect(response.status()).toBe(200);
+    const responseData = await apiClient.get('/unknown');
     
     // Verify response structure
-    const responseBody = await response.json();
-    expect(responseBody).toHaveProperty('page');
-    expect(responseBody).toHaveProperty('per_page');
-    expect(responseBody).toHaveProperty('total');
-    expect(responseBody).toHaveProperty('data');
-    expect(Array.isArray(responseBody.data)).toBeTruthy();
+    expect(responseData).toHaveProperty('page');
+    expect(responseData).toHaveProperty('per_page');
+    expect(responseData).toHaveProperty('total');
+    expect(responseData).toHaveProperty('data');
+    expect(Array.isArray(responseData.data)).toBeTruthy();
   });
 });

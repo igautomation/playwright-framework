@@ -4,7 +4,7 @@
  * Tests for ReqRes API with JSON schema validation
  */
 const { test, expect } = require('@playwright/test');
-const { ApiUtils } = require('../../../utils/api/apiUtils');
+const { ApiClient } = require('../../../utils/api');
 const { SchemaValidator } = require('../../../utils/api/schemaValidator');
 const config = require('../../../config');
 
@@ -83,11 +83,11 @@ const schemas = config.api?.schemas || {
 };
 
 test.describe('ReqRes API with Schema Validation', () => {
-  let apiUtils;
+  let apiClient;
   let schemaValidator;
   
   test.beforeEach(({ request }) => {
-    apiUtils = new ApiUtils(request, baseUrl);
+    apiClient = new ApiClient(baseUrl);
     schemaValidator = new SchemaValidator();
   });
   
@@ -96,23 +96,17 @@ test.describe('ReqRes API with Schema Validation', () => {
     const page = parseInt(process.env.TEST_PAGE) || config.api?.testData?.page;
     
     // Send GET request to list users endpoint
-    const response = await apiUtils.get('/users', {
+    const responseData = await apiClient.get('/users', {
       params: { page }
     });
     
-    // Verify response status
-    expect(response.status()).toBe(200);
-    
-    // Get response body
-    const responseBody = await response.json();
-    
     // Validate response against schema
-    const validationResult = schemaValidator.validate(responseBody, schemas.usersList);
+    const validationResult = schemaValidator.validate(responseData, schemas.usersList);
     expect(validationResult.valid).toBeTruthy();
     
     // Additional assertions
-    expect(responseBody.page).toBe(page);
-    expect(responseBody.data.length).toBeGreaterThan(0);
+    expect(responseData.page).toBe(page);
+    expect(responseData.data.length).toBeGreaterThan(0);
   });
   
   test('Get single user with schema validation', async ({ request }) => {
@@ -120,20 +114,14 @@ test.describe('ReqRes API with Schema Validation', () => {
     const userId = parseInt(process.env.TEST_USER_ID) || config.api?.testData?.userId;
     
     // Send GET request to get a specific user
-    const response = await apiUtils.get(`/users/${userId}`);
-    
-    // Verify response status
-    expect(response.status()).toBe(200);
-    
-    // Get response body
-    const responseBody = await response.json();
+    const responseData = await apiClient.get(`/users/${userId}`);
     
     // Validate response against schema
-    const validationResult = schemaValidator.validate(responseBody, schemas.singleUser);
+    const validationResult = schemaValidator.validate(responseData, schemas.singleUser);
     expect(validationResult.valid).toBeTruthy();
     
     // Additional assertions
-    expect(responseBody.data.id).toBe(userId);
+    expect(responseData.data.id).toBe(userId);
   });
   
   test('Create user with schema validation', async ({ request }) => {
@@ -144,35 +132,32 @@ test.describe('ReqRes API with Schema Validation', () => {
     };
     
     // Send POST request to create a user
-    const response = await apiUtils.post('/users', userData);
-    
-    // Verify response status
-    expect(response.status()).toBe(201);
-    
-    // Get response body
-    const responseBody = await response.json();
+    const responseData = await apiClient.post('/users', userData);
     
     // Validate response against schema
-    const validationResult = schemaValidator.validate(responseBody, schemas.createUser);
+    const validationResult = schemaValidator.validate(responseData, schemas.createUser);
     expect(validationResult.valid).toBeTruthy();
     
     // Additional assertions
-    expect(responseBody.name).toBe(userData.name);
-    expect(responseBody.job).toBe(userData.job);
+    expect(responseData.name).toBe(userData.name);
+    expect(responseData.job).toBe(userData.job);
   });
   
   test('Validate error response for non-existent resource', async ({ request }) => {
     // Get non-existent resource ID from environment or config
     const resourceId = parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId;
     
-    // Send GET request for a non-existent resource
-    const response = await apiUtils.get(`/unknown/${resourceId}`);
-    
-    // Verify response status is 404 Not Found
-    expect(response.status()).toBe(404);
-    
-    // Verify response body is empty object
-    const responseBody = await response.json();
-    expect(Object.keys(responseBody).length).toBe(0);
+    try {
+      // Send GET request for a non-existent resource
+      await apiClient.get(`/unknown/${resourceId}`);
+      // If we get here, the request didn't fail as expected
+      expect(false).toBeTruthy('Expected request to fail with 404');
+    } catch (error) {
+      // Verify response status is 404 Not Found
+      expect(error.status).toBe(404);
+      
+      // Verify response body is empty object
+      expect(Object.keys(error.data || {}).length).toBe(0);
+    }
   });
 });

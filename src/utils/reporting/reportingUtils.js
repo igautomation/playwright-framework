@@ -802,6 +802,60 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;');
 }
 
+/**
+ * Attach a screenshot to the test report
+ * @param {string} screenshotPath - Path to the screenshot
+ * @param {string} name - Name of the screenshot
+ * @param {Object} testInfo - Test information object
+ */
+async function attachScreenshot(screenshotPath, name, testInfo) {
+  try {
+    if (!fs.existsSync(screenshotPath)) {
+      logger.warn(`Screenshot not found: ${screenshotPath}`);
+      return;
+    }
+    
+    await testInfo.attach(name || 'Screenshot', {
+      path: screenshotPath,
+      contentType: 'image/png'
+    });
+    
+    logger.info(`Screenshot attached: ${screenshotPath}`);
+  } catch (error) {
+    logger.error('Failed to attach screenshot:', error);
+  }
+}
+
+/**
+ * Attach a log message to the test report
+ * @param {string} message - Log message
+ * @param {string} name - Log name
+ * @param {Object} testInfo - Test information object (optional)
+ */
+function attachLog(message, name = 'Log', testInfo = null) {
+  try {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: 'INFO',
+      message: message
+    };
+    
+    logger.info(`${name}: ${message}`);
+    
+    if (testInfo) {
+      testInfo.attach(name, {
+        body: JSON.stringify(logEntry),
+        contentType: 'text/plain'
+      });
+    }
+    
+    return logEntry;
+  } catch (error) {
+    logger.error('Failed to attach log:', error);
+    return null;
+  }
+}
+
 module.exports = {
   // HTML report generation
   generateHtmlReport,
@@ -816,5 +870,9 @@ module.exports = {
   generateMarkdownReport,
   
   // Notifications
-  sendReportNotification
+  sendReportNotification,
+  
+  // Attachment utilities
+  attachScreenshot,
+  attachLog
 };

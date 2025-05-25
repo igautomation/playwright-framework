@@ -4,7 +4,7 @@
  * Enhanced tests that combine API and UI interactions with improved error handling
  */
 const { test, expect } = require('@playwright/test');
-const { ApiUtils } = require('../../utils/api/apiUtils');
+const { ApiClient, RestUtils } = require('../../utils/api');
 const { WebInteractions } = require('../../utils/web/webInteractions');
 const { DataGenerator } = require('../../utils/data/dataGenerator');
 const { PlaywrightErrorHandler } = require('../../utils/common/errorHandler');
@@ -40,14 +40,14 @@ const selectors = {
 };
 
 test.describe('API-UI Combined Tests V2', () => {
-  let apiUtils;
+  let apiClient;
   let webInteractions;
   let dataGenerator;
   let authToken;
   
   test.beforeEach(async ({ page, request }) => {
     // Initialize utilities
-    apiUtils = new ApiUtils(request, apiBaseUrl);
+    apiClient = new ApiClient(apiBaseUrl);
     webInteractions = new WebInteractions(page);
     dataGenerator = new DataGenerator();
     
@@ -63,6 +63,11 @@ test.describe('API-UI Combined Tests V2', () => {
       const responseBody = await response.json();
       // Store the token
       authToken = responseBody?.data?.access_token || '';
+      
+      // Set auth token for API client
+      if (authToken) {
+        apiClient.setAuthToken(authToken);
+      }
     });
     
     // Login with error handling
@@ -138,18 +143,13 @@ test.describe('API-UI Combined Tests V2', () => {
     await page.waitForURL('**/admin/viewSystemUsers');
     
     // Verify via API that the user was created
-    const response = await apiUtils.get('/v2/admin/users', {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      },
+    const responseData = await apiClient.get('/v2/admin/users', {
       params: {
         username: userData.username
       }
     });
     
     // Verify API response
-    expect(response.status()).toBe(200);
-    const responseData = await response.json();
     expect(responseData.data).toBeDefined();
     expect(responseData.data.length).toBeGreaterThan(0);
     
@@ -165,20 +165,13 @@ test.describe('API-UI Combined Tests V2', () => {
     test.skip(!authToken, 'Auth token not captured');
     
     // First, get an existing employee via API
-    const employeesResponse = await apiUtils.get('/v2/pim/employees', {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
-    
-    expect(employeesResponse.status()).toBe(200);
-    const employees = await employeesResponse.json();
+    const employeesData = await apiClient.get('/v2/pim/employees');
     
     // Skip if no employees found
-    test.skip(!employees.data || employees.data.length === 0, 'No employees found');
+    test.skip(!employeesData.data || employeesData.data.length === 0, 'No employees found');
     
     // Get the first employee
-    const employee = employees.data[0];
+    const employee = employeesData.data[0];
     const employeeId = employee.empNumber;
     
     // Generate updated data
@@ -189,17 +182,9 @@ test.describe('API-UI Combined Tests V2', () => {
     };
     
     // Update employee via API with error handling
-    const updateResponse = await PlaywrightErrorHandler.withRetry(async () => {
-      return await apiUtils.put(`/v2/pim/employees/${employeeId}`, updatedData, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const updateData = await PlaywrightErrorHandler.withRetry(async () => {
+      return await apiClient.put(`/v2/pim/employees/${employeeId}`, updatedData);
     }, { maxRetries: 2, retryDelay: 1000 });
-    
-    // Verify API response
-    expect(updateResponse.status()).toBe(200);
     
     // Navigate to PIM page to verify updated employee in UI
     await webInteractions.click(selectors.pimLink);

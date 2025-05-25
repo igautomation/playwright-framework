@@ -4,7 +4,7 @@ import { test as baseTest } from '@playwright/test';
 import RestUtils from '../utils/api/restUtils.js';
 import AuthUtils from '../utils/api/auth.js';
 import XrayUtils from '../utils/xray/xrayUtils.js';
-import reportUtils from '../utils/reporting/reportUtils.js';
+import * as reportingUtils from '../utils/reporting/reportingUtils.js';
 import FlakyTestTracker from '../utils/ci/flakyTestTracker.js';
 import logger from '../utils/common/logger.js';
 
@@ -59,7 +59,7 @@ const customTest = baseTest.extend({
 
       try {
         await page.screenshot({ path: screenshotPath });
-        reportUtils.attachScreenshot(screenshotPath, `Attempt ${attempt}`, testInfo);
+        reportingUtils.attachScreenshot(screenshotPath, `Attempt ${attempt}`, testInfo);
         await testInfo.attach('retry-failure', {
           body: await page.screenshot(),
           contentType: 'image/png'

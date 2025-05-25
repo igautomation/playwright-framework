@@ -1,0 +1,186 @@
+{
+  "url": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+  "timestamp": "2025-05-22T18:37:45.754Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "description": "Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/color-contrast?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<p data-v-7b563373=\"\" data-v-0af708be=\"\" class=\"oxd-text oxd-text--p\">Username : Admin</p>",
+          "target": [
+            ".oxd-sheet > p:nth-child(1)"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.03 (foreground color: #64728c, background color: #e8eaef, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "html": "<p data-v-7b563373=\"\" data-v-0af708be=\"\" class=\"oxd-text oxd-text--p\">Password : admin123</p>",
+          "target": [
+            ".oxd-sheet > p:nth-child(2)"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.03 (foreground color: #64728c, background color: #e8eaef, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "html": "<button data-v-10d463b7=\"\" data-v-0af708be=\"\" type=\"submit\" class=\"oxd-button oxd-button--medium oxd-button--main orangehrm-login-button\"><!----> Login <!----></button>",
+          "target": [
+            "button"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.59 (foreground color: #ffffff, background color: #ff7b1d, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "id": "html-has-lang",
+      "impact": "serious",
+      "description": "Ensures every HTML document has a lang attribute",
+      "help": "<html> element must have a lang attribute",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/html-has-lang?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<html>",
+          "target": [
+            "html"
+          ],
+          "failureSummary": "Fix any of the following:\n  The <html> element does not have a lang attribute"
+        }
+      ]
+    },
+    {
+      "id": "landmark-one-main",
+      "impact": "moderate",
+      "description": "Ensures the document has a main landmark",
+      "help": "Document should have one main landmark",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/landmark-one-main?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<html>",
+          "target": [
+            "html"
+          ],
+          "failureSummary": "Fix all of the following:\n  Document does not have a main landmark"
+        }
+      ]
+    },
+    {
+      "id": "link-name",
+      "impact": "serious",
+      "description": "Ensures links have discernible text",
+      "help": "Links must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/link-name?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<a data-v-0af708be=\"\" href=\"https://www.linkedin.com/company/orangehrm/mycompany/\" target=\"_blank\">",
+          "target": [
+            ".orangehrm-login-footer-sm > a:nth-child(1)"
+          ],
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+        },
+        {
+          "html": "<a data-v-0af708be=\"\" href=\"https://www.facebook.com/OrangeHRM/\" target=\"_blank\">",
+          "target": [
+            "a:nth-child(2)"
+          ],
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+        },
+        {
+          "html": "<a data-v-0af708be=\"\" href=\"https://twitter.com/orangehrm?lang=en\" target=\"_blank\">",
+          "target": [
+            "a:nth-child(3)"
+          ],
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+        },
+        {
+          "html": "<a data-v-0af708be=\"\" href=\"https://www.youtube.com/c/OrangeHRMInc\" target=\"_blank\">",
+          "target": [
+            "a:nth-child(4)"
+          ],
+          "failureSummary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+        }
+      ]
+    },
+    {
+      "id": "page-has-heading-one",
+      "impact": "moderate",
+      "description": "Ensure that the page, or at least one of its frames contains a level-one heading",
+      "help": "Page should contain a level-one heading",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/page-has-heading-one?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<html>",
+          "target": [
+            "html"
+          ],
+          "failureSummary": "Fix all of the following:\n  Page must have a level-one heading"
+        }
+      ]
+    },
+    {
+      "id": "region",
+      "impact": "moderate",
+      "description": "Ensures all page content is contained by landmarks",
+      "help": "All page content should be contained by landmarks",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/region?application=axeAPI",
+      "nodes": [
+        {
+          "html": "<div data-v-17f5fb62=\"\" data-v-6adfd385=\"\" class=\"orangehrm-login-branding\"><img data-v-17f5fb62=\"\" src=\"/web/images/ohrm_branding.png?v=1721393199309\" alt=\"company-branding\"></div>",
+          "target": [
+            ".orangehrm-login-branding"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<h5 data-v-7b563373=\"\" data-v-0af708be=\"\" class=\"oxd-text oxd-text--h5 orangehrm-login-title\">Login</h5>",
+          "target": [
+            "h5"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div data-v-0af708be=\"\" class=\"orangehrm-login-error\">",
+          "target": [
+            ".orangehrm-login-error"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div data-v-2130bd2a=\"\" data-v-0af708be=\"\" class=\"oxd-form-row\">",
+          "target": [
+            ".oxd-form-row[data-v-2130bd2a=\"\"]:nth-child(2)"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div data-v-2130bd2a=\"\" data-v-0af708be=\"\" class=\"oxd-form-row\">",
+          "target": [
+            ".oxd-form-row[data-v-2130bd2a=\"\"]:nth-child(3)"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div data-v-0af708be=\"\" class=\"orangehrm-login-forgot\"><p data-v-7b563373=\"\" data-v-0af708be=\"\" class=\"oxd-text oxd-text--p orangehrm-login-forgot-header\">Forgot your password? </p></div>",
+          "target": [
+            ".orangehrm-login-forgot"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div class=\"orangehrm-copyright-wrapper\">",
+          "target": [
+            ".orangehrm-copyright-wrapper"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        },
+        {
+          "html": "<div data-v-6adfd385=\"\" class=\"orangehrm-login-logo\"><img data-v-6adfd385=\"\" src=\"/web/images/ohrm_logo.png\" alt=\"orangehrm-logo\"></div>",
+          "target": [
+            ".orangehrm-login-logo"
+          ],
+          "failureSummary": "Fix any of the following:\n  Some page content is not contained by landmarks"
+        }
+      ]
+    }
+  ]
+}

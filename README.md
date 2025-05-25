@@ -1,140 +1,87 @@
-# Playwright Framework with Salesforce Page Object Generation
+# Playwright Test Framework
 
-A comprehensive test automation framework using Playwright with built-in Salesforce page object generation capabilities.
+A comprehensive test automation framework using Playwright with support for standard web applications and Salesforce.
 
 ## Features
 
-- **Page Object Generation**: Automatically generate page objects from Salesforce pages
-- **Test Case Generation**: Create test cases with common scenarios
-- **Docker Support**: Run tests in containers
-- **CI/CD Integration**: GitHub Actions workflows
-- **Reporting**: Multiple reporting options including Allure
-- **Cross-browser Testing**: Chrome, Firefox, Safari, and mobile browsers
+- Page Object Generation for standard web applications and Salesforce
+- Modal/Dialog detection and handling
+- Environment-specific configuration (Dev, QA, Prod)
+- DOM collections support (tables, lists, grids)
+- Test generation
 
-## Prerequisites
+## Environment Configuration
 
-- Node.js (v16 or higher)
-- Playwright (`npm install @playwright/test`)
-- Salesforce CLI (`npm install @salesforce/cli`)
+The framework supports multiple environments through environment-specific configuration files:
 
-## Installation
+- `.env.example` - Template with all available configuration options
+- `.env.dev` - Development environment configuration
+- `.env.qa` - QA environment configuration
+- `.env.prod` - Production environment configuration
+- `.env` - Local overrides (not committed to version control)
+
+To select an environment, set the `NODE_ENV` variable:
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/playwright-framework.git
-cd playwright-framework
+# For development
+NODE_ENV=dev npx playwright test
 
-# Install dependencies
-npm install
+# For QA
+NODE_ENV=qa npx playwright test
 
-# Install browsers
-npx playwright install
+# For production
+NODE_ENV=prod npx playwright test
 ```
 
-## Configuration
+## Page Object Generation
 
-Create a `.env` file based on `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file to set your Salesforce credentials and other configuration options.
-
-## Salesforce Page Object Generation
-
-### Extract DOM Elements
+Generate page objects from existing web pages:
 
 ```bash
-# Using npm script
-npm run sf:extract -- --url "https://your-org.lightning.force.com/lightning/o/Contact/new"
+# Standard web application
+node src/utils/generators/generate-page.js --url https://example.com/page --name ExamplePage
 
-# Using CLI directly
-node src/utils/generators/sf-session-extractor.js --url "https://your-org.lightning.force.com/lightning/o/Contact/new"
-```
+# Salesforce application
+node src/utils/generators/generate-page.js --url https://myorg.lightning.force.com/page --name SfPage --salesforce
 
-### Generate Page Objects
+# With authentication
+node src/utils/generators/generate-page.js --url https://myorg.lightning.force.com/page --name SfPage --salesforce --username user@example.com --password mypassword
 
-```bash
-# Using npm script
-npm run sf:generate -- --name ContactPage --url "/lightning/o/Contact/new"
-
-# Using CLI directly
-node src/utils/generators/sf-page-generator.js --name ContactPage --url "/lightning/o/Contact/new"
-```
-
-### Complete Workflow
-
-```bash
-# Using npm script
-npm run sf:workflow -- --url "https://your-org.lightning.force.com/lightning/o/Contact/new" --name ContactPage
-
-# Using CLI directly
-./run-sf-workflow.sh --url "https://your-org.lightning.force.com/lightning/o/Contact/new" --name ContactPage
+# Generate test files
+node src/utils/generators/generate-page.js --url https://example.com/page --name ExamplePage --generate-tests
 ```
 
 ## Running Tests
 
 ```bash
 # Run all tests
-npm test
+npx playwright test
 
 # Run specific test file
-npm test -- tests/pages/ContactPage.spec.js
+npx playwright test tests/pages/OrangeHRMLogin.spec.js
 
-# Run with UI mode
-npm run test:ui
+# Run with specific browser
+npx playwright test --project=chromium
 
-# Run Salesforce generator tests
-npm run test:generators
+# Run in debug mode
+npx playwright test --debug
 ```
-
-## Docker Support
-
-```bash
-# Build and run tests in Docker
-docker-compose up --build
-
-# Run specific tests in Docker
-docker-compose run playwright npm test -- tests/pages/ContactPage.spec.js
-```
-
-## CI/CD Integration
-
-The framework includes GitHub Actions workflows:
-
-- **CI**: Runs on every push and pull request
-- **Salesforce Generators**: Tests the Salesforce page object generators
 
 ## Project Structure
 
 ```
 playwright-framework/
+├── auth/                  # Authentication storage
 ├── src/
-│   ├── pages/           # Generated page objects
-│   │   ├── BasePage.js  # Base class for all pages
-│   │   └── ...
+│   ├── pages/             # Page objects
 │   └── utils/
-│       └── generators/  # Generator utilities
-│           ├── config.js
-│           ├── selectors.js
-│           ├── sf-page-generator.js
-│           ├── sf-session-extractor.js
-│           └── ...
+│       ├── generators/    # Page object generators
+│       └── config.js      # Centralized configuration
 ├── tests/
-│   ├── generators/      # Tests for generator utilities
-│   └── pages/           # Generated test classes
-├── .env.example         # Example environment variables
-├── docker-compose.yml   # Docker configuration
-├── Dockerfile           # Docker build file
-├── playwright.config.js # Playwright configuration
-└── run-sf-workflow.sh   # Main workflow script
+│   └── pages/             # Test files
+├── .env.example           # Environment template
+├── .env.dev               # Development environment
+├── .env.qa                # QA environment
+├── .env.prod              # Production environment
+└── playwright.config.js   # Playwright configuration
 ```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.

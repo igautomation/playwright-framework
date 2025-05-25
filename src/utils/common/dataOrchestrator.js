@@ -4,9 +4,11 @@
  * Manages test data across the framework
  * Used for generic key-value driven test data.
  */
-const externalResources = require('../../config/external-resources');
 
 class DataOrchestrator {
+  /**
+   * Constructor
+   */
   constructor() {
     this.data = {};
     this.initialize();
@@ -26,17 +28,17 @@ class DataOrchestrator {
     this.data.users = {
       admin: {
         username: process.env.ADMIN_USERNAME || '',
-        email: process.env.ADMIN_EMAIL || `admin@${externalResources.email.defaultDomain}`
+        email: process.env.ADMIN_EMAIL || 'admin@example.com'
       },
       customer: {
         username: process.env.CUSTOMER_USERNAME || '',
-        email: process.env.CUSTOMER_EMAIL || `customer@${externalResources.email.defaultDomain}`
+        email: process.env.CUSTOMER_EMAIL || 'customer@example.com'
       }
     };
     
     // Load API data
     this.data.api = {
-      baseUrl: externalResources.apis.default,
+      baseUrl: process.env.API_BASE_URL || 'https://api.example.com',
       endpoints: {
         users: '/users',
         login: '/login'

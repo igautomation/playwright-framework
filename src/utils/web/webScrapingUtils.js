@@ -6,6 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 const https = require('https');
 const http = require('http');
+const logger = require('../common/logger');
 
 /**
  * Web Scraping Utilities for Playwright
@@ -47,7 +48,7 @@ class WebScrapingUtils {
    */
   async extractTableData(tableSelector, options = {}) {
     try {
-      console.log(`Extracting data from table: ${tableSelector}`);
+      logger.info(`Extracting data from table: ${tableSelector}`);
 
       return await this.page.evaluate((selector, opts) => {
         const table = document.querySelector(selector);
@@ -101,7 +102,7 @@ class WebScrapingUtils {
         });
       }, tableSelector, options);
     } catch (error) {
-      console.error(`Failed to extract table data from: ${tableSelector}`, error);
+      logger.error(`Failed to extract table data from: ${tableSelector}`, error);
       throw error;
     }
   }
@@ -114,7 +115,7 @@ class WebScrapingUtils {
    */
   async extractLinks(selector = 'a', options = {}) {
     try {
-      console.log(`Extracting links with selector: ${selector}`);
+      logger.info(`Extracting links with selector: ${selector}`);
 
       return await this.page.evaluate((sel, opts) => {
         const links = Array.from(document.querySelectorAll(sel));
@@ -147,7 +148,7 @@ class WebScrapingUtils {
         });
       }, selector, options);
     } catch (error) {
-      console.error(`Failed to extract links with selector: ${selector}`, error);
+      logger.error(`Failed to extract links with selector: ${selector}`, error);
       throw error;
     }
   }
@@ -160,7 +161,7 @@ class WebScrapingUtils {
    */
   async extractText(selector, options = {}) {
     try {
-      console.log(`Extracting text from elements: ${selector}`);
+      logger.info(`Extracting text from elements: ${selector}`);
 
       return await this.page.evaluate((sel, opts) => {
         const elements = Array.from(document.querySelectorAll(sel));
@@ -178,7 +179,7 @@ class WebScrapingUtils {
         return elements.map((el) => el.textContent.trim());
       }, selector, options);
     } catch (error) {
-      console.error(`Failed to extract text from elements: ${selector}`, error);
+      logger.error(`Failed to extract text from elements: ${selector}`, error);
       throw error;
     }
   }
@@ -191,7 +192,7 @@ class WebScrapingUtils {
    */
   async extractStructuredData(selectors, options = {}) {
     try {
-      console.log('Extracting structured data');
+      logger.info('Extracting structured data');
 
       const result = {};
 
@@ -214,7 +215,7 @@ class WebScrapingUtils {
 
       return result;
     } catch (error) {
-      console.error('Failed to extract structured data', error);
+      logger.error('Failed to extract structured data', error);
       throw error;
     }
   }
@@ -227,18 +228,18 @@ class WebScrapingUtils {
    */
   async saveDOMSnapshot(name, options = {}) {
     try {
-      console.log(`Saving DOM snapshot: ${name}`);
+      logger.info(`Saving DOM snapshot: ${name}`);
 
       // Get HTML content
       let html = await this.page.content();
       
       // Process HTML based on options
       if (options.removeStyles) {
-        html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+        html = html.replace(/<style[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
       }
       
       if (options.removeScripts) {
-        html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        html = html.replace(/<script[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       }
       
       if (options.minify) {
@@ -256,10 +257,10 @@ class WebScrapingUtils {
       // Save snapshot
       fs.writeFileSync(filepath, html);
 
-      console.log(`DOM snapshot saved to: ${filepath}`);
+      logger.info(`DOM snapshot saved to: ${filepath}`);
       return filepath;
     } catch (error) {
-      console.error(`Failed to save DOM snapshot: ${name}`, error);
+      logger.error(`Failed to save DOM snapshot: ${name}`, error);
       throw error;
     }
   }
@@ -271,7 +272,7 @@ class WebScrapingUtils {
    */
   async extractMetadata(options = {}) {
     try {
-      console.log('Extracting page metadata');
+      logger.info('Extracting page metadata');
 
       return await this.page.evaluate((opts) => {
         const metadata = {};
@@ -334,7 +335,7 @@ class WebScrapingUtils {
         return metadata;
       }, options);
     } catch (error) {
-      console.error('Failed to extract page metadata', error);
+      logger.error('Failed to extract page metadata', error);
       throw error;
     }
   }
@@ -347,7 +348,7 @@ class WebScrapingUtils {
    */
   async extractImages(selector = 'img', options = {}) {
     try {
-      console.log(`Extracting images with selector: ${selector}`);
+      logger.info(`Extracting images with selector: ${selector}`);
 
       return await this.page.evaluate((sel, opts) => {
         const images = Array.from(document.querySelectorAll(sel));
@@ -386,7 +387,7 @@ class WebScrapingUtils {
         });
       }, selector, options);
     } catch (error) {
-      console.error(`Failed to extract images with selector: ${selector}`, error);
+      logger.error(`Failed to extract images with selector: ${selector}`, error);
       throw error;
     }
   }
@@ -400,7 +401,7 @@ class WebScrapingUtils {
    */
   async downloadFile(url, filename, options = {}) {
     try {
-      console.log(`Downloading file from: ${url}`);
+      logger.info(`Downloading file from: ${url}`);
       
       return new Promise((resolve, reject) => {
         // Determine protocol
@@ -451,7 +452,7 @@ class WebScrapingUtils {
           
           fileStream.on('finish', () => {
             fileStream.close();
-            console.log(`File downloaded to: ${filepath}`);
+            logger.info(`File downloaded to: ${filepath}`);
             resolve(filepath);
           });
         }).on('error', (err) => {
@@ -460,7 +461,7 @@ class WebScrapingUtils {
         });
       });
     } catch (error) {
-      console.error(`Failed to download file from: ${url}`, error);
+      logger.error(`Failed to download file from: ${url}`, error);
       throw error;
     }
   }
@@ -473,7 +474,7 @@ class WebScrapingUtils {
    */
   async extractFormData(formSelector, options = {}) {
     try {
-      console.log(`Extracting form data from: ${formSelector}`);
+      logger.info(`Extracting form data from: ${formSelector}`);
 
       return await this.page.evaluate((selector, opts) => {
         const form = document.querySelector(selector);
@@ -543,7 +544,7 @@ class WebScrapingUtils {
         return formData;
       }, formSelector, options);
     } catch (error) {
-      console.error(`Failed to extract form data from: ${formSelector}`, error);
+      logger.error(`Failed to extract form data from: ${formSelector}`, error);
       throw error;
     }
   }
@@ -556,7 +557,7 @@ class WebScrapingUtils {
    */
   async extractDataWithJsonPath(selectorMap, options = {}) {
     try {
-      console.log('Extracting data with JSON path selectors');
+      logger.info('Extracting data with JSON path selectors');
 
       const result = {};
       
@@ -596,7 +597,7 @@ class WebScrapingUtils {
       
       return result;
     } catch (error) {
-      console.error('Failed to extract data with JSON path selectors', error);
+      logger.error('Failed to extract data with JSON path selectors', error);
       throw error;
     }
   }
@@ -609,7 +610,7 @@ class WebScrapingUtils {
    */
   async extractList(listSelector, options = {}) {
     try {
-      console.log(`Extracting list data from: ${listSelector}`);
+      logger.info(`Extracting list data from: ${listSelector}`);
 
       return await this.page.evaluate((selector, opts) => {
         const list = document.querySelector(selector);
@@ -667,7 +668,7 @@ class WebScrapingUtils {
         });
       }, listSelector, options);
     } catch (error) {
-      console.error(`Failed to extract list data from: ${listSelector}`, error);
+      logger.error(`Failed to extract list data from: ${listSelector}`, error);
       throw error;
     }
   }

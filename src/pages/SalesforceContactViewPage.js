@@ -36,7 +36,7 @@ class SalesforceContactViewPage extends BasePage {
     this.minimize = '[data-aura-rendered-by="485:0"]';
     this.pop_out = '[data-aura-rendered-by="517:0"]';
     this.favorites_list = '[data-aura-rendered-by="43:218;a"]';
-    this.0notifications = '[data-aura-rendered-by="74:218;a"]';
+    this.notifications = '[data-aura-rendered-by="74:218;a"]';
     this.view_profile = '[data-aura-rendered-by="100:218;a"]';
     this.button = '[data-aura-rendered-by="5:1122;a"]';
     this.button = '[data-aura-rendered-by="214:0;p"]';
@@ -216,10 +216,10 @@ class SalesforceContactViewPage extends BasePage {
   }
 
   /**
-   * Click 0Notifications button
+   * Click Notifications button
    */
-  async click0notifications() {
-    await this.click(this.0notifications);
+  async clickNotifications() {
+    await this.click(this.notifications);
   }
 
   /**
@@ -339,7 +339,7 @@ class SalesforceContactViewPage extends BasePage {
    * @returns {Promise<Array<Object>>} - Array of row objects with column values
    */
   async getCampaign_historyRows() {
-    const rows = await this.page.locator('table tr, [role="row"]').all();
+    const rows = await this.page.locator('[role="grid"] tr, [role="row"]').all();
     const result = [];
     
     for (const row of rows) {
@@ -379,7 +379,7 @@ class SalesforceContactViewPage extends BasePage {
    * @param {string|number} columnKey - Column name or index to click
    */
   async clickInCampaign_history(criteria, columnKey) {
-    const rows = await this.page.locator('table tr, [role="row"]').all();
+    const rows = await this.page.locator('[role="grid"] tr, [role="row"]').all();
     
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -405,256 +405,6 @@ class SalesforceContactViewPage extends BasePage {
     }
     
     throw new Error('No matching row found in table');
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
-  }
-  /**
-   * Get all items from list list
-   * @returns {Promise<Array<string>>} - Array of list item text values
-   */
-  async getListItems() {
-    const items = await this.page.locator('ul li, [role="listitem"], [role="option"]').all();
-    const result = [];
-    
-    for (const item of items) {
-      result.push(await item.textContent());
-    }
-    
-    return result;
-  }
-
-  /**
-   * Click on a specific item in list list
-   * @param {string|RegExp} textOrPattern - Text or pattern to match against list item
-   */
-  async clickInList(textOrPattern) {
-    await this.page.locator('ul li, [role="listitem"], [role="option"]')
-      .filter({ hasText: textOrPattern })
-      .first()
-      .click();
   }
 }
 

@@ -4,7 +4,7 @@
  * Tests that combine API and UI interactions
  */
 const { test, expect } = require('@playwright/test');
-const { ApiUtils } = require('../../utils/api/apiUtils');
+const { ApiClient } = require('../../utils/api');
 const { WebInteractions } = require('../../utils/web/webInteractions');
 const { DataGenerator } = require('../../utils/data/dataGenerator');
 const config = require('../../config');
@@ -31,14 +31,14 @@ const selectors = {
 };
 
 test.describe('API-UI Combined Tests', () => {
-  let apiUtils;
+  let apiClient;
   let webInteractions;
   let dataGenerator;
   let authToken;
   
   test.beforeEach(async ({ page, request }) => {
     // Initialize utilities
-    apiUtils = new ApiUtils(request, apiBaseUrl);
+    apiClient = new ApiClient(apiBaseUrl);
     webInteractions = new WebInteractions(page);
     dataGenerator = new DataGenerator();
     
@@ -54,6 +54,11 @@ test.describe('API-UI Combined Tests', () => {
       const responseBody = await response.json();
       // Store the token
       authToken = responseBody?.data?.access_token || '';
+      
+      // Set auth token for API client
+      if (authToken) {
+        apiClient.setAuthToken(authToken);
+      }
     });
     
     // Login
@@ -80,16 +85,9 @@ test.describe('API-UI Combined Tests', () => {
     };
     
     // Create employee via API
-    const response = await apiUtils.post('/v2/pim/employees', employeeData, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const responseData = await apiClient.post('/v2/pim/employees', employeeData);
     
     // Verify API response
-    expect(response.status()).toBe(200);
-    const responseData = await response.json();
     expect(responseData.data).toBeDefined();
     const employeeId = responseData.data.empNumber;
     
@@ -115,15 +113,9 @@ test.describe('API-UI Combined Tests', () => {
     test.skip(!authToken, 'Auth token not captured');
     
     // Get employees via API
-    const response = await apiUtils.get('/v2/pim/employees', {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
+    const responseData = await apiClient.get('/v2/pim/employees');
     
     // Verify API response
-    expect(response.status()).toBe(200);
-    const responseData = await response.json();
     expect(responseData.data).toBeDefined();
     
     // Skip if no employees found

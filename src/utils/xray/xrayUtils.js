@@ -5,7 +5,9 @@
  */
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const config = require('../../config');
+const logger = require('../common/logger');
 
 /**
  * Xray Integration Utilities
@@ -29,15 +31,15 @@ class XrayUtils {
     
     // Validate required configuration
     if (!this.baseUrl) {
-      console.warn('Xray API URL not configured. Set XRAY_API_URL environment variable or provide in options.');
+      logger.warn('Xray API URL not configured. Set XRAY_API_URL environment variable or provide in options.');
     }
     
     if (!this.clientId || !this.clientSecret) {
-      console.warn('Xray credentials not configured. Set XRAY_CLIENT_ID and XRAY_CLIENT_SECRET environment variables or provide in options.');
+      logger.warn('Xray credentials not configured. Set XRAY_CLIENT_ID and XRAY_CLIENT_SECRET environment variables or provide in options.');
     }
     
     if (!this.projectKey) {
-      console.warn('Xray project key not configured. Set XRAY_PROJECT_KEY environment variable or provide in options.');
+      logger.warn('Xray project key not configured. Set XRAY_PROJECT_KEY environment variable or provide in options.');
     }
   }
   
@@ -64,30 +66,19 @@ class XrayUtils {
         throw new Error('Xray integration not fully configured');
       }
       
-      const response = await fetch(`${this.baseUrl}/authenticate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          client_id: this.clientId,
-          client_secret: this.clientSecret
-        })
+      const response = await axios.post(`${this.baseUrl}/authenticate`, {
+        client_id: this.clientId,
+        client_secret: this.clientSecret
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to authenticate: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      this.token = data.token;
+      this.token = response.data.token;
       
       // Set token expiry (24 hours)
       this.tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
       
       return this.token;
     } catch (error) {
-      console.error('Failed to get Xray token:', error);
+      logger.error('Failed to get Xray token:', error);
       throw error;
     }
   }
@@ -146,24 +137,18 @@ class XrayUtils {
         formData.append('testPlanKey', options.testPlanKey);
       }
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const uploadResponse = await axios.post(endpoint, formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to upload results: ${response.status} ${response.statusText}`);
-      }
+      logger.info(`Test results uploaded to Xray: ${uploadResponse.data.key}`);
       
-      const data = await response.json();
-      console.log(`Test results uploaded to Xray: ${data.key}`);
-      
-      return data;
+      return uploadResponse.data;
     } catch (error) {
-      console.error('Failed to upload test results to Xray:', error);
+      logger.error('Failed to upload test results to Xray:', error);
       throw error;
     }
   }
@@ -208,25 +193,18 @@ class XrayUtils {
         execution.fields.tests = options.testKeys;
       }
       
-      const response = await fetch(`${this.baseUrl}/import/execution`, {
-        method: 'POST',
+      const response = await axios.post(`${this.baseUrl}/import/execution`, execution, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(execution)
+        }
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to create execution: ${response.status} ${response.statusText}`);
-      }
+      logger.info(`Test execution created in Xray: ${response.data.key}`);
       
-      const data = await response.json();
-      console.log(`Test execution created in Xray: ${data.key}`);
-      
-      return data;
+      return response.data;
     } catch (error) {
-      console.error('Failed to create test execution in Xray:', error);
+      logger.error('Failed to create test execution in Xray:', error);
       throw error;
     }
   }
@@ -243,21 +221,16 @@ class XrayUtils {
       }
       
       const token = await this.getToken();
-      const response = await fetch(`${this.baseUrl}/api/v1/executions/${executionKey}`, {
-        method: 'GET',
+      const response = await axios.get(`${this.baseUrl}/api/v1/executions/${executionKey}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to get execution: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
+      return response.data;
     } catch (error) {
-      console.error(`Failed to get test execution ${executionKey}:`, error);
+      logger.error(`Failed to get test execution ${executionKey}:`, error);
       throw error;
     }
   }
@@ -311,22 +284,16 @@ class XrayUtils {
         }).filter(Boolean);
       }
       
-      const response = await fetch(`${this.baseUrl}/api/v1/import/execution/test`, {
-        method: 'POST',
+      const response = await axios.post(`${this.baseUrl}/api/v1/import/execution/test`, result, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(result)
+        }
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to update test result: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
+      return response.data;
     } catch (error) {
-      console.error(`Failed to update test result for ${testKey}:`, error);
+      logger.error(`Failed to update test result for ${testKey}:`, error);
       throw error;
     }
   }
@@ -343,21 +310,16 @@ class XrayUtils {
       }
       
       const token = await this.getToken();
-      const response = await fetch(`${this.baseUrl}/api/v1/tests/${testKey}`, {
-        method: 'GET',
+      const response = await axios.get(`${this.baseUrl}/api/v1/tests/${testKey}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to get test: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
+      return response.data;
     } catch (error) {
-      console.error(`Failed to get test ${testKey}:`, error);
+      logger.error(`Failed to get test ${testKey}:`, error);
       throw error;
     }
   }
@@ -376,7 +338,7 @@ class XrayUtils {
       
       for (const file of files) {
         const content = fs.readFileSync(file, 'utf-8');
-        const matches = content.match(/@TEST-\d+/g) || [];
+        const matches = content.match(/@TEST-\\d+/g) || [];
         
         if (matches.length > 0) {
           testIdMap[file] = matches.map(match => match.replace('@', ''));
@@ -385,7 +347,7 @@ class XrayUtils {
       
       return testIdMap;
     } catch (error) {
-      console.error('Failed to extract test IDs:', error);
+      logger.error('Failed to extract test IDs:', error);
       throw error;
     }
   }
@@ -422,7 +384,7 @@ class XrayUtils {
       if (results && Array.isArray(results.tests)) {
         results.tests.forEach(test => {
           // Extract test key from test name or description
-          const testKeyMatch = (test.name || test.description || '').match(/@(TEST-\d+)/);
+          const testKeyMatch = (test.name || test.description || '').match(/@(TEST-\\d+)/);
           const testKey = testKeyMatch ? testKeyMatch[1] : null;
           
           if (testKey) {
@@ -459,7 +421,61 @@ class XrayUtils {
       
       return payload;
     } catch (error) {
-      console.error('Failed to generate Xray payload:', error);
+      logger.error('Failed to generate Xray payload:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Fetch test cases from a test plan
+   * @param {string} testPlanId - Test plan ID
+   * @returns {Promise<Array>} Test cases
+   */
+  async fetchTestCases(testPlanId) {
+    try {
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
+      
+      const token = await this.getToken();
+      const response = await axios.get(
+        `${this.baseUrl}/rest/raven/1.0/api/testplan/${testPlanId}/test`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      
+      return response.data;
+    } catch (error) {
+      logger.error(`Failed to fetch test cases for test plan ${testPlanId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Report test results to a test execution
+   * @param {string} testExecutionId - Test execution ID
+   * @param {Array} results - Test results
+   * @returns {Promise<void>}
+   */
+  async reportResults(testExecutionId, results) {
+    try {
+      if (!this.isConfigured()) {
+        throw new Error('Xray integration not fully configured');
+      }
+      
+      const token = await this.getToken();
+      await axios.post(
+        `${this.baseUrl}/rest/raven/1.0/api/testexecution/${testExecutionId}/result`,
+        results,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      
+      logger.info(`Results reported to test execution ${testExecutionId}`);
+    } catch (error) {
+      logger.error(`Failed to report results to test execution ${testExecutionId}:`, error);
       throw error;
     }
   }

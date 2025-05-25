@@ -1,15 +1,18 @@
-// src/utils/api/auth.js
-
 /**
- * Authentication utility for API testing inside the framework.
+ * Authentication utility for API testing
+ * 
  * Supports both:
  * - Static API key header (via API_KEY)
- * - OAuth2 client credential flow (via XRAY_CLIENT_ID, XRAY_CLIENT_SECRET)
- *
- * This utility should be used inside fixtures or API utilities (not directly in test files).
+ * - OAuth2 client credential flow (via OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
  */
 
+/**
+ * Authentication utilities for API testing
+ */
 class AuthUtils {
+  /**
+   * Constructor
+   */
   constructor() {
     // Load base credentials from environment variables
     this.apiKey = process.env.API_KEY || null;
@@ -20,8 +23,8 @@ class AuthUtils {
   }
 
   /**
-   * Fetches a new OAuth2 token using the client credential flow.
-   * This method should be called before using getOAuthHeaders().
+   * Fetches a new OAuth2 token using the client credential flow
+   * @returns {Promise<string>} OAuth token
    */
   async getOAuthToken() {
     if (!this.tokenUrl || !this.clientId || !this.clientSecret) {
@@ -47,8 +50,8 @@ class AuthUtils {
   }
 
   /**
-   * Returns a basic API key header.
-   * This should be used when only static tokens are needed.
+   * Returns a basic API key header
+   * @returns {Object} API key headers
    */
   getApiKeyHeaders() {
     if (!this.apiKey) {
@@ -61,8 +64,8 @@ class AuthUtils {
   }
 
   /**
-   * Returns the Authorization header using the fetched OAuth token.
-   * Requires getOAuthToken() to be called first.
+   * Returns the Authorization header using the fetched OAuth token
+   * @returns {Object} OAuth headers
    */
   getOAuthHeaders() {
     if (!this.oauthToken) {
@@ -75,4 +78,4 @@ class AuthUtils {
   }
 }
 
-export default AuthUtils;
+module.exports = AuthUtils;

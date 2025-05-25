@@ -1,12 +1,14 @@
-// src/utils/common/retryWithBackoff.js
-
-import logger from './logger.js';
-
 /**
  * RetryWithBackoff provides async retry logic with configurable backoff and hooks.
  * Use this to wrap any flaky or failure-prone operation (API, DB, etc.)
  */
+const logger = require('./logger');
+
 class RetryWithBackoff {
+  /**
+   * Constructor
+   * @param {Object} options - Configuration options
+   */
   constructor(options = {}) {
     // Retry configuration with fallback defaults
     this.maxRetries = Number(process.env.MAX_RETRIES) || 3;
@@ -22,7 +24,6 @@ class RetryWithBackoff {
 
   /**
    * Wraps and retries a failing async operation.
-   *
    * @param {Function} operation - the async function to retry
    * @returns {Promise<any>} - the operation result
    */
@@ -71,10 +72,11 @@ class RetryWithBackoff {
   /**
    * Waits for a specified time.
    * @param {number} ms - delay in milliseconds
+   * @private
    */
   _wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
-export default RetryWithBackoff;
+module.exports = RetryWithBackoff;
