@@ -4,10 +4,10 @@
 const { test, expect } = require('@playwright/test');
 const config = require('../../config');
 
-// Get Salesforce credentials from environment or config
-const sfUsername = process.env.SALESFORCE_USERNAME || config.salesforce?.username;
-const sfPassword = process.env.SALESFORCE_PASSWORD || config.salesforce?.password;
-const sfLoginUrl = process.env.SALESFORCE_LOGIN_URL || config.salesforce?.loginUrl || 'https://login.salesforce.com';
+// Get Salesforce credentials from config
+const sfUsername = config.credentials.salesforce.username;
+const sfPassword = config.credentials.salesforce.password;
+const sfLoginUrl = config.urls.salesforce;
 
 test.describe('Salesforce Authentication', () => {
   test('should login to Salesforce successfully', async ({ page }) => {

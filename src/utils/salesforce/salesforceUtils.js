@@ -15,12 +15,12 @@ class SalesforceUtils {
    * @param {Object} options - Configuration options
    */
   constructor(options = {}) {
-    this.username = options.username || process.env.SALESFORCE_USERNAME || config.salesforce?.username;
-    this.password = options.password || process.env.SALESFORCE_PASSWORD || config.salesforce?.password;
-    this.securityToken = options.securityToken || process.env.SALESFORCE_SECURITY_TOKEN || config.salesforce?.securityToken || '';
-    this.loginUrl = options.loginUrl || process.env.SALESFORCE_LOGIN_URL || config.salesforce?.loginUrl || 'https://login.salesforce.com';
-    this.apiVersion = options.apiVersion || process.env.SALESFORCE_API_VERSION || config.salesforce?.apiVersion || '56.0';
-    this.instanceUrl = null;
+    this.username = options.username || process.env.SF_USERNAME || config.salesforce?.username;
+    this.password = options.password || process.env.SF_PASSWORD || config.salesforce?.password;
+    this.securityToken = options.securityToken || process.env.SF_SECURITY_TOKEN || config.salesforce?.securityToken || '';
+    this.loginUrl = options.loginUrl || process.env.SF_URL || config.salesforce?.loginUrl || 'https://login.salesforce.com';
+    this.apiVersion = options.apiVersion || process.env.SF_API_VERSION || config.salesforce?.apiVersion || '57.0';
+    this.instanceUrl = options.instanceUrl || process.env.SF_INSTANCE_URL || null;
     this.accessToken = null;
     this.requestContext = null;
   }
@@ -42,8 +42,8 @@ class SalesforceUtils {
       // Prepare login payload
       const payload = new URLSearchParams();
       payload.append('grant_type', 'password');
-      payload.append('client_id', process.env.SALESFORCE_CLIENT_ID || config.salesforce?.clientId);
-      payload.append('client_secret', process.env.SALESFORCE_CLIENT_SECRET || config.salesforce?.clientSecret);
+      payload.append('client_id', process.env.SF_CLIENT_ID || config.salesforce?.clientId);
+      payload.append('client_secret', process.env.SF_CLIENT_SECRET || config.salesforce?.clientSecret);
       payload.append('username', this.username);
       payload.append('password', this.password + this.securityToken);
 
@@ -55,7 +55,7 @@ class SalesforceUtils {
       if (response.ok()) {
         const data = await response.json();
         this.accessToken = data.access_token;
-        this.instanceUrl = data.instance_url;
+        this.instanceUrl = data.instance_url || this.instanceUrl;
         
         // Update request context with auth token
         await this.requestContext.dispose();

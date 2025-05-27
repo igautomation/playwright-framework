@@ -4,31 +4,22 @@
  * Core tests for authentication functionality
  */
 const { test, expect } = require('@playwright/test');
-const { WebInteractions } = require('../../utils/web/webInteractions');
+const WebInteractions = require('../../utils/web/webInteractions');
 const config = require('../../config');
 
-// Read base URL from environment or config
-const baseUrl = process.env.BASE_URL || config.baseUrl;
-const loginPath = process.env.LOGIN_PATH || config.paths?.login;
-const dashboardPath = process.env.DASHBOARD_PATH || config.paths?.dashboard;
+// Get configuration values
+const baseUrl = config.urls.orangeHRM;
+const loginPath = config.paths.orangeHRM.login;
+const dashboardPath = config.paths.orangeHRM.dashboard;
 
-// Read credentials from environment or config
-const validUsername = process.env.USERNAME || config.credentials?.username;
-const validPassword = process.env.PASSWORD || config.credentials?.password;
-const invalidUsername = process.env.INVALID_USERNAME || config.credentials?.invalidUsername;
-const invalidPassword = process.env.INVALID_PASSWORD || config.credentials?.invalidPassword;
+// Credentials
+const validUsername = config.credentials.orangeHRM.username;
+const validPassword = config.credentials.orangeHRM.password;
+const invalidUsername = config.credentials.orangeHRM.invalidUsername;
+const invalidPassword = config.credentials.orangeHRM.invalidPassword;
 
-// Read selectors from environment or config
-const selectors = {
-  usernameInput: process.env.USERNAME_INPUT || config.selectors?.auth?.usernameInput,
-  passwordInput: process.env.PASSWORD_INPUT || config.selectors?.auth?.passwordInput,
-  loginButton: process.env.LOGIN_BUTTON || config.selectors?.auth?.loginButton,
-  errorAlert: process.env.ERROR_ALERT || config.selectors?.auth?.errorAlert,
-  requiredFieldError: process.env.REQUIRED_FIELD_ERROR || config.selectors?.auth?.requiredFieldError,
-  userDropdown: process.env.USER_DROPDOWN || config.selectors?.auth?.userDropdown,
-  logoutMenuItem: process.env.LOGOUT_MENU_ITEM || config.selectors?.auth?.logoutMenuItem,
-  rememberMeCheckbox: process.env.REMEMBER_ME_CHECKBOX || config.selectors?.auth?.rememberMeCheckbox
-};
+// Selectors
+const selectors = config.selectors.auth;
 
 test.describe('Authentication', () => {
   let webInteractions;
@@ -96,7 +87,7 @@ test.describe('Authentication', () => {
     await webInteractions.click(selectors.logoutMenuItem);
     
     // Verify we're back at the login page
-    await expect(page).toHaveURL(new RegExp(`.*${loginPath.replace(/\//g, '\\/')}`));
+    await expect(page).toHaveURL(new RegExp(`.*${loginPath.replace(/\\//g, '\\\\/')}`));
     await expect(page.locator(selectors.loginButton)).toBeVisible();
   });
   

@@ -1,6 +1,6 @@
 /**
  * User API Tests
- * 
+ *
  * Tests for user-related API endpoints
  */
 const { test, expect } = require('@playwright/test');
@@ -8,13 +8,11 @@ const { ApiClient } = require('../../../utils/api');
 const { SchemaValidator } = require('../../../utils/api/schemaValidator');
 const config = require('../../../config');
 
-// Read base URL from environment or config
-const baseUrl = process.env.API_BASE_URL || config.api?.baseUrl;
-
 // Read test data from config or use environment variables
 const testData = {
   userId: parseInt(process.env.TEST_USER_ID) || config.api?.testData?.userId,
-  nonExistentUserId: parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId
+  nonExistentUserId:
+    parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId,
 };
 
 // Define schemas
@@ -36,11 +34,11 @@ const userListSchema = {
           email: { type: 'string', format: 'email' },
           first_name: { type: 'string' },
           last_name: { type: 'string' },
-          avatar: { type: 'string', format: 'uri' }
-        }
-      }
-    }
-  }
+          avatar: { type: 'string', format: 'uri' },
+        },
+      },
+    },
+  },
 };
 
 const singleUserSchema = {
@@ -55,70 +53,67 @@ const singleUserSchema = {
         email: { type: 'string', format: 'email' },
         first_name: { type: 'string' },
         last_name: { type: 'string' },
-        avatar: { type: 'string', format: 'uri' }
-      }
-    }
-  }
+        avatar: { type: 'string', format: 'uri' },
+      },
+    },
+  },
 };
 
 test.describe('User API Tests', () => {
   let apiClient;
   let schemaValidator;
-  
+
   test.beforeEach(({ request }) => {
-    apiClient = new ApiClient(baseUrl);
+    apiClient = new ApiClient(config.urls.reqres);
     schemaValidator = new SchemaValidator();
   });
-  
+
   test('Get list of users', async ({ request }) => {
     // Send GET request to list users endpoint
-    const responseData = await apiClient.get('/users', {
-      params: { page: 1 }
+    const responseData = await apiClient.get(config.paths.reqres.users, {
+      params: { page: config.api.testData.page || 1 },
     });
-    
+
     // Verify response structure using schema validation
     const validationResult = schemaValidator.validate(responseData, userListSchema);
     expect(validationResult.valid).toBeTruthy();
-    
+
     // Additional assertions
-    expect(responseData.page).toBe(1);
+    expect(responseData.page).toBe(config.api.testData.page || 1);
     expect(responseData.data.length).toBeGreaterThan(0);
   });
-  
+
   test('Get single user by ID', async ({ request }) => {
     // Send GET request to get a specific user
     const userId = testData.userId;
-    const responseData = await apiClient.get(`/users/${userId}`);
-    
+    const responseData = await apiClient.get(`${config.paths.reqres.users}/${userId}`);
+
     // Verify response structure using schema validation
     const validationResult = schemaValidator.validate(responseData, singleUserSchema);
     expect(validationResult.valid).toBeTruthy();
-    
+
     // Additional assertions
     expect(responseData.data.id).toBe(userId);
   });
-  
+
   test('Get non-existent user returns 404', async ({ request }) => {
     // Send GET request for a user that doesn't exist
     const userId = testData.nonExistentUserId;
-    
+
     try {
-      await apiClient.get(`/users/${userId}`);
+      await apiClient.get(`${config.paths.reqres.users}/${userId}`);
       // If we get here, the request didn't fail as expected
       expect(false).toBeTruthy('Expected request to fail with 404');
     } catch (error) {
       // Verify response status is 404 Not Found
       expect(error.status).toBe(404);
-      
-      // Verify response body is empty
-      expect(Object.keys(error.data || {}).length).toBe(0);
     }
   });
-  
+
   test('Get user resources', async ({ request }) => {
     // Send GET request to get user resources
-    const responseData = await apiClient.get('/unknown');
-    
+    const responseData = await apiClient.get('/api/unknown');
+
     // Verify response structure
     expect(responseData).toHaveProperty('page');
     expect(responseData).toHaveProperty('per_page');

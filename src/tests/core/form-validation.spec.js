@@ -4,15 +4,16 @@
  * Core tests for form validation functionality
  */
 const { test, expect } = require('@playwright/test');
+const config = require('../../config');
 
 test.describe('Form Validation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the login page
-    await page.goto(process.env.ORANGEHRM_URL);
+    await page.goto(config.urls.orangeHRM);
     
     // Login with default credentials
-    await page.getByPlaceholder('Username').fill(process.env.USERNAME);
-    await page.getByPlaceholder('Password').fill(process.env.PASSWORD);
+    await page.getByPlaceholder('Username').fill(config.credentials.orangeHRM.username);
+    await page.getByPlaceholder('Password').fill(config.credentials.orangeHRM.password);
     await page.getByRole('button', { name: 'Login' }).click();
     
     // Wait for dashboard to load
@@ -21,7 +22,7 @@ test.describe('Form Validation', () => {
   
   test('should validate required fields in Add User form', async ({ page }) => {
     // Navigate to Admin page
-    await page.getByRole('link', { name: process.env.USERNAME }).click();
+    await page.getByRole('link', { name: 'Admin' }).click();
     
     // Click Add button
     await page.getByRole('button', { name: 'Add' }).click();
@@ -40,7 +41,7 @@ test.describe('Form Validation', () => {
   
   test('should validate password strength in Add User form', async ({ page }) => {
     // Navigate to Admin page
-    await page.getByRole('link', { name: process.env.USERNAME }).click();
+    await page.getByRole('link', { name: 'Admin' }).click();
     
     // Click Add button
     await page.getByRole('button', { name: 'Add' }).click();
@@ -63,7 +64,7 @@ test.describe('Form Validation', () => {
   
   test('should validate password confirmation in Add User form', async ({ page }) => {
     // Navigate to Admin page
-    await page.getByRole('link', { name: process.env.USERNAME }).click();
+    await page.getByRole('link', { name: 'Admin' }).click();
     
     // Click Add button
     await page.getByRole('button', { name: 'Add' }).click();
@@ -87,7 +88,7 @@ test.describe('Form Validation', () => {
   
   test('should validate username uniqueness in Add User form', async ({ page }) => {
     // Navigate to Admin page
-    await page.getByRole('link', { name: process.env.USERNAME }).click();
+    await page.getByRole('link', { name: 'Admin' }).click();
     
     // Click Add button
     await page.getByRole('button', { name: 'Add' }).click();
@@ -97,7 +98,7 @@ test.describe('Form Validation', () => {
     
     // Select User Role
     await page.locator('.oxd-select-text').first().click();
-    await page.getByRole('option', { name: process.env.USERNAME }).click();
+    await page.getByRole('option', { name: 'Admin' }).click();
     
     // Enter Employee Name
     await page.locator('input[placeholder="Type for hints..."]').fill('Paul');
@@ -109,7 +110,7 @@ test.describe('Form Validation', () => {
     await page.getByRole('option', { name: 'Enabled' }).click();
     
     // Enter existing username (Admin)
-    await page.locator('input[autocomplete="off"]').nth(0).fill(process.env.USERNAME);
+    await page.locator('input[autocomplete="off"]').nth(0).fill('Admin');
     
     // Click elsewhere to trigger validation
     await page.locator('body').click();

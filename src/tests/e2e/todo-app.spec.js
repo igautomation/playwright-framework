@@ -4,11 +4,12 @@
  * End-to-end tests for a todo application
  */
 const { test, expect } = require('@playwright/test');
+const config = require('../../config');
 
 test.describe('Todo App', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the todo app
-    await page.goto(process.env.TODO_APP_URL);
+    await page.goto(config.urls.todoMVC);
   });
   
   test('should allow adding todo items', async ({ page }) => {

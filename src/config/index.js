@@ -4,16 +4,23 @@
  * Central configuration for the framework
  */
 
+// Import environment-specific configurations
+const environments = require('./environments');
+const secrets = require('./secrets');
+
 // Default configuration
 const defaultConfig = {
   // Base URLs
-  baseUrl: process.env.BASE_URL || 'https://opensource-demo.orangehrmlive.com',
+  baseUrl: process.env.BASE_URL || environments.urls.orangeHRM,
+  
+  // Environment URLs
+  urls: environments.urls,
   
   // API configuration
   api: {
-    baseUrl: process.env.API_BASE_URL || 'https://reqres.in/api',
+    baseUrl: process.env.REQRES_API_URL ? `${process.env.REQRES_API_URL}/api` : `${environments.urls.reqres}/api`,
     timeout: parseInt(process.env.API_TIMEOUT || '30000'),
-    apiKey: process.env.API_KEY || 'reqres-free-v1',
+    apiKey: process.env.REQRES_API_KEY || secrets.reqres.apiKey(),
     testData: {
       userId: parseInt(process.env.TEST_USER_ID || '2'),
       nonExistentUserId: parseInt(process.env.TEST_NONEXISTENT_USER_ID || '999'),
@@ -61,19 +68,20 @@ const defaultConfig = {
   
   // Credentials
   credentials: {
-    username: process.env.USERNAME || 'Admin',
-    password: process.env.PASSWORD || 'admin123',
-    invalidUsername: process.env.INVALID_USERNAME || 'invalid',
-    invalidPassword: process.env.INVALID_PASSWORD || 'wrong'
+    orangeHRM: {
+      username: process.env.USERNAME || secrets.orangeHRM.username(),
+      password: process.env.PASSWORD || secrets.orangeHRM.password(),
+      invalidUsername: process.env.INVALID_USERNAME || 'invalid',
+      invalidPassword: process.env.INVALID_PASSWORD || 'wrong'
+    },
+    salesforce: {
+      username: process.env.SALESFORCE_USERNAME || secrets.salesforce.username(),
+      password: process.env.SALESFORCE_PASSWORD || secrets.salesforce.password()
+    }
   },
   
   // Paths
-  paths: {
-    login: process.env.LOGIN_PATH || '/web/index.php/auth/login',
-    dashboard: process.env.DASHBOARD_PATH || '/web/index.php/dashboard/index',
-    admin: process.env.ADMIN_PATH || '/web/index.php/admin/viewSystemUsers',
-    pim: process.env.PIM_PATH || '/web/index.php/pim/viewEmployeeList'
-  },
+  paths: environments.paths,
   
   // Selectors
   selectors: {

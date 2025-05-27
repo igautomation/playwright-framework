@@ -1,4 +1,5 @@
 // @ts-check
+require('dotenv').config();
 const { defineConfig, devices } = require('@playwright/test');
 const configManager = require('./src/utils/config');
 
@@ -32,7 +33,7 @@ module.exports = defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: config.orangeHrm.url,
+    baseURL: process.env.BASE_URL || config.orangeHrm.url,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -89,7 +90,7 @@ module.exports = defineConfig({
     {
       name: 'src-tests',
       testDir: './src/tests',
-      testMatch: '**/*.spec.js',
+      testMatch: '**/*.+(spec|test).js',
       use: { 
         ...devices['Desktop Chrome'],
         headless: browserConfig.headless,

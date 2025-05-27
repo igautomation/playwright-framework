@@ -4,6 +4,7 @@
  * Consolidated API client that combines functionality from apiRequest.js and apiUtils.js
  */
 const { request } = require('@playwright/test');
+const config = require('../../config');
 
 /**
  * API Client for making HTTP requests
@@ -15,12 +16,19 @@ class ApiClient {
    * @param {Object} options - Additional options for API requests
    */
   constructor(baseUrl, options = {}) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl || config.api.baseUrl;
     this.options = options;
     this.defaultHeaders = options.headers || {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     };
+    
+    // Add API key header if available from environment or config
+    const apiKey = process.env.REQRES_API_KEY || config.api.apiKey;
+    if (apiKey) {
+      this.defaultHeaders['x-api-key'] = apiKey;
+    }
+    
     this.requestContext = null;
   }
 

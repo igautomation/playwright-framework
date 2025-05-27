@@ -7,17 +7,18 @@
 
 module.exports = {
   // Salesforce credentials - prefer environment variables
-  username: process.env.SALESFORCE_USERNAME || '',
-  password: process.env.SALESFORCE_PASSWORD || '',
-  securityToken: process.env.SALESFORCE_SECURITY_TOKEN || '',
+  username: process.env.SF_USERNAME || '',
+  password: process.env.SF_PASSWORD || '',
+  securityToken: process.env.SF_SECURITY_TOKEN || '',
   
   // OAuth settings
-  clientId: process.env.SALESFORCE_CLIENT_ID || '',
-  clientSecret: process.env.SALESFORCE_CLIENT_SECRET || '',
+  clientId: process.env.SF_CLIENT_ID || '',
+  clientSecret: process.env.SF_CLIENT_SECRET || '',
   
   // API settings
-  apiVersion: process.env.SALESFORCE_API_VERSION || '56.0',
-  loginUrl: process.env.SALESFORCE_LOGIN_URL || 'https://login.salesforce.com',
+  apiVersion: process.env.SF_API_VERSION || '57.0',
+  loginUrl: process.env.SF_URL || 'https://login.salesforce.com',
+  instanceUrl: process.env.SF_INSTANCE_URL || '',
   
   // Test data
   testData: {

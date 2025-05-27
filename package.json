@@ -1,45 +1,18 @@
 {
   "name": "playwright-framework",
   "version": "1.0.0",
-  "description": "Advanced Playwright Test Framework with Salesforce Page Object Generation",
+  "description": "Comprehensive Playwright testing framework",
   "main": "index.js",
-  "bin": {
-    "generate-page": "./bin/generate-page",
-    "sf-extract": "./src/utils/generators/sf-session-extractor.js",
-    "sf-generate": "./src/utils/generators/sf-page-generator.js"
-  },
   "scripts": {
     "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "test:smoke": "playwright test -g '@smoke'",
-    "test:regression": "playwright test -g '@regression'",
-    "test:api": "playwright test -g '@api'",
-    "test:visual": "playwright test -g '@visual'",
-    "test:accessibility": "playwright test -g '@accessibility'",
-    "test:performance": "playwright test -g '@performance'",
-    "test:e2e": "playwright test -g '@e2e'",
-    "test:parallel": "playwright test --workers=4",
-    "test:single": "playwright test --workers=1",
-    "test:generators": "node tests/generators/sf-page-generator.test.js",
-    "test:utils": "playwright test --project=utils",
-    "test:src": "playwright test --project=src-tests",
-    "test:all": "playwright test --project=chromium --project=utils --project=src-tests",
-    "report": "playwright show-report",
-    "report:allure": "allure generate ./allure-results --clean -o ./reports/allure && allure open ./reports/allure",
-    "validate": "node ./scripts/utils/validate-tests.js",
-    "setup": "node ./scripts/setup/setup.js",
-    "setup:hooks": "node ./scripts/setup/setup-hooks.js",
+    "test:e2e": "playwright test src/tests/e2e",
+    "test:api": "playwright test src/tests/api",
+    "test:accessibility": "playwright test src/tests/accessibility",
+    "test:salesforce": "playwright test src/tests/salesforce",
+    "setup:credentials": "node setup-credentials.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "postinstall": "npm run setup:hooks",
-    "generate-page": "./bin/generate-page",
-    "sf:extract": "node src/utils/generators/sf-session-extractor.js",
-    "sf:generate": "node src/utils/generators/sf-page-generator.js",
-    "sf:workflow": "./run-sf-workflow.sh",
-    "check-types": "tsc --noEmit"
+    "format": "prettier --write ."
   },
   "keywords": [
     "playwright",
@@ -47,35 +20,31 @@
     "automation",
     "e2e",
     "api",
-    "visual",
-    "accessibility",
-    "performance",
-    "salesforce"
+    "accessibility"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@playwright/test": "^1.40.0",
-    "allure-playwright": "^2.9.2",
-    "axe-core": "^4.7.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
     "chart.js": "^4.4.0",
     "commander": "^11.1.0",
-    "dotenv": "^16.5.0",
-    "dotenv-safe": "^9.1.0",
+    "csv-parse": "^5.5.2",
+    "dotenv": "^16.3.1",
     "js-yaml": "^4.1.0",
-    "lighthouse": "^11.0.0",
-    "pixelmatch": "^5.3.0",
-    "pngjs": "^7.0.0",
-    "xml2js": "^0.6.2"
+    "jsonwebtoken": "^9.0.2",
+    "moment": "^2.29.4",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "eslint": "^8.54.0",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-playwright": "^0.18.0",
-    "lint-staged": "^16.0.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0",
+    "prettier": "^3.1.0"
   }
 }

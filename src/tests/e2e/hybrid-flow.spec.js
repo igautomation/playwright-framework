@@ -3,18 +3,21 @@
  * 
  * End-to-end tests combining UI and API interactions
  */
+require('dotenv').config();
 const { test, expect } = require('@playwright/test');
+const config = require('../../config');
 
 test.describe('Hybrid Flow', () => {
   let authToken;
+  const baseUrl = config.urls.orangeHRM;
   
   test.beforeEach(async ({ page, request }) => {
     // UI Login to get auth token
-    await page.goto(process.env.ORANGEHRM_URL);
+    await page.goto(baseUrl);
     
     // Fill in login form
-    await page.getByPlaceholder('Username').fill(process.env.USERNAME);
-    await page.getByPlaceholder('Password').fill(process.env.PASSWORD);
+    await page.getByPlaceholder('Username').fill(config.credentials.orangeHRM.username);
+    await page.getByPlaceholder('Password').fill(config.credentials.orangeHRM.password);
     
     // Intercept network requests to capture auth token
     await page.route('**/api/v2/auth/login', async route => {
@@ -46,7 +49,7 @@ test.describe('Hybrid Flow', () => {
       employeeId: '1234'
     };
     
-    const response = await request.post(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees`, {
+    const response = await request.post(`${baseUrl}/web/index.php/api/v2/pim/employees`, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json'
@@ -82,7 +85,7 @@ test.describe('Hybrid Flow', () => {
     test.skip(!authToken, 'Auth token not captured');
     
     // First, get an existing employee via API
-    const employeesResponse = await request.get(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees`, {
+    const employeesResponse = await request.get(`${baseUrl}/web/index.php/api/v2/pim/employees`, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -105,7 +108,7 @@ test.describe('Hybrid Flow', () => {
       middleName: 'Test'
     };
     
-    const updateResponse = await request.put(`${process.env.BASE_URL}/web/index.php/api/v2/pim/employees/${employeeId}`, {
+    const updateResponse = await request.put(`${baseUrl}/web/index.php/api/v2/pim/employees/${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json'
