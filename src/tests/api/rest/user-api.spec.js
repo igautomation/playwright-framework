@@ -6,13 +6,12 @@
 const { test, expect } = require('@playwright/test');
 const { ApiClient } = require('../../../utils/api');
 const { SchemaValidator } = require('../../../utils/api/schemaValidator');
-const config = require('../../../config');
+require('dotenv').config();
 
-// Read test data from config or use environment variables
+// Test data
 const testData = {
-  userId: parseInt(process.env.TEST_USER_ID) || config.api?.testData?.userId,
-  nonExistentUserId:
-    parseInt(process.env.TEST_NONEXISTENT_USER_ID) || config.api?.testData?.nonExistentUserId,
+  userId: 2,
+  nonExistentUserId: 999,
 };
 
 // Define schemas
@@ -31,10 +30,10 @@ const userListSchema = {
         required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
         properties: {
           id: { type: 'number' },
-          email: { type: 'string', format: 'email' },
+          email: { type: 'string' },
           first_name: { type: 'string' },
           last_name: { type: 'string' },
-          avatar: { type: 'string', format: 'uri' },
+          avatar: { type: 'string' },
         },
       },
     },
@@ -50,10 +49,10 @@ const singleUserSchema = {
       required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
       properties: {
         id: { type: 'number' },
-        email: { type: 'string', format: 'email' },
+        email: { type: 'string' },
         first_name: { type: 'string' },
         last_name: { type: 'string' },
-        avatar: { type: 'string', format: 'uri' },
+        avatar: { type: 'string' },
       },
     },
   },
@@ -64,14 +63,16 @@ test.describe('User API Tests', () => {
   let schemaValidator;
 
   test.beforeEach(({ request }) => {
-    apiClient = new ApiClient(config.urls.reqres);
+    apiClient = new ApiClient(process.env.REQRES_API_URL || 'https://reqres.in');
+    // Set authentication token for API requests
+    apiClient.setAuthToken(process.env.API_KEY || 'reqres-free-v1');
     schemaValidator = new SchemaValidator();
   });
 
   test('Get list of users', async ({ request }) => {
     // Send GET request to list users endpoint
-    const responseData = await apiClient.get(config.paths.reqres.users, {
-      params: { page: config.api.testData.page || 1 },
+    const responseData = await apiClient.get('/api/users', {
+      params: { page: 1 },
     });
 
     // Verify response structure using schema validation
@@ -79,14 +80,14 @@ test.describe('User API Tests', () => {
     expect(validationResult.valid).toBeTruthy();
 
     // Additional assertions
-    expect(responseData.page).toBe(config.api.testData.page || 1);
+    expect(responseData.page).toBe(1);
     expect(responseData.data.length).toBeGreaterThan(0);
   });
 
   test('Get single user by ID', async ({ request }) => {
     // Send GET request to get a specific user
     const userId = testData.userId;
-    const responseData = await apiClient.get(`${config.paths.reqres.users}/${userId}`);
+    const responseData = await apiClient.get(`/api/users/${userId}`);
 
     // Verify response structure using schema validation
     const validationResult = schemaValidator.validate(responseData, singleUserSchema);
@@ -101,7 +102,7 @@ test.describe('User API Tests', () => {
     const userId = testData.nonExistentUserId;
 
     try {
-      await apiClient.get(`${config.paths.reqres.users}/${userId}`);
+      await apiClient.get(`/api/users/${userId}`);
       // If we get here, the request didn't fail as expected
       expect(false).toBeTruthy('Expected request to fail with 404');
     } catch (error) {

@@ -1,134 +1,139 @@
 #!/usr/bin/env node
 
 /**
- * CLI entry point for the framework
+ * Command Line Interface for Playwright Framework
+ * Provides commands for running tests, generating reports, and other utilities
  */
+
 const { program } = require('commander');
 const path = require('path');
-const packageJson = require('../../package.json');
+const fs = require('fs');
+const { execSync } = require('child_process');
 
 // Set up the CLI program
 program
   .name('playwright-framework')
-  .description('Enterprise-grade Playwright test automation framework')
-  .version(packageJson.version);
+  .description('CLI for Playwright Testing Framework')
+  .version('1.0.0');
 
-// Add commands
+// Run tests command
 program
   .command('run')
-  .description('Run tests')
-  .option('-t, --tags <tags>', 'Run tests with specific tags')
-  .option('-p, --project <project>', 'Run tests with specific project')
-  .option('-h, --headed', 'Run tests in headed mode')
-  .option('-d, --debug', 'Run tests in debug mode')
-  .option('-r, --reporter <reporter>', 'Specify reporter')
-  .option('-e, --env <env>', 'Specify environment')
-  .option('-l, --list', 'List all tests without running them')
-  .action(require('./commands/run'));
-
-program
-  .command('list-tags')
-  .description('List all available tags')
-  .action(() => {
-    console.log('Listing tags...');
-    // Implementation for listing tags
+  .description('Run tests with specified options')
+  .option('-p, --project <project>', 'Project to run tests on', 'chromium')
+  .option('-t, --test <pattern>', 'Test pattern to match')
+  .option('-h, --headed', 'Run in headed mode')
+  .option('-d, --debug', 'Run in debug mode')
+  .option('-r, --reporter <reporter>', 'Reporter to use', 'html')
+  .action((options) => {
+    let command = 'npx playwright test';
+    
+    if (options.test) {
+      command += ` "${options.test}"`;
+    }
+    
+    command += ` --project=${options.project}`;
+    
+    if (options.headed) {
+      command += ' --headed';
+    }
+    
+    if (options.debug) {
+      command += ' --debug';
+    }
+    
+    command += ` --reporter=${options.reporter}`;
+    
+    console.log(`Running command: ${command}`);
+    try {
+      execSync(command, { stdio: 'inherit' });
+    } catch (error) {
+      process.exit(error.status);
+    }
   });
 
+// Generate page object command
 program
-  .command('list-tests')
-  .description('List all available tests without running them')
-  .option('-p, --project <project>', 'List tests for specific project')
-  .option('-t, --tags <tags>', 'Filter tests by tags')
-  .action(require('./commands/list-tests'));
+  .command('generate:page')
+  .description('Generate a page object')
+  .argument('<name>', 'Name of the page object')
+  .option('-o, --output <dir>', 'Output directory', './src/pages')
+  .action((name, options) => {
+    const outputDir = options.output;
+    const fileName = `${name}Page.js`;
+    const filePath = path.join(outputDir, fileName);
+    
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
+    // Create page object template
+    const template = `/**
+ * ${name} Page Object
+ */
+class ${name}Page {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
+  constructor(page) {
+    this.page = page;
+    
+    // Define selectors
+    this.selectors = {
+      // Add your selectors here
+    };
+  }
+  
+  /**
+   * Navigate to this page
+   */
+  async navigate() {
+    await this.page.goto(process.env.BASE_URL);
+  }
+  
+  // Add your page methods here
+}
 
+module.exports = ${name}Page;
+`;
+    
+    fs.writeFileSync(filePath, template);
+    console.log(`✅ Generated page object: ${filePath}`);
+  });
+
+// Salesforce commands
 program
-  .command('self-test')
-  .description('Run framework self-test')
-  .action(require('./commands/self-test'));
+  .command('salesforce:auth')
+  .description('Authenticate with Salesforce')
+  .action(() => {
+    try {
+      execSync('node src/tests/salesforce/global-setup.js', { stdio: 'inherit' });
+      console.log('✅ Salesforce authentication completed');
+    } catch (error) {
+      console.error('❌ Salesforce authentication failed');
+      process.exit(1);
+    }
+  });
 
-// Test verification commands
+// Report command
 program
-  .command('verify-tests')
-  .description('Verify test files for best practices')
-  .option('-d, --dir <directory>', 'Test directory to verify')
-  .option('-p, --pattern <pattern>', 'File pattern to match')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .option('--generate-report', 'Generate HTML report')
-  .option('-v, --verbose', 'Show verbose output')
-  .action(require('./commands/verify-tests'));
+  .command('report')
+  .description('Show test report')
+  .option('-p, --port <port>', 'Port to serve the report on', '9323')
+  .action((options) => {
+    try {
+      execSync(`npx playwright show-report --port=${options.port}`, { stdio: 'inherit' });
+    } catch (error) {
+      console.error('❌ Failed to show report');
+      process.exit(1);
+    }
+  });
 
-program
-  .command('verify-all-tests')
-  .description('Run comprehensive verification of all tests')
-  .option('-v, --verbose', 'Show verbose output')
-  .option('--generate-report', 'Generate HTML report')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .action(require('./commands/verify-all-tests'));
+// Parse arguments
+program.parse();
 
-program
-  .command('test-lint')
-  .description('Lint test files for common issues')
-  .option('-d, --dir <directory>', 'Test directory to lint')
-  .option('-p, --pattern <pattern>', 'File pattern to match')
-  .option('--fix', 'Automatically fix issues when possible')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .action(require('./commands/test-lint'));
-
-program
-  .command('test-report')
-  .description('Generate test reports')
-  .option('-o, --output-dir <directory>', 'Output directory for reports')
-  .option('-t, --types <types>', 'Report types to generate (comma-separated)', (val) => val.split(','))
-  .option('-r, --results-dir <directory>', 'Test results directory')
-  .option('--open', 'Open reports after generation')
-  .option('-v, --verbose', 'Show verbose output')
-  .action(require('./commands/test-report'));
-
-// Test coverage command
-program
-  .command('test-coverage-analyze')
-  .description('Analyze test coverage without instrumentation')
-  .option('--test-dir <directory>', 'Test directory')
-  .option('--source-dir <directory>', 'Source directory to analyze')
-  .option('-o, --output-dir <directory>', 'Output directory for coverage reports')
-  .option('-t, --threshold <percentage>', 'Coverage threshold percentage', parseInt)
-  .option('--exclude <patterns>', 'Comma-separated patterns to exclude')
-  .option('--ignore-threshold', 'Continue even if coverage is below threshold')
-  .option('--open', 'Open coverage report after generation')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .action(require('./commands/test-coverage-analyze'));
-
-// CI/CD integration commands
-program
-  .command('ci-setup')
-  .description('Set up CI/CD integration')
-  .option('-s, --system <system>', 'CI system (github, jenkins, gitlab)')
-  .option('-n, --name <name>', 'Workflow/pipeline name')
-  .option('-b, --branches <branches>', 'Comma-separated list of branches to trigger on')
-  .option('--node-version <version>', 'Node.js version')
-  .option('--test-command <command>', 'Test command')
-  .option('--report-command <command>', 'Report command')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .action(require('./commands/ci-setup'));
-
-// Dashboard command
-program
-  .command('test-dashboard')
-  .description('Generate test quality dashboard')
-  .option('-d, --data-dir <directory>', 'Dashboard data directory')
-  .option('-o, --output <path>', 'Output file path')
-  .option('--add-run', 'Add current test run to dashboard')
-  .option('-r, --results-dir <directory>', 'Test results directory')
-  .option('--run-id <id>', 'Run ID')
-  .option('--history-size <size>', 'Number of runs to keep in history')
-  .option('--open', 'Open dashboard after generation')
-  .option('--ignore-errors', 'Continue even if errors are found')
-  .action(require('./commands/test-dashboard'));
-
-// Parse command line arguments
-program.parse(process.argv);
-
-// If no arguments provided, show help
+// If no arguments, show help
 if (!process.argv.slice(2).length) {
   program.outputHelp();
 }

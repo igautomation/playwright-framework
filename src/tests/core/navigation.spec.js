@@ -9,11 +9,11 @@ const config = require('../../config');
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the login page
-    await page.goto(config.urls.orangeHRM);
+    await page.goto(config.baseUrl);
 
     // Login with default credentials
-    await page.getByPlaceholder('Username').fill(config.credentials.orangeHRM.username);
-    await page.getByPlaceholder('Password').fill(config.credentials.orangeHRM.password);
+    await page.getByPlaceholder('Username').fill(config.credentials.username);
+    await page.getByPlaceholder('Password').fill(config.credentials.password);
     await page.getByRole('button', { name: 'Login' }).click();
 
     // Wait for dashboard to load

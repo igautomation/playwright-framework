@@ -5,44 +5,40 @@
  */
 const { test, expect } = require('@playwright/test');
 const { ApiClient } = require('../../../utils/api');
-const config = require('../../../config');
+require('dotenv').config();
 
-// Read test data from config or environment variables
+// Test data
 const testData = {
-  userIds: process.env.TEST_USER_IDS
-    ? process.env.TEST_USER_IDS.split(',').map(Number)
-    : config.api?.testData?.userIds || [1, 2, 3, 23],
-  pages: process.env.TEST_PAGES
-    ? process.env.TEST_PAGES.split(',').map(Number)
-    : config.api?.testData?.pages || [1, 2, 3],
-  users: config.api?.testData?.users || [
-    {
-      name: process.env.TEST_USER1_NAME || 'User 1',
-      job: process.env.TEST_USER1_JOB || 'Job 1',
-      expectedStatus: parseInt(process.env.TEST_USER1_STATUS || '201'),
+  userIds: [1, 2, 3, 23],
+  pages: [1, 2, 3],
+  users: [
+    { 
+      name: 'User 1', 
+      job: 'Job 1', 
+      expectedStatus: 201 
     },
-    {
-      name: process.env.TEST_USER2_NAME || 'User 2',
-      job: process.env.TEST_USER2_JOB || 'Job 2',
-      expectedStatus: parseInt(process.env.TEST_USER2_STATUS || '201'),
+    { 
+      name: 'User 2', 
+      job: 'Job 2', 
+      expectedStatus: 201 
     },
-    {
-      name: process.env.TEST_USER3_NAME || 'User 3',
-      job: process.env.TEST_USER3_JOB || 'Job 3',
-      expectedStatus: parseInt(process.env.TEST_USER3_STATUS || '201'),
-    },
+    { 
+      name: 'User 3', 
+      job: 'Job 3', 
+      expectedStatus: 201 
+    }
   ],
-  queryParams: config.api?.testData?.queryParams || [
-    {
-      param: process.env.TEST_PARAM1_NAME || 'page',
-      value: parseInt(process.env.TEST_PARAM1_VALUE || '1'),
-      expectedStatus: parseInt(process.env.TEST_PARAM1_STATUS || '200'),
+  queryParams: [
+    { 
+      param: 'page', 
+      value: 1, 
+      expectedStatus: 200 
     },
-    {
-      param: process.env.TEST_PARAM2_NAME || 'per_page',
-      value: parseInt(process.env.TEST_PARAM2_VALUE || '3'),
-      expectedStatus: parseInt(process.env.TEST_PARAM2_STATUS || '200'),
-    },
+    { 
+      param: 'per_page', 
+      value: 3, 
+      expectedStatus: 200 
+    }
   ],
 };
 
@@ -50,7 +46,9 @@ test.describe('Data-Driven API Tests', () => {
   let apiClient;
 
   test.beforeEach(({ request }) => {
-    apiClient = new ApiClient(config.urls.reqres);
+    apiClient = new ApiClient(process.env.REQRES_API_URL || 'https://reqres.in');
+    // Set authentication token for API requests
+    apiClient.setAuthToken(process.env.API_KEY || 'reqres-free-v1');
   });
 
   // Data-driven test for user creation
@@ -58,7 +56,7 @@ test.describe('Data-Driven API Tests', () => {
     test(`Create user: ${userData.name} - ${userData.job}`, async ({ request }) => {
       try {
         // Send POST request to create a user
-        const responseData = await apiClient.post(config.paths.reqres.users, {
+        const responseData = await apiClient.post('/api/users', {
           name: userData.name,
           job: userData.job,
         });
@@ -83,15 +81,12 @@ test.describe('Data-Driven API Tests', () => {
   for (const userId of testData.userIds) {
     test(`Get user with ID: ${userId}`, async ({ request }) => {
       // Determine expected status based on user ID
-      // Read from config or environment variables
-      const maxValidId = parseInt(
-        process.env.MAX_VALID_USER_ID || config.api?.testData?.maxValidUserId || '12'
-      );
+      const maxValidId = 12;
       const expectedStatus = userId <= maxValidId ? 200 : 404;
 
       try {
         // Send GET request to get a specific user
-        const responseData = await apiClient.get(`${config.paths.reqres.users}/${userId}`);
+        const responseData = await apiClient.get(`/api/users/${userId}`);
 
         // If we get here, the request was successful
         expect(expectedStatus).toBe(200);
@@ -115,7 +110,7 @@ test.describe('Data-Driven API Tests', () => {
   for (const page of testData.pages) {
     test(`Get users from page ${page}`, async ({ request }) => {
       // Send GET request to list users with pagination
-      const responseData = await apiClient.get(config.paths.reqres.users, {
+      const responseData = await apiClient.get('/api/users', {
         params: { page },
       });
 
@@ -125,13 +120,8 @@ test.describe('Data-Driven API Tests', () => {
       expect(Array.isArray(responseData.data)).toBeTruthy();
 
       // Determine expected user count based on page
-      // Read from config or environment variables
-      const maxPageWithData = parseInt(
-        process.env.MAX_PAGE_WITH_DATA || config.api?.testData?.maxPageWithData || '2'
-      );
-      const usersPerPage = parseInt(
-        process.env.USERS_PER_PAGE || config.api?.testData?.usersPerPage || '6'
-      );
+      const maxPageWithData = 2;
+      const usersPerPage = 6;
       const expectedUserCount = page <= maxPageWithData ? usersPerPage : 0;
       expect(responseData.data.length).toBe(expectedUserCount);
     });
@@ -142,7 +132,7 @@ test.describe('Data-Driven API Tests', () => {
     test(`API with ${testCase.param}=${testCase.value}`, async ({ request }) => {
       try {
         // Send GET request with params
-        const responseData = await apiClient.get(config.paths.reqres.users, {
+        const responseData = await apiClient.get('/api/users', {
           params: { [testCase.param]: testCase.value },
         });
 

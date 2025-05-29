@@ -4,23 +4,83 @@
  * Central configuration for the framework
  */
 
-// Import environment-specific configurations
-const environments = require('./environments');
-const secrets = require('./secrets');
+// Define default URLs and paths directly to avoid dependency issues
+const defaultUrls = {
+  orangeHRM: process.env.ORANGE_HRM_URL || 'https://opensource-demo.orangehrmlive.com',
+  reqres: process.env.REQRES_API_URL || 'https://reqres.in',
+  todoMVC: process.env.TODO_MVC_URL || 'https://todomvc.com/examples/vue/',
+  salesforce: process.env.SALESFORCE_URL || 'https://login.salesforce.com'
+};
+
+const defaultPaths = {
+  orangeHRM: {
+    login: '/web/index.php/auth/login',
+    dashboard: '/web/index.php/dashboard/index',
+    admin: '/web/index.php/admin/viewSystemUsers',
+    pim: '/web/index.php/pim/viewEmployeeList'
+  },
+  reqres: {
+    users: '/api/users',
+    register: '/api/register',
+    login: '/api/login'
+  }
+};
+
+// Default credentials
+const defaultCredentials = {
+  orangeHRM: {
+    username: process.env.USERNAME || 'Admin',
+    password: process.env.PASSWORD || 'admin123',
+    invalidUsername: process.env.INVALID_USERNAME || 'invalid',
+    invalidPassword: process.env.INVALID_PASSWORD || 'wrong'
+  },
+  salesforce: {
+    username: process.env.SALESFORCE_USERNAME || '',
+    password: process.env.SALESFORCE_PASSWORD || ''
+  }
+};
+
+// Try to import environment-specific configurations
+let environments = { urls: defaultUrls, paths: defaultPaths };
+let secrets = { 
+  orangeHRM: { 
+    username: () => defaultCredentials.orangeHRM.username,
+    password: () => defaultCredentials.orangeHRM.password
+  },
+  salesforce: {
+    username: () => defaultCredentials.salesforce.username,
+    password: () => defaultCredentials.salesforce.password
+  },
+  reqres: {
+    apiKey: () => ''
+  }
+};
+
+try {
+  environments = require('./environments');
+} catch (e) {
+  console.log('Using default environment configuration');
+}
+
+try {
+  secrets = require('./secrets');
+} catch (e) {
+  console.log('Using default secrets configuration');
+}
 
 // Default configuration
 const defaultConfig = {
   // Base URLs
-  baseUrl: process.env.BASE_URL || environments.urls.orangeHRM,
+  baseUrl: process.env.BASE_URL || defaultUrls.orangeHRM,
   
   // Environment URLs
-  urls: environments.urls,
+  urls: environments.urls || defaultUrls,
   
   // API configuration
   api: {
-    baseUrl: process.env.REQRES_API_URL ? `${process.env.REQRES_API_URL}/api` : `${environments.urls.reqres}/api`,
+    baseUrl: process.env.REQRES_API_URL ? `${process.env.REQRES_API_URL}/api` : `${defaultUrls.reqres}/api`,
     timeout: parseInt(process.env.API_TIMEOUT || '30000'),
-    apiKey: process.env.REQRES_API_KEY || secrets.reqres.apiKey(),
+    apiKey: process.env.REQRES_API_KEY || '',
     testData: {
       userId: parseInt(process.env.TEST_USER_ID || '2'),
       nonExistentUserId: parseInt(process.env.TEST_NONEXISTENT_USER_ID || '999'),
@@ -67,21 +127,10 @@ const defaultConfig = {
   },
   
   // Credentials
-  credentials: {
-    orangeHRM: {
-      username: process.env.USERNAME || secrets.orangeHRM.username(),
-      password: process.env.PASSWORD || secrets.orangeHRM.password(),
-      invalidUsername: process.env.INVALID_USERNAME || 'invalid',
-      invalidPassword: process.env.INVALID_PASSWORD || 'wrong'
-    },
-    salesforce: {
-      username: process.env.SALESFORCE_USERNAME || secrets.salesforce.username(),
-      password: process.env.SALESFORCE_PASSWORD || secrets.salesforce.password()
-    }
-  },
+  credentials: defaultCredentials,
   
   // Paths
-  paths: environments.paths,
+  paths: environments.paths || defaultPaths,
   
   // Selectors
   selectors: {

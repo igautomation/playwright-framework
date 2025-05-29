@@ -1,174 +1,136 @@
-/**
- * Salesforce Utilities
- * 
- * Provides helper functions for Salesforce testing
- */
-const { request } = require('@playwright/test');
-const config = require('../../config');
+// @ts-check
+require('dotenv').config();
+const jsforce = require('jsforce');
 
 /**
- * Salesforce Utilities class
+ * Utility class for Salesforce API operations
  */
 class SalesforceUtils {
   /**
-   * Constructor
-   * @param {Object} options - Configuration options
+   * @param {Object} config - Configuration object
+   * @param {string} config.username - Salesforce username
+   * @param {string} config.password - Salesforce password
+   * @param {string} [config.securityToken] - Salesforce security token
+   * @param {string} [config.loginUrl] - Salesforce login URL
    */
-  constructor(options = {}) {
-    this.username = options.username || process.env.SF_USERNAME || config.salesforce?.username;
-    this.password = options.password || process.env.SF_PASSWORD || config.salesforce?.password;
-    this.securityToken = options.securityToken || process.env.SF_SECURITY_TOKEN || config.salesforce?.securityToken || '';
-    this.loginUrl = options.loginUrl || process.env.SF_URL || config.salesforce?.loginUrl || 'https://login.salesforce.com';
-    this.apiVersion = options.apiVersion || process.env.SF_API_VERSION || config.salesforce?.apiVersion || '57.0';
-    this.instanceUrl = options.instanceUrl || process.env.SF_INSTANCE_URL || null;
-    this.accessToken = null;
-    this.requestContext = null;
+  constructor(config) {
+    this.username = config.username || process.env.SF_USERNAME;
+    this.password = config.password || process.env.SF_PASSWORD;
+    this.securityToken = config.securityToken || process.env.SF_SECURITY_TOKEN || '';
+    this.loginUrl = config.loginUrl || process.env.SF_LOGIN_URL || 'https://login.salesforce.com';
+    this.conn = new jsforce.Connection({ loginUrl: this.loginUrl });
+    this.isLoggedIn = false;
   }
 
   /**
-   * Login to Salesforce API
+   * Login to Salesforce
    * @returns {Promise<Object>} Login result
    */
   async login() {
     try {
-      // Create request context
-      this.requestContext = await request.newContext({
-        baseURL: this.loginUrl,
-        extraHTTPHeaders: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      });
-
-      // Prepare login payload
-      const payload = new URLSearchParams();
-      payload.append('grant_type', 'password');
-      payload.append('client_id', process.env.SF_CLIENT_ID || config.salesforce?.clientId);
-      payload.append('client_secret', process.env.SF_CLIENT_SECRET || config.salesforce?.clientSecret);
-      payload.append('username', this.username);
-      payload.append('password', this.password + this.securityToken);
-
-      // Send login request
-      const response = await this.requestContext.post('/services/oauth2/token', {
-        data: payload.toString()
-      });
-
-      if (response.ok()) {
-        const data = await response.json();
-        this.accessToken = data.access_token;
-        this.instanceUrl = data.instance_url || this.instanceUrl;
-        
-        // Update request context with auth token
-        await this.requestContext.dispose();
-        this.requestContext = await request.newContext({
-          baseURL: this.instanceUrl,
-          extraHTTPHeaders: {
-            'Authorization': `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        return { success: true, instanceUrl: this.instanceUrl };
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Login failed: ${response.status()} - ${errorText}`);
-      }
+      const result = await this.conn.login(
+        this.username, 
+        this.password + this.securityToken
+      );
+      this.isLoggedIn = true;
+      return result;
     } catch (error) {
-      console.error('Salesforce login error:', error);
+      console.error(`Salesforce login error: ${error.message}`);
       throw error;
     }
   }
 
   /**
-   * Create a record via API
+   * Create a record
    * @param {string} objectType - Salesforce object type (e.g., 'Account', 'Contact')
    * @param {Object} data - Record data
-   * @returns {Promise<Object>} Created record
+   * @returns {Promise<Object>} Create result
    */
   async createRecord(objectType, data) {
-    if (!this.accessToken) {
-      await this.login();
-    }
-
-    const response = await this.requestContext.post(`/services/data/v${this.apiVersion}/sobjects/${objectType}`, {
-      data: data
-    });
-
-    if (response.ok()) {
-      return await response.json();
-    } else {
-      const errorText = await response.text();
-      throw new Error(`Failed to create ${objectType}: ${response.status()} - ${errorText}`);
+    if (!this.isLoggedIn) await this.login();
+    
+    try {
+      return await this.conn.sobject(objectType).create(data);
+    } catch (error) {
+      console.error(`Error creating ${objectType}: ${error.message}`);
+      throw error;
     }
   }
 
   /**
-   * Query records via API
-   * @param {string} soql - SOQL query
-   * @returns {Promise<Object>} Query results
-   */
-  async query(soql) {
-    if (!this.accessToken) {
-      await this.login();
-    }
-
-    const encodedQuery = encodeURIComponent(soql);
-    const response = await this.requestContext.get(`/services/data/v${this.apiVersion}/query/?q=${encodedQuery}`);
-
-    if (response.ok()) {
-      return await response.json();
-    } else {
-      const errorText = await response.text();
-      throw new Error(`Query failed: ${response.status()} - ${errorText}`);
-    }
-  }
-
-  /**
-   * Update a record via API
+   * Update a record
    * @param {string} objectType - Salesforce object type
    * @param {string} recordId - Record ID
    * @param {Object} data - Record data
-   * @returns {Promise<boolean>} Success status
+   * @returns {Promise<Object>} Update result
    */
   async updateRecord(objectType, recordId, data) {
-    if (!this.accessToken) {
-      await this.login();
+    if (!this.isLoggedIn) await this.login();
+    
+    try {
+      return await this.conn.sobject(objectType).update({ Id: recordId, ...data });
+    } catch (error) {
+      console.error(`Error updating ${objectType}: ${error.message}`);
+      throw error;
     }
-
-    const response = await this.requestContext.patch(
-      `/services/data/v${this.apiVersion}/sobjects/${objectType}/${recordId}`,
-      { data: data }
-    );
-
-    // Successful update returns 204 No Content
-    return response.status() === 204;
   }
 
   /**
-   * Delete a record via API
+   * Delete a record
    * @param {string} objectType - Salesforce object type
    * @param {string} recordId - Record ID
-   * @returns {Promise<boolean>} Success status
+   * @returns {Promise<Object>} Delete result
    */
   async deleteRecord(objectType, recordId) {
-    if (!this.accessToken) {
-      await this.login();
+    if (!this.isLoggedIn) await this.login();
+    
+    try {
+      return await this.conn.sobject(objectType).destroy(recordId);
+    } catch (error) {
+      console.error(`Error deleting ${objectType}: ${error.message}`);
+      throw error;
     }
-
-    const response = await this.requestContext.delete(
-      `/services/data/v${this.apiVersion}/sobjects/${objectType}/${recordId}`
-    );
-
-    // Successful delete returns 204 No Content
-    return response.status() === 204;
   }
 
   /**
-   * Dispose resources
+   * Execute a SOQL query
+   * @param {string} query - SOQL query
+   * @returns {Promise<Object>} Query result
    */
-  async dispose() {
-    if (this.requestContext) {
-      await this.requestContext.dispose();
-      this.requestContext = null;
+  async query(query) {
+    if (!this.isLoggedIn) await this.login();
+    
+    try {
+      return await this.conn.query(query);
+    } catch (error) {
+      console.error(`Query error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Clean up test data
+   * @param {string} objectType - Salesforce object type
+   * @param {string} fieldName - Field name to filter by
+   * @param {string} fieldValue - Field value to filter by
+   * @returns {Promise<Object>} Delete result
+   */
+  async cleanupTestData(objectType, fieldName, fieldValue) {
+    if (!this.isLoggedIn) await this.login();
+    
+    try {
+      const query = `SELECT Id FROM ${objectType} WHERE ${fieldName} = '${fieldValue}'`;
+      const result = await this.conn.query(query);
+      
+      if (result.records.length > 0) {
+        const ids = result.records.map(record => record.Id);
+        return await this.conn.sobject(objectType).destroy(ids);
+      }
+      
+      return { success: true, message: 'No records found to delete' };
+    } catch (error) {
+      console.error(`Error cleaning up test data: ${error.message}`);
+      throw error;
     }
   }
 }

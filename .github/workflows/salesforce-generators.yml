@@ -59,7 +59,13 @@ jobs:
         if: ${{ secrets.SF_USERNAME != '' && secrets.SF_PASSWORD != '' }}
         run: |
           # Only run this if credentials are provided
-          ./run-sf-workflow.sh --name TestPage
+          # Skip this step in CI if script doesn't exist
+          if [ -f "./run-sf-workflow.sh" ]; then
+            chmod +x ./run-sf-workflow.sh
+            ./run-sf-workflow.sh --name TestPage
+          else
+            echo "Skipping page generation workflow - script not found"
+          fi
           
       - name: Upload artifacts
         if: always()

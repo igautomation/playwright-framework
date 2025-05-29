@@ -8,17 +8,23 @@ const {
   getViolations,
   checkAccessibility,
 } = require('../../utils/accessibility/accessibilityUtils');
-const config = require('../../config');
 
-// Read base URL from environment or config
-const baseUrl = process.env.BASE_URL || config.baseUrl || process.env.BASE_URL;
-const loginPath = process.env.LOGIN_PATH || config.paths?.login || '/web/index.php/auth/login';
-const dashboardPath =
-  process.env.DASHBOARD_PATH || config.paths?.dashboard || '/web/index.php/dashboard/index';
+// Define constants for the tests
+const baseUrl = 'https://opensource-demo.orangehrmlive.com';
+const loginPath = '/web/index.php/auth/login';
+const dashboardPath = '/web/index.php/dashboard/index';
 
-// Read credentials from environment or config
-const username = process.env.USERNAME || config.credentials?.username || process.env.USERNAME;
-const password = process.env.PASSWORD || config.credentials?.password || process.env.PASSWORD;
+// Credentials
+const username = 'Admin';
+const password = 'admin123';
+
+// Accessibility rules to check
+const accessibilityRules = [
+  'color-contrast',
+  'label',
+  'aria-roles',
+  'image-alt',
+];
 
 test.describe('Accessibility Tests', () => {
   test('login page should not have critical accessibility violations', async ({ page }) => {
@@ -68,14 +74,6 @@ test.describe('Accessibility Tests', () => {
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
-
-    // Get accessibility rules from config or use defaults
-    const accessibilityRules = config.accessibility?.rules || [
-      'color-contrast',
-      'label',
-      'aria-roles',
-      'image-alt',
-    ];
 
     // Get violations for specific rules
     const violations = await getViolations(page, {

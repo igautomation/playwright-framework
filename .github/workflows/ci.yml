@@ -30,6 +30,12 @@ jobs:
           AUTOMATION_EXERCISE_URL=https://automationexercise.com
           SELECTORS_HUB_URL=https://selectorshub.com/xpath-practice-page/
 
+          # Salesforce Configuration
+          SF_USERNAME=${{ secrets.SF_USERNAME || 'dummy@example.com' }}
+          SF_PASSWORD=${{ secrets.SF_PASSWORD || 'dummypassword' }}
+          SF_LOGIN_URL=https://login.salesforce.com
+          SF_INSTANCE_URL=https://example.lightning.force.com
+          
           # Credentials
           USERNAME=Admin
           PASSWORD=admin123
@@ -49,10 +55,33 @@ jobs:
 
           # External Resources
           AXE_CORE_CDN=https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js
+          
+          # Browser Configuration
+          HEADLESS=true
           EOL
       - run: npm run test -- --project=${{ matrix.browser }}
+      
+      - name: Setup Salesforce Authentication
+        run: |
+          if [ -n "${{ secrets.SF_USERNAME }}" ] && [ -n "${{ secrets.SF_PASSWORD }}" ]; then
+            echo "Running Salesforce authentication setup..."
+            mkdir -p auth
+            node src/tests/salesforce/global-setup.js
+          else
+            echo "::warning::Salesforce credentials not found in GitHub Secrets. Skipping Salesforce tests."
+            echo "To run Salesforce tests, add SF_USERNAME and SF_PASSWORD to your GitHub repository secrets."
+          fi
+      
+      - name: Run Salesforce Tests
+        if: ${{ secrets.SF_USERNAME != '' && secrets.SF_PASSWORD != '' }}
+        run: npm run test -- --project=salesforce
+        continue-on-error: true
+        
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: reports
-          path: reports/
+          path: |
+            reports/
+            playwright-report/
+            screenshots/

@@ -7,13 +7,10 @@ const { test, expect } = require('@playwright/test');
 const { generateAccessibilityReport } = require('../../utils/accessibility/accessibilityUtils');
 const path = require('path');
 
-// Import the config
-const config = require('../../config');
-
 test.describe('Fixed Accessibility Tests', () => {
   test('OrangeHRM login page should generate accessibility report', async ({ page }) => {
     // Navigate to the login page
-    await page.goto(config.urls.orangeHRM);
+    await page.goto('https://opensource-demo.orangehrmlive.com');
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -28,11 +25,11 @@ test.describe('Fixed Accessibility Tests', () => {
 
   test('OrangeHRM dashboard should generate accessibility report', async ({ page }) => {
     // Navigate to the login page
-    await page.goto(config.urls.orangeHRM);
+    await page.goto('https://opensource-demo.orangehrmlive.com');
 
     // Login with default credentials
-    await page.getByPlaceholder('Username').fill(config.credentials.orangeHRM.username);
-    await page.getByPlaceholder('Password').fill(config.credentials.orangeHRM.password);
+    await page.getByPlaceholder('Username').fill('Admin');
+    await page.getByPlaceholder('Password').fill('admin123');
     await page.getByRole('button', { name: 'Login' }).click();
 
     // Wait for dashboard to load
@@ -49,7 +46,7 @@ test.describe('Fixed Accessibility Tests', () => {
 
   test('OrangeHRM login form should be accessible', async ({ page }) => {
     // Navigate to the login page
-    await page.goto(config.urls.orangeHRM);
+    await page.goto('https://opensource-demo.orangehrmlive.com');
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
