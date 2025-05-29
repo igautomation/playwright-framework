@@ -1,0 +1,316 @@
+name: Create Distribution Bundle
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for the bundle'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Create sample project structure
+        run: |
+          mkdir -p dist/sample-project/{tests,pages,fixtures,utils,reports}
+          
+          # Create sample test file
+          cat > dist/sample-project/tests/sample-test.spec.js << 'EOL'
+          import { test, expect } from '@playwright/test';
+          import { HomePage } from '../pages/home-page';
+
+          test.describe('Sample Test Suite', () => {
+            test('should navigate to homepage', async ({ page }) => {
+              const homePage = new HomePage(page);
+              await homePage.navigate();
+              await homePage.assertPageLoaded();
+            });
+          });
+          EOL
+          
+          # Create sample page object
+          cat > dist/sample-project/pages/home-page.js << 'EOL'
+          export class HomePage {
+            constructor(page) {
+              this.page = page;
+              this.heading = page.locator('h1');
+              this.loginButton = page.getByRole('button', { name: 'Login' });
+            }
+            
+            async navigate() {
+              await this.page.goto(process.env.BASE_URL || 'https://example.com');
+            }
+            
+            async assertPageLoaded() {
+              await this.heading.waitFor({ state: 'visible' });
+            }
+          }
+          EOL
+          
+          # Create sample fixture
+          cat > dist/sample-project/fixtures/test-data.json << 'EOL'
+          {
+            "users": [
+              {
+                "username": "testuser",
+                "password": "password123"
+              }
+            ],
+            "endpoints": {
+              "api": "https://api.example.com"
+            }
+          }
+          EOL
+          
+          # Create sample .env file
+          cat > dist/sample-project/.env.example << 'EOL'
+          # Web Configuration
+          BASE_URL=https://example.com
+          
+          # API Configuration
+          API_URL=https://api.example.com
+          API_KEY=your_api_key
+          
+          # Test Configuration
+          HEADLESS=true
+          BROWSER=chromium
+          EOL
+          
+          # Create sample playwright config
+          cat > dist/sample-project/playwright.config.js << 'EOL'
+          import { defineConfig } from '@playwright/test';
+          import dotenv from 'dotenv';
+
+          dotenv.config();
+
+          export default defineConfig({
+            testDir: './tests',
+            timeout: 30000,
+            reporter: [['html'], ['json', { outputFile: 'reports/test-results.json' }]],
+            use: {
+              baseURL: process.env.BASE_URL,
+              screenshot: 'only-on-failure',
+              trace: 'retain-on-failure',
+            },
+            projects: [
+              {
+                name: 'chromium',
+                use: { browserName: 'chromium' },
+              },
+            ],
+          });
+          EOL
+          
+          # Create README
+          cat > dist/sample-project/README.md << 'EOL'
+          # Playwright Test Framework - Sample Project
+
+          This is a sample project demonstrating how to use the Playwright Test Framework.
+
+          ## Setup
+
+          1. Install dependencies:
+             ```
+             npm install
+             ```
+
+          2. Install browsers:
+             ```
+             npx playwright install
+             ```
+
+          3. Copy the environment file:
+             ```
+             cp .env.example .env
+             ```
+             Then edit the `.env` file with your configuration.
+
+          ## Running Tests
+
+          ```
+          npx playwright test
+          ```
+
+          ## Viewing Reports
+
+          ```
+          npx playwright show-report
+          ```
+          EOL
+          
+          # Create package.json
+          cat > dist/sample-project/package.json << 'EOL'
+          {
+            "name": "playwright-framework-sample",
+            "version": "1.0.0",
+            "description": "Sample project using Playwright Test Framework",
+            "scripts": {
+              "test": "playwright test",
+              "report": "playwright show-report"
+            },
+            "dependencies": {
+              "playwright-framework": "file:../framework"
+            },
+            "devDependencies": {
+              "@playwright/test": "^1.40.0",
+              "dotenv": "^16.3.1"
+            }
+          }
+          EOL
+      
+      - name: Prepare framework bundle
+        run: |
+          # Create framework directory
+          mkdir -p dist/framework/{lib,bin}
+          
+          # Copy essential framework files (minified/obfuscated)
+          cp -r src/utils dist/framework/lib/
+          cp -r src/helpers dist/framework/lib/
+          cp -r src/core dist/framework/lib/
+          
+          # Create package.json for the framework
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          cat > dist/framework/package.json << EOL
+          {
+            "name": "playwright-framework",
+            "version": "${VERSION}",
+            "description": "Comprehensive Playwright testing framework",
+            "main": "lib/index.js",
+            "bin": {
+              "pw-framework": "./bin/cli.js"
+            },
+            "scripts": {
+              "postinstall": "node bin/setup.js"
+            },
+            "dependencies": {
+              "@playwright/test": "^1.40.0",
+              "dotenv": "^16.3.1",
+              "chalk": "^4.1.2",
+              "commander": "^11.1.0",
+              "winston": "^3.11.0"
+            }
+          }
+          EOL
+          
+          # Create CLI tool
+          cat > dist/framework/bin/cli.js << 'EOL'
+          #!/usr/bin/env node
+          const { program } = require('commander');
+          const path = require('path');
+          const fs = require('fs');
+          const { execSync } = require('child_process');
+
+          program
+            .version(require('../package.json').version)
+            .description('Playwright Framework CLI');
+
+          program
+            .command('init')
+            .description('Initialize a new test project')
+            .action(() => {
+              console.log('Creating new test project...');
+              const sampleDir = path.join(__dirname, '../sample');
+              const targetDir = process.cwd();
+              
+              // Copy sample files
+              fs.cpSync(sampleDir, targetDir, { recursive: true });
+              console.log('Project initialized successfully!');
+            });
+
+          program.parse(process.argv);
+          EOL
+          
+          # Create setup script
+          cat > dist/framework/bin/setup.js << 'EOL'
+          #!/usr/bin/env node
+          console.log('Setting up Playwright Framework...');
+          console.log('Installation complete! Run "npx pw-framework init" to create a new project.');
+          EOL
+          
+          # Make scripts executable
+          chmod +x dist/framework/bin/cli.js
+          chmod +x dist/framework/bin/setup.js
+          
+          # Create index.js
+          cat > dist/framework/lib/index.js << 'EOL'
+          // Export framework components
+          module.exports = {
+            utils: require('./utils'),
+            helpers: require('./helpers'),
+            core: require('./core')
+          };
+          EOL
+          
+          # Copy sample project to framework for easy initialization
+          mkdir -p dist/framework/sample
+          cp -r dist/sample-project/* dist/framework/sample/
+      
+      - name: Create installation script
+        run: |
+          cat > dist/install.sh << 'EOL'
+          #!/bin/bash
+          
+          echo "Installing Playwright Framework..."
+          
+          # Install the framework
+          npm install --global ./framework
+          
+          # Create a new project if requested
+          if [ "$1" == "--create-project" ]; then
+            PROJECT_NAME=${2:-"playwright-project"}
+            echo "Creating new project: $PROJECT_NAME"
+            
+            mkdir -p "$PROJECT_NAME"
+            cd "$PROJECT_NAME"
+            
+            # Initialize project
+            npx pw-framework init
+            
+            echo "Project created successfully!"
+            echo "To get started:"
+            echo "  cd $PROJECT_NAME"
+            echo "  npm install"
+            echo "  npx playwright install"
+          else
+            echo "Framework installed successfully!"
+            echo "To create a new project, run: npx pw-framework init"
+          fi
+          EOL
+          
+          chmod +x dist/install.sh
+      
+      - name: Package the bundle
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name || '1.0.0' }}"
+          VERSION="${VERSION#v}"  # Remove 'v' prefix if present
+          
+          cd dist
+          zip -r "playwright-framework-${VERSION}.zip" ./*
+      
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-framework-bundle
+          path: dist/playwright-framework-*.zip
+          retention-days: 30
+      
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/playwright-framework-*.zip

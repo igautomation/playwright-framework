@@ -1,126 +1,59 @@
 # Playwright Testing Framework
 
-A comprehensive testing framework built with Playwright for web and API testing, including Salesforce automation.
+A comprehensive testing framework built on top of Playwright for end-to-end, API, and accessibility testing.
 
-## Features
+## Distribution
 
-- Page Object Model architecture
-- Data-driven testing
-- API testing capabilities
-- Salesforce automation
-- Reporting and screenshots
-- Environment-based configuration
-- Utility functions for common operations
+This framework can be distributed as a bundled package to clients and end users with the following benefits:
 
-## Getting Started
+### Easy Installation
 
-### Prerequisites
-
-- Node.js 14 or higher
-- npm or yarn
-- Salesforce credentials (for Salesforce tests)
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
+The framework is packaged with a simple installation script:
 
 ```bash
-npm install
+# Download the bundle and extract it
+unzip playwright-framework-1.0.0.zip
+
+# Run the installation script
+./install.sh --create-project my-test-project
 ```
 
-3. Set up environment variables:
+This will:
+1. Install the framework globally
+2. Create a new project with sample structure
+3. Set up all necessary configurations
 
-```bash
-cp .env.example .env
-```
+### Protected Source Code
 
-Edit the `.env` file with your credentials.
+The distributed framework:
+- Contains only compiled/minified code
+- Exposes a clean API without revealing implementation details
+- Protects proprietary testing logic and utilities
 
-## Running Tests
+### Sample Project Structure
 
-### All Tests
-
-```bash
-npm test
-```
-
-### Salesforce Tests
-
-```bash
-npm run test:salesforce
-```
-
-### API Tests
-
-```bash
-npm run test:api
-```
-
-### E2E Tests
-
-```bash
-npm run test:e2e
-```
-
-## Salesforce Testing
-
-The framework includes comprehensive support for Salesforce testing:
-
-### UI Testing
-
-- Login functionality
-- Account management
-- Contact management
-- Lead management
-- Opportunity management
-
-### API Testing
-
-- CRUD operations for Salesforce objects
-- Query operations
-- Authentication
-
-### Configuration
-
-Salesforce configuration is managed through environment variables and the `src/config/salesforce.config.js` file.
-
-## Project Structure
+The bundle includes a sample project with:
 
 ```
-playwright-framework/
-├── auth/                  # Authentication state storage
-├── data/                  # Test data files
-│   ├── json/              # JSON test data
-│   └── salesforce-*.json  # Salesforce test data
-├── src/
-│   ├── config/            # Configuration files
-│   ├── pages/             # Page objects
-│   │   └── salesforce/    # Salesforce page objects
-│   ├── tests/             # Test files
-│   │   └── salesforce/    # Salesforce tests
-│   └── utils/             # Utility functions
-│       └── salesforce/    # Salesforce utilities
-├── .env                   # Environment variables
-├── .env.example           # Example environment variables
-├── playwright.config.js   # Playwright configuration
-└── package.json           # Project dependencies
+sample-project/
+├── tests/              # Test files
+├── pages/              # Page objects
+├── fixtures/           # Test data
+├── utils/              # Utility functions
+├── reports/            # Test reports
+├── .env.example        # Environment configuration
+├── playwright.config.js # Playwright configuration
+└── package.json        # Project dependencies
 ```
 
-## Best Practices
+## For Framework Developers
 
-- Use Page Object Model for UI tests
-- Store test data in separate JSON files
-- Use environment variables for credentials
-- Follow the DRY principle
-- Write descriptive test names
-- Use proper assertions
-- Handle errors gracefully
+To create a distribution bundle:
 
-## Contributing
+1. Trigger the "Create Distribution Bundle" workflow from GitHub Actions
+2. Provide a version number when prompted
+3. Download the generated ZIP file from the workflow artifacts
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+## Documentation
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+For detailed documentation, visit our [GitHub Pages site](https://your-username.github.io/playwright-framework/).
